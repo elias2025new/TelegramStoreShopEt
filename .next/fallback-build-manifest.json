@@ -1,0 +1,12 @@
+{
+  "pages": {
+    "/_app": []
+  },
+  "devFiles": [],
+  "polyfillFiles": [],
+  "lowPriorityFiles": [
+    "static/8p-dXGui-dmvVR_tkuEvp/_ssgManifest.js",
+    "static/8p-dXGui-dmvVR_tkuEvp/_buildManifest.js"
+  ],
+  "rootMainFiles": []
+}
