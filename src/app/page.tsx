@@ -1,11 +1,16 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
+import { useAdmin } from '@/context/AdminContext';
 import ProductGrid from '@/components/ProductGrid';
+import AdminOverlay from '@/components/Admin/AdminOverlay';
 
 export default function Home() {
   const { totalItems } = useCart();
+  const { isOwner } = useAdmin();
+  const [adminOpen, setAdminOpen] = useState(false);
 
   return (
     <main className="min-h-screen bg-white dark:bg-gray-950 pb-20">
@@ -32,7 +37,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Search Bar - Visual Only for now */}
+        {/* Search Bar */}
         <div className="mt-2 relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <svg className="h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -48,7 +53,7 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Categories Scroller - Static for now */}
+      {/* Categories Scroller */}
       <div className="px-4 py-3 overflow-x-auto whitespace-nowrap scrollbar-hide">
         {['All', 'Electronics', 'Fashion', 'Home', 'Beauty'].map((category, i) => (
           <button
@@ -65,6 +70,20 @@ export default function Home() {
 
       {/* Product Grid */}
       <ProductGrid />
+
+      {/* Floating Admin Button — visible only to store owner */}
+      {isOwner && (
+        <button
+          onClick={() => setAdminOpen(true)}
+          className="fixed bottom-6 right-4 z-40 flex items-center gap-2 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold px-4 py-3 rounded-2xl shadow-xl shadow-amber-500/40 transition-all"
+        >
+          <span className="text-lg">⚡</span>
+          <span className="text-sm">Manage Store</span>
+        </button>
+      )}
+
+      {/* Admin Overlay */}
+      <AdminOverlay isOpen={adminOpen} onClose={() => setAdminOpen(false)} />
     </main>
   );
 }
