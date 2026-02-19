@@ -87,20 +87,20 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
                         placeholder="Product Name"
                         className="w-full px-2 py-1.5 text-sm font-semibold border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
                     />
-                    <div className="flex gap-2">
-                        <div className="flex-1 relative">
-                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold uppercase">Price</span>
+                    <div className="flex gap-1.5">
+                        <div className="flex-[1.4] relative">
+                            <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-[8px] text-gray-400 font-bold uppercase pointer-events-none">Price</span>
                             <input
                                 type="number"
                                 value={localPrice}
                                 onChange={(e) => setLocalPrice(e.target.value)}
-                                className="w-full pl-10 pr-2 py-1.5 text-sm font-bold border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                                className="w-full pl-7 pr-1 py-1.5 text-sm font-bold border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
                             />
                         </div>
                         <select
                             value={localCategory}
                             onChange={(e) => setLocalCategory(e.target.value)}
-                            className="w-[100px] px-1 py-1.5 text-xs border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                            className="flex-1 min-w-[80px] px-1 py-1.5 text-[11px] border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
                         >
                             {CATEGORIES.map((cat) => (
                                 <option key={cat} value={cat}>{cat}</option>
