@@ -5,6 +5,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { supabase } from '@/utils/supabase/client';
 import { useAdmin } from '@/context/AdminContext';
+import { useQueryClient } from '@tanstack/react-query';
 
 const DRAFT_KEY = 'admin_product_draft';
 const CATEGORIES = ['Electronics', 'Fashion', 'Home', 'Beauty', 'Food & Drink', 'Other'];
@@ -202,6 +203,7 @@ function base64ToFile(dataUrl: string, fileName: string): File {
 
 export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
     const { storeId } = useAdmin();
+    const queryClient = useQueryClient();
     const [view, setView] = useState<'upload' | 'manage'>('upload');
     const [images, setImages] = useState<ImageItem[]>([]);
     const [existingProducts, setExistingProducts] = useState<Product[]>([]);
@@ -332,6 +334,10 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                 .eq('id', id);
 
             if (error) throw error;
+
+            // Invalidate React Query cache to sync storefront
+            queryClient.invalidateQueries({ queryKey: ['products'] });
+
             setExistingProducts((prev) => prev.map((p) => (p.id === id ? { ...p, ...updates } : p)));
             setUploadStatus('✅ Product updated successfully!');
             setTimeout(() => setUploadStatus(''), 3000);
@@ -349,6 +355,9 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                 .eq('id', id);
 
             if (dbError) throw dbError;
+
+            // Invalidate React Query cache to sync storefront
+            queryClient.invalidateQueries({ queryKey: ['products'] });
 
             // Optional: Delete from storage if you want to keep bucket clean
             if (imageUrl) {
@@ -432,6 +441,9 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
 
             const { error: insertError } = await supabase.from('products').insert(results);
             if (insertError) throw insertError;
+
+            // Invalidate React Query cache to sync storefront
+            queryClient.invalidateQueries({ queryKey: ['products'] });
 
             // ✅ Clear draft on success
             localStorage.removeItem(DRAFT_KEY);
