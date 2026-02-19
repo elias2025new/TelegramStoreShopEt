@@ -29,6 +29,13 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
     const [localName, setLocalName] = useState(product.name);
     const [localPrice, setLocalPrice] = useState(product.price.toString());
     const [localCategory, setLocalCategory] = useState(product.category || 'Other');
+    const [isSaving, setIsSaving] = useState(false);
+
+    // Track if there are unsaved changes
+    const hasChanges =
+        localName !== product.name ||
+        localPrice !== product.price.toString() ||
+        localCategory !== (product.category || 'Other');
 
     // Keep local state in sync if product changes externally (e.g. image update)
     useEffect(() => {
@@ -37,77 +44,91 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
         setLocalCategory(product.category || 'Other');
     }, [product]);
 
-    const handleBlur = async () => {
+    const handleSave = async () => {
         const priceNum = parseFloat(localPrice);
-        if (
-            localName !== product.name ||
-            priceNum !== product.price ||
-            localCategory !== (product.category || 'Other')
-        ) {
+        if (isNaN(priceNum)) {
+            alert('Please enter a valid price');
+            return;
+        }
+
+        setIsSaving(true);
+        try {
             await onUpdate(product.id, {
-                name: localName,
-                price: isNaN(priceNum) ? product.price : priceNum,
+                name: localName.trim(),
+                price: priceNum,
                 category: localCategory,
             });
+        } finally {
+            setIsSaving(false);
         }
     };
 
     return (
-        <div className="flex gap-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800">
-            <div
-                className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-gray-200 dark:bg-gray-800 cursor-pointer group"
-                onClick={() => onChangeImage(product.id)}
-            >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={product.image_url || ''} alt={product.name} className="w-full h-full object-cover group-hover:opacity-75 transition-opacity" />
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-                    </svg>
-                </div>
-            </div>
-            <div className="flex-1 flex flex-col gap-2">
-                <input
-                    type="text"
-                    value={localName}
-                    onChange={(e) => setLocalName(e.target.value)}
-                    onBlur={handleBlur}
-                    placeholder="Product Name"
-                    className="w-full px-2 py-1.5 text-sm font-semibold border border-transparent hover:border-gray-200 dark:hover:border-gray-700 rounded-lg bg-transparent focus:bg-white dark:focus:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
-                />
-                <div className="flex gap-2">
-                    <div className="flex-1 relative">
-                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold uppercase">Price</span>
-                        <input
-                            type="number"
-                            value={localPrice}
-                            onChange={(e) => setLocalPrice(e.target.value)}
-                            onBlur={handleBlur}
-                            className="w-full pl-10 pr-2 py-1.5 text-sm font-bold border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
-                        />
+        <div className="flex flex-col gap-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800">
+            <div className="flex gap-3">
+                <div
+                    className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-gray-200 dark:bg-gray-800 cursor-pointer group"
+                    onClick={() => onChangeImage(product.id)}
+                >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={product.image_url || ''} alt={product.name} className="w-full h-full object-cover group-hover:opacity-75 transition-opacity" />
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                        </svg>
                     </div>
-                    <select
-                        value={localCategory}
-                        onChange={(e) => {
-                            setLocalCategory(e.target.value);
-                            onUpdate(product.id, { category: e.target.value });
-                        }}
-                        className="w-[100px] px-1 py-1.5 text-xs border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
-                    >
-                        {CATEGORIES.map((cat) => (
-                            <option key={cat} value={cat}>{cat}</option>
-                        ))}
-                    </select>
                 </div>
+                <div className="flex-1 flex flex-col gap-2">
+                    <input
+                        type="text"
+                        value={localName}
+                        onChange={(e) => setLocalName(e.target.value)}
+                        placeholder="Product Name"
+                        className="w-full px-2 py-1.5 text-sm font-semibold border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                    />
+                    <div className="flex gap-2">
+                        <div className="flex-1 relative">
+                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold uppercase">Price</span>
+                            <input
+                                type="number"
+                                value={localPrice}
+                                onChange={(e) => setLocalPrice(e.target.value)}
+                                className="w-full pl-10 pr-2 py-1.5 text-sm font-bold border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                            />
+                        </div>
+                        <select
+                            value={localCategory}
+                            onChange={(e) => setLocalCategory(e.target.value)}
+                            className="w-[100px] px-1 py-1.5 text-xs border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                        >
+                            {CATEGORIES.map((cat) => (
+                                <option key={cat} value={cat}>{cat}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+                <button
+                    onClick={() => onDelete(product.id, product.image_url)}
+                    className="self-start p-2 text-gray-400 hover:text-red-500 transition-colors"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" />
+                    </svg>
+                </button>
             </div>
-            <button
-                onClick={() => onDelete(product.id, product.image_url)}
-                className="self-start p-2 text-gray-400 hover:text-red-500 transition-colors"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" />
-                </svg>
-            </button>
+            {hasChanges && (
+                <div className="flex items-center justify-between pt-1">
+                    <span className="text-[11px] text-amber-600 dark:text-amber-400 font-medium">⚠️ Unsaved changes</span>
+                    <button
+                        onClick={handleSave}
+                        disabled={isSaving}
+                        className={`px-4 py-1.5 rounded-lg text-xs font-bold text-white transition-all ${isSaving ? 'bg-gray-400' : 'bg-green-600 hover:bg-green-700 active:scale-95 shadow-sm'
+                            }`}
+                    >
+                        {isSaving ? 'Saving...' : 'Save Changes'}
+                    </button>
+                </div>
+            )}
         </div>
     );
 }
