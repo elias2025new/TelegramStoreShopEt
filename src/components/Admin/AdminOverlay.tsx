@@ -1,23 +1,53 @@
 
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { supabase } from '@/utils/supabase/client';
 import { useAdmin } from '@/context/AdminContext';
 
+const DRAFT_KEY = 'admin_product_draft';
+const CATEGORIES = ['Electronics', 'Fashion', 'Home', 'Beauty', 'Food & Drink', 'Other'];
+
 interface ImageItem {
     file: File;
-    preview: string;
+    preview: string;   // object URL or base64 data URL
+    base64: string;    // data URL — used for serialisation
     price: string;
     category: string;
+    fileName: string;
 }
 
-const CATEGORIES = ['Electronics', 'Fashion', 'Home', 'Beauty', 'Food & Drink', 'Other'];
+interface SerializedItem {
+    base64: string;
+    price: string;
+    category: string;
+    fileName: string;
+}
 
 interface AdminOverlayProps {
     isOpen: boolean;
     onClose: () => void;
+}
+
+/** Convert a File to a base64 data-URL string */
+function fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+/** Re-create a File from a base64 data-URL */
+function base64ToFile(dataUrl: string, fileName: string): File {
+    const [header, data] = dataUrl.split(',');
+    const mime = header.match(/:(.*?);/)?.[1] ?? 'image/jpeg';
+    const binary = atob(data);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new File([bytes], fileName, { type: mime });
 }
 
 export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
@@ -25,35 +55,96 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
     const [images, setImages] = useState<ImageItem[]>([]);
     const [isUploading, setIsUploading] = useState(false);
     const [uploadStatus, setUploadStatus] = useState('');
+    const [draftRestored, setDraftRestored] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const hasRestoredRef = useRef(false); // prevent double-restore on re-renders
 
-    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = Array.from(e.target.files || []);
-        const newItems: ImageItem[] = files.map(file => ({
-            file,
-            preview: URL.createObjectURL(file),
-            price: '',
-            category: 'Other',
+    // ── Restore draft on first open ─────────────────────────────────────────
+    useEffect(() => {
+        if (!isOpen || hasRestoredRef.current) return;
+        hasRestoredRef.current = true;
+
+        try {
+            const raw = localStorage.getItem(DRAFT_KEY);
+            if (!raw) return;
+            const saved: SerializedItem[] = JSON.parse(raw);
+            if (!Array.isArray(saved) || saved.length === 0) return;
+
+            const restored: ImageItem[] = saved.map((s) => ({
+                file: base64ToFile(s.base64, s.fileName),
+                preview: s.base64,   // use base64 directly as img src — works fine
+                base64: s.base64,
+                price: s.price,
+                category: s.category,
+                fileName: s.fileName,
+            }));
+
+            setImages(restored);
+            setDraftRestored(true);
+            // Hide the "Draft restored" badge after 3 s
+            setTimeout(() => setDraftRestored(false), 3000);
+        } catch {
+            // Corrupt data — wipe it
+            localStorage.removeItem(DRAFT_KEY);
+        }
+    }, [isOpen]);
+
+    // ── Persist draft whenever images change ────────────────────────────────
+    useEffect(() => {
+        if (images.length === 0) return; // don't overwrite with empty (let publish clear it)
+        const serialized: SerializedItem[] = images.map((item) => ({
+            base64: item.base64,
+            price: item.price,
+            category: item.category,
+            fileName: item.fileName,
         }));
-        setImages(prev => [...prev, ...newItems]);
-    };
+        try {
+            localStorage.setItem(DRAFT_KEY, JSON.stringify(serialized));
+        } catch {
+            // Storage quota exceeded — silently ignore
+        }
+    }, [images]);
+
+    // ── File select ─────────────────────────────────────────────────────────
+    const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || []);
+        if (files.length === 0) return;
+
+        const newItems: ImageItem[] = await Promise.all(
+            files.map(async (file) => {
+                const base64 = await fileToBase64(file);
+                return {
+                    file,
+                    preview: base64,
+                    base64,
+                    price: '',
+                    category: 'Other',
+                    fileName: file.name,
+                };
+            })
+        );
+        setImages((prev) => [...prev, ...newItems]);
+        // reset input so the same file can be re-selected if removed
+        e.target.value = '';
+    }, []);
 
     const updateItem = (index: number, field: 'price' | 'category', value: string) => {
-        setImages(prev => prev.map((item, i) =>
-            i === index ? { ...item, [field]: value } : item
-        ));
+        setImages((prev) => prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)));
     };
 
     const removeItem = (index: number) => {
-        setImages(prev => {
-            URL.revokeObjectURL(prev[index].preview);
-            return prev.filter((_, i) => i !== index);
+        setImages((prev) => {
+            const next = prev.filter((_, i) => i !== index);
+            // If all items removed, clear draft immediately
+            if (next.length === 0) localStorage.removeItem(DRAFT_KEY);
+            return next;
         });
     };
 
+    // ── Publish ─────────────────────────────────────────────────────────────
     const handlePublish = async () => {
         if (images.length === 0) return;
-        const invalid = images.find(img => !img.price || parseFloat(img.price) <= 0);
+        const invalid = images.find((img) => !img.price || parseFloat(img.price) <= 0);
         if (invalid) {
             setUploadStatus('Please enter a valid price for all items.');
             return;
@@ -63,38 +154,37 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
         setUploadStatus('Uploading...');
 
         try {
-            const results = await Promise.all(images.map(async (item) => {
-                // Upload image to Supabase Storage
-                const fileExt = item.file.name.split('.').pop();
-                const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
-                const filePath = `products/${fileName}`;
+            const results = await Promise.all(
+                images.map(async (item) => {
+                    const fileExt = item.fileName.split('.').pop();
+                    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+                    const filePath = `products/${fileName}`;
 
-                const { error: storageError } = await supabase.storage
-                    .from('products')
-                    .upload(filePath, item.file);
+                    const { error: storageError } = await supabase.storage
+                        .from('products')
+                        .upload(filePath, item.file);
 
-                if (storageError) throw storageError;
+                    if (storageError) throw storageError;
 
-                const { data: urlData } = supabase.storage
-                    .from('products')
-                    .getPublicUrl(filePath);
+                    const { data: urlData } = supabase.storage.from('products').getPublicUrl(filePath);
 
-                return {
-                    name: item.file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '),
-                    price: parseFloat(item.price),
-                    category: item.category,
-                    image_url: urlData.publicUrl,
-                };
-            }));
+                    return {
+                        name: item.fileName.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '),
+                        price: parseFloat(item.price),
+                        category: item.category,
+                        image_url: urlData.publicUrl,
+                    };
+                })
+            );
 
-            const { error: insertError } = await supabase
-                .from('products')
-                .insert(results);
-
+            const { error: insertError } = await supabase.from('products').insert(results);
             if (insertError) throw insertError;
 
-            setUploadStatus(`✅ ${results.length} product(s) published!`);
+            // ✅ Clear draft on success
+            localStorage.removeItem(DRAFT_KEY);
+            hasRestoredRef.current = false; // allow fresh restore next time
             setImages([]);
+            setUploadStatus(`✅ ${results.length} product(s) published!`);
             if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
                 window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
             }
@@ -111,7 +201,14 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
         <div className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-gray-950">
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
-                <h2 className="text-lg font-bold text-gray-900 dark:text-white">⚡ Manage Store</h2>
+                <div className="flex items-center gap-2">
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-white">⚡ Manage Store</h2>
+                    {draftRestored && (
+                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 animate-pulse">
+                            Draft restored
+                        </span>
+                    )}
+                </div>
                 <button
                     onClick={onClose}
                     className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300"
@@ -154,23 +251,24 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                         {images.map((item, index) => (
                             <div key={index} className="flex gap-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800">
                                 <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-gray-200 dark:bg-gray-800">
-                                    <Image src={item.preview} alt="preview" fill className="object-cover" />
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={item.preview} alt="preview" className="w-full h-full object-cover" />
                                 </div>
                                 <div className="flex-1 flex flex-col gap-2">
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{item.file.name}</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{item.fileName}</p>
                                     <input
                                         type="number"
                                         placeholder="Price (ETB)"
                                         value={item.price}
-                                        onChange={e => updateItem(index, 'price', e.target.value)}
+                                        onChange={(e) => updateItem(index, 'price', e.target.value)}
                                         className="w-full px-2 py-1.5 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
                                     />
                                     <select
                                         value={item.category}
-                                        onChange={e => updateItem(index, 'category', e.target.value)}
+                                        onChange={(e) => updateItem(index, 'category', e.target.value)}
                                         className="w-full px-2 py-1.5 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
                                     >
-                                        {CATEGORIES.map(cat => (
+                                        {CATEGORIES.map((cat) => (
                                             <option key={cat} value={cat}>{cat}</option>
                                         ))}
                                     </select>
