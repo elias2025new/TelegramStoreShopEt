@@ -1,7 +1,6 @@
-'use client';
-
 import { useState } from 'react';
 import Link from 'next/link';
+import { useQueryClient } from '@tanstack/react-query';
 import { useCart } from '@/context/CartContext';
 import { useAdmin } from '@/context/AdminContext';
 import ProductGrid from '@/components/ProductGrid';
@@ -11,10 +10,11 @@ export default function Home() {
   const { totalItems } = useCart();
   const { isOwner } = useAdmin();
   const [adminOpen, setAdminOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   return (
     <main className="min-h-screen bg-white dark:bg-gray-950 pb-20">
-      {/* Header */}
+      {/* ... header ... */}
       <header className="sticky top-0 z-10 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 px-4 py-3">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-teal-400 bg-clip-text text-transparent">
@@ -83,7 +83,14 @@ export default function Home() {
       )}
 
       {/* Admin Overlay */}
-      <AdminOverlay isOpen={adminOpen} onClose={() => setAdminOpen(false)} />
+      <AdminOverlay
+        isOpen={adminOpen}
+        onClose={() => {
+          setAdminOpen(false);
+          // Final safety sync when closing
+          queryClient.invalidateQueries({ queryKey: ['products'] });
+        }}
+      />
     </main>
   );
 }

@@ -335,8 +335,8 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
 
             if (error) throw error;
 
-            // Invalidate React Query cache to sync storefront
-            queryClient.invalidateQueries({ queryKey: ['products'] });
+            // Aggressively reset React Query cache to sync storefront immediately
+            queryClient.resetQueries({ queryKey: ['products'] });
 
             setExistingProducts((prev) => prev.map((p) => (p.id === id ? { ...p, ...updates } : p)));
             setUploadStatus('✅ Product updated successfully!');
@@ -356,8 +356,8 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
 
             if (dbError) throw dbError;
 
-            // Invalidate React Query cache to sync storefront
-            queryClient.invalidateQueries({ queryKey: ['products'] });
+            // Aggressively reset React Query cache to sync storefront immediately
+            queryClient.resetQueries({ queryKey: ['products'] });
 
             // Optional: Delete from storage if you want to keep bucket clean
             if (imageUrl) {
@@ -442,8 +442,8 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
             const { error: insertError } = await supabase.from('products').insert(results);
             if (insertError) throw insertError;
 
-            // Invalidate React Query cache to sync storefront
-            queryClient.invalidateQueries({ queryKey: ['products'] });
+            // Aggressively reset React Query cache to sync storefront immediately
+            queryClient.resetQueries({ queryKey: ['products'] });
 
             // ✅ Clear draft on success
             localStorage.removeItem(DRAFT_KEY);
