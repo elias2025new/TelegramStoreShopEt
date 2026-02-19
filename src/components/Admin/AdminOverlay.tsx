@@ -328,18 +328,28 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
     // ── Manage Existing Products ──────────────────────────────────────────
     const handleUpdateProduct = async (id: string, updates: Partial<Product>) => {
         try {
-            const { error } = await supabase
+            const { error, count } = await supabase
                 .from('products')
                 .update(updates)
                 .eq('id', id);
 
             if (error) throw error;
 
+            // Check if the update actually happened (RLS might block it silently)
+            if (count === 0) {
+                throw new Error('Update failed: You might not have permission to edit this product.');
+            }
+
             // Aggressively reset React Query cache to sync storefront immediately
             queryClient.resetQueries({ queryKey: ['products'] });
 
             setExistingProducts((prev) => prev.map((p) => (p.id === id ? { ...p, ...updates } : p)));
             setUploadStatus('✅ Product updated successfully!');
+
+            if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+                window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+            }
+
             setTimeout(() => setUploadStatus(''), 3000);
         } catch (err: any) {
             setUploadStatus(`❌ Error updating: ${err.message}`);
@@ -349,12 +359,16 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
     const handleDeleteProduct = async (id: string, imageUrl: string | null) => {
         try {
             // Delete from database
-            const { error: dbError } = await supabase
+            const { error: dbError, count } = await supabase
                 .from('products')
                 .delete()
                 .eq('id', id);
 
             if (dbError) throw dbError;
+
+            if (count === 0) {
+                throw new Error('Delete failed: You might not have permission to delete this product.');
+            }
 
             // Aggressively reset React Query cache to sync storefront immediately
             queryClient.resetQueries({ queryKey: ['products'] });
@@ -369,6 +383,11 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
 
             setExistingProducts((prev) => prev.filter((p) => p.id !== id));
             setUploadStatus('✅ Product deleted.');
+
+            if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+                window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+            }
+
             setTimeout(() => setUploadStatus(''), 3000);
         } catch (err: any) {
             setUploadStatus(`❌ Error deleting: ${err.message}`);
