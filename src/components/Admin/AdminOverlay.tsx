@@ -30,6 +30,7 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
     const [localPrice, setLocalPrice] = useState(product.price.toString());
     const [localCategory, setLocalCategory] = useState(product.category || 'Other');
     const [isSaving, setIsSaving] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     // Track if there are unsaved changes
     const hasChanges =
@@ -65,7 +66,7 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
 
     return (
         <div className="flex flex-col gap-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800">
-            <div className="flex gap-3">
+            <div className={`flex gap-3 transition-opacity ${showDeleteConfirm ? 'opacity-20 pointer-events-none' : ''}`}>
                 <div
                     className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-gray-200 dark:bg-gray-800 cursor-pointer group"
                     onClick={() => onChangeImage(product.id)}
@@ -108,7 +109,7 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
                     </div>
                 </div>
                 <button
-                    onClick={() => onDelete(product.id, product.image_url)}
+                    onClick={() => setShowDeleteConfirm(true)}
                     className="self-start p-2 text-gray-400 hover:text-red-500 transition-colors"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -116,7 +117,8 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
                     </svg>
                 </button>
             </div>
-            {hasChanges && (
+
+            {hasChanges && !showDeleteConfirm && (
                 <div className="flex items-center justify-between pt-1">
                     <span className="text-[11px] text-amber-600 dark:text-amber-400 font-medium">⚠️ Unsaved changes</span>
                     <button
@@ -127,6 +129,28 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
                     >
                         {isSaving ? 'Saving...' : 'Save Changes'}
                     </button>
+                </div>
+            )}
+
+            {showDeleteConfirm && (
+                <div className="flex flex-col gap-2 pt-1 border-t border-red-50 dark:border-red-900/30">
+                    <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-red-600 dark:text-red-400">Delete this product?</span>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setShowDeleteConfirm(false)}
+                                className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-all font-bold"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => onDelete(product.id, product.image_url)}
+                                className="px-3 py-1.5 rounded-lg text-xs font-bold bg-red-600 hover:bg-red-700 text-white shadow-sm active:scale-95 transition-all"
+                            >
+                                Yes, Delete
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
@@ -317,8 +341,6 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
     };
 
     const handleDeleteProduct = async (id: string, imageUrl: string | null) => {
-        if (!confirm('Are you sure you want to delete this product?')) return;
-
         try {
             // Delete from database
             const { error: dbError } = await supabase
