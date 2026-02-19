@@ -13,6 +13,7 @@ interface ImageItem {
     file: File;
     preview: string;   // object URL or base64 data URL
     base64: string;    // data URL — used for serialisation
+    title: string;
     price: string;
     category: string;
     fileName: string;
@@ -20,6 +21,7 @@ interface ImageItem {
 
 interface SerializedItem {
     base64: string;
+    title: string;
     price: string;
     category: string;
     fileName: string;
@@ -74,6 +76,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                 file: base64ToFile(s.base64, s.fileName),
                 preview: s.base64,   // use base64 directly as img src — works fine
                 base64: s.base64,
+                title: s.title || '',
                 price: s.price,
                 category: s.category,
                 fileName: s.fileName,
@@ -94,6 +97,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
         if (images.length === 0) return; // don't overwrite with empty (let publish clear it)
         const serialized: SerializedItem[] = images.map((item) => ({
             base64: item.base64,
+            title: item.title,
             price: item.price,
             category: item.category,
             fileName: item.fileName,
@@ -117,6 +121,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                     file,
                     preview: base64,
                     base64,
+                    title: file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '),
                     price: '',
                     category: 'Other',
                     fileName: file.name,
@@ -128,7 +133,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
         e.target.value = '';
     }, []);
 
-    const updateItem = (index: number, field: 'price' | 'category', value: string) => {
+    const updateItem = (index: number, field: 'title' | 'price' | 'category', value: string) => {
         setImages((prev) => prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)));
     };
 
@@ -144,9 +149,9 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
     // ── Publish ─────────────────────────────────────────────────────────────
     const handlePublish = async () => {
         if (images.length === 0) return;
-        const invalid = images.find((img) => !img.price || parseFloat(img.price) <= 0);
+        const invalid = images.find((img) => !img.price || parseFloat(img.price) <= 0 || !img.title.trim());
         if (invalid) {
-            setUploadStatus('Please enter a valid price for all items.');
+            setUploadStatus('Please enter a valid title and price for all items.');
             return;
         }
 
@@ -169,7 +174,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                     const { data: urlData } = supabase.storage.from('products').getPublicUrl(filePath);
 
                     return {
-                        name: item.fileName.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '),
+                        name: item.title.trim(),
                         price: parseFloat(item.price),
                         category: item.category,
                         image_url: urlData.publicUrl,
@@ -255,23 +260,32 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                                     <img src={item.preview} alt="preview" className="w-full h-full object-cover" />
                                 </div>
                                 <div className="flex-1 flex flex-col gap-2">
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{item.fileName}</p>
                                     <input
-                                        type="number"
-                                        placeholder="Price (ETB)"
-                                        value={item.price}
-                                        onChange={(e) => updateItem(index, 'price', e.target.value)}
-                                        className="w-full px-2 py-1.5 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                        type="text"
+                                        placeholder="Title / Brand Name"
+                                        value={item.title}
+                                        onChange={(e) => updateItem(index, 'title', e.target.value)}
+                                        className="w-full px-2 py-1.5 text-sm font-semibold border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
                                     />
-                                    <select
-                                        value={item.category}
-                                        onChange={(e) => updateItem(index, 'category', e.target.value)}
-                                        className="w-full px-2 py-1.5 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                                    >
-                                        {CATEGORIES.map((cat) => (
-                                            <option key={cat} value={cat}>{cat}</option>
-                                        ))}
-                                    </select>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="number"
+                                            placeholder="Price (ETB)"
+                                            value={item.price}
+                                            onChange={(e) => updateItem(index, 'price', e.target.value)}
+                                            className="flex-1 px-2 py-1.5 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                        />
+                                        <select
+                                            value={item.category}
+                                            onChange={(e) => updateItem(index, 'category', e.target.value)}
+                                            className="w-1/3 px-1 py-1.5 text-xs border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                        >
+                                            {CATEGORIES.map((cat) => (
+                                                <option key={cat} value={cat}>{cat}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <p className="text-[10px] text-gray-400 dark:text-gray-500 truncate mt-0.5">{item.fileName}</p>
                                 </div>
                                 <button
                                     onClick={() => removeItem(index)}
