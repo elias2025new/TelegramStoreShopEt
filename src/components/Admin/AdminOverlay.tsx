@@ -553,47 +553,47 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                         {images.length > 0 && (
                             <div className="flex flex-col gap-4 mb-4">
                                 {images.map((item, index) => (
-                                    <div key={index} className="flex gap-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 overflow-hidden">
-                                        <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-gray-200 dark:bg-gray-800">
-                                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                                            <img src={item.preview} alt="preview" className="w-full h-full object-cover" />
-                                        </div>
-                                        <div className="flex-1 min-w-0 flex flex-col gap-2">
-                                            <input
-                                                type="text"
-                                                placeholder="Title / Brand Name"
-                                                value={item.title}
-                                                onChange={(e) => updateItem(index, 'title', e.target.value)}
-                                                className="w-full px-2 py-1.5 text-sm font-semibold border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                                            />
-                                            <div className="flex gap-2">
-                                                <input
-                                                    type="number"
-                                                    placeholder="Price (ETB)"
-                                                    value={item.price}
-                                                    onChange={(e) => updateItem(index, 'price', e.target.value)}
-                                                    className="flex-1 px-2 py-1.5 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                                                />
-                                                <select
-                                                    value={item.category}
-                                                    onChange={(e) => updateItem(index, 'category', e.target.value)}
-                                                    className="flex-1 px-2 py-1.5 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                                                >
-                                                    {CATEGORIES.map((cat) => (
-                                                        <option key={cat} value={cat}>{cat}</option>
-                                                    ))}
-                                                </select>
+                                    <div key={index} className="flex flex-col gap-2 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800">
+                                        {/* Top row: image + delete */}
+                                        <div className="flex items-center justify-between gap-3">
+                                            <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-gray-200 dark:bg-gray-800">
+                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                <img src={item.preview} alt="preview" className="w-full h-full object-cover" />
                                             </div>
-                                            <p className="text-[10px] text-gray-400 dark:text-gray-500 truncate mt-0.5">{item.fileName}</p>
+                                            <p className="flex-1 text-[10px] text-gray-400 dark:text-gray-500 truncate">{item.fileName}</p>
+                                            <button
+                                                onClick={() => removeItem(index)}
+                                                className="p-1 text-red-400 hover:text-red-600 flex-shrink-0"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                    <path d="M18 6 6 18" /><path d="m6 6 12 12" />
+                                                </svg>
+                                            </button>
                                         </div>
-                                        <button
-                                            onClick={() => removeItem(index)}
-                                            className="self-start p-1 text-red-400 hover:text-red-600"
+                                        {/* Fields stacked vertically */}
+                                        <input
+                                            type="text"
+                                            placeholder="Title / Brand Name"
+                                            value={item.title}
+                                            onChange={(e) => updateItem(index, 'title', e.target.value)}
+                                            className="w-full px-3 py-2 text-sm font-semibold border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                        />
+                                        <input
+                                            type="number"
+                                            placeholder="Price (ETB)"
+                                            value={item.price}
+                                            onChange={(e) => updateItem(index, 'price', e.target.value)}
+                                            className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                        />
+                                        <select
+                                            value={item.category}
+                                            onChange={(e) => updateItem(index, 'category', e.target.value)}
+                                            className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
                                         >
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                <path d="M18 6 6 18" /><path d="m6 6 12 12" />
-                                            </svg>
-                                        </button>
+                                            {CATEGORIES.map((cat) => (
+                                                <option key={cat} value={cat}>{cat}</option>
+                                            ))}
+                                        </select>
                                     </div>
                                 ))}
                             </div>
