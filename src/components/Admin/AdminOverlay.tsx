@@ -482,7 +482,12 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-gray-950">
+        <div
+            className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-gray-950"
+            style={{
+                paddingTop: 'calc(var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px))',
+            }}
+        >
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
                 <div className="flex flex-col">
