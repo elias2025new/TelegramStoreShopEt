@@ -577,7 +577,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                                                 <select
                                                     value={item.category}
                                                     onChange={(e) => updateItem(index, 'category', e.target.value)}
-                                                    className="w-1/3 px-1 py-1.5 text-xs border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                                    className="flex-1 px-2 py-1.5 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
                                                 >
                                                     {CATEGORIES.map((cat) => (
                                                         <option key={cat} value={cat}>{cat}</option>
