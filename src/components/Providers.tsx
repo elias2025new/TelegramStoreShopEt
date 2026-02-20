@@ -14,7 +14,18 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         // Basic Telegram WebApp initialization
         if (typeof window !== 'undefined') {
             import('@twa-dev/sdk').then((WebApp) => {
-                WebApp.default.ready();
+                const twa = WebApp.default;
+                twa.ready();
+                // Expand to fill full height
+                twa.expand();
+                // Request true fullscreen (covers top status bar too) — Telegram 8.0+
+                try {
+                    twa.requestFullscreen();
+                } catch {
+                    // Older Telegram clients don't support requestFullscreen, ignore
+                }
+                // Hide the back button so users don't see the Telegram back arrow
+                twa.BackButton.hide();
             });
         }
     }, []);
