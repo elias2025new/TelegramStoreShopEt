@@ -19,7 +19,12 @@ export default function RootLayout({
         style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}
       >
         <Providers>
-          <div className="mx-auto max-w-md min-h-screen bg-white dark:bg-gray-950 shadow-sm">
+          <div
+            className="mx-auto max-w-md min-h-screen bg-white dark:bg-gray-950 shadow-sm"
+            style={{
+              paddingTop: 'calc(var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px))',
+            }}
+          >
             {children}
           </div>
         </Providers>
