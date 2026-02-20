@@ -553,12 +553,12 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                         {images.length > 0 && (
                             <div className="flex flex-col gap-4 mb-4">
                                 {images.map((item, index) => (
-                                    <div key={index} className="flex gap-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800">
+                                    <div key={index} className="flex gap-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 overflow-hidden">
                                         <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-gray-200 dark:bg-gray-800">
                                             {/* eslint-disable-next-line @next/next/no-img-element */}
                                             <img src={item.preview} alt="preview" className="w-full h-full object-cover" />
                                         </div>
-                                        <div className="flex-1 flex flex-col gap-2">
+                                        <div className="flex-1 min-w-0 flex flex-col gap-2">
                                             <input
                                                 type="text"
                                                 placeholder="Title / Brand Name"
