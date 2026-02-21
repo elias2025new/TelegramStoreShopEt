@@ -65,6 +65,13 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
         }
     };
 
+    const handleFocus = (e: React.FocusEvent<HTMLElement>) => {
+        const target = e.target as HTMLElement;
+        setTimeout(() => {
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
+    };
+
     return (
         <div className="flex flex-col gap-3 p-3 bg-[#1c1c1e] rounded-xl border border-[#2a2a2a]">
             <div className={`flex gap-3 transition-opacity ${showDeleteConfirm ? 'opacity-20 pointer-events-none' : ''}`}>
@@ -85,6 +92,7 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
                         type="text"
                         value={localName}
                         onChange={(e) => setLocalName(e.target.value)}
+                        onFocus={handleFocus}
                         placeholder="Product Name"
                         className="w-full px-2 py-1.5 text-sm font-semibold border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none transition-all placeholder-gray-500"
                     />
@@ -95,12 +103,14 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
                                 type="number"
                                 value={localPrice}
                                 onChange={(e) => setLocalPrice(e.target.value)}
+                                onFocus={handleFocus}
                                 className="w-full pl-8 pr-1 py-1.5 text-sm font-bold border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none transition-all placeholder-gray-500"
                             />
                         </div>
                         <select
                             value={localCategory}
                             onChange={(e) => setLocalCategory(e.target.value)}
+                            onFocus={handleFocus}
                             className="flex-1 min-w-[80px] px-1 py-1.5 text-[11px] border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none transition-all"
                         >
                             {CATEGORIES.map((cat) => (
@@ -174,6 +184,87 @@ interface SerializedItem {
     price: string;
     category: string;
     fileName: string;
+}
+
+interface UploadItemRowProps {
+    item: ImageItem;
+    index: number;
+    updateItem: (index: number, field: 'title' | 'price' | 'category', value: string) => void;
+    removeItem: (index: number) => void;
+}
+
+function UploadItemRow({ item, index, updateItem, removeItem }: UploadItemRowProps) {
+    const [localTitle, setLocalTitle] = useState(item.title);
+    const [localPrice, setLocalPrice] = useState(item.price);
+    const [localCategory, setLocalCategory] = useState(item.category);
+
+    useEffect(() => {
+        setLocalTitle(item.title);
+        setLocalPrice(item.price);
+        setLocalCategory(item.category);
+    }, [item.title, item.price, item.category]);
+
+    const handleFocus = (e: React.FocusEvent<HTMLElement>) => {
+        const target = e.target as HTMLElement;
+        setTimeout(() => {
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
+    };
+
+    return (
+        <div className="flex flex-col gap-2 p-3 bg-[#1c1c1e] rounded-xl border border-[#2a2a2a]">
+            {/* Top row: image + delete */}
+            <div className="flex items-center justify-between gap-3">
+                <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-[#0a0a0a]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={item.preview} alt="preview" className="w-full h-full object-cover" />
+                </div>
+                <p className="flex-1 text-[10px] text-gray-400 truncate font-mono">{item.fileName}</p>
+                <button
+                    onClick={() => removeItem(index)}
+                    className="p-1 text-gray-500 hover:text-red-500 flex-shrink-0 transition-colors"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 6 6 18" /><path d="m6 6 12 12" />
+                    </svg>
+                </button>
+            </div>
+            {/* Fields — 2-col grid */}
+            <div className="grid grid-cols-2 gap-2">
+                <input
+                    type="text"
+                    placeholder="Title / Brand Name"
+                    value={localTitle}
+                    onChange={(e) => setLocalTitle(e.target.value)}
+                    onBlur={() => updateItem(index, 'title', localTitle)}
+                    onFocus={handleFocus}
+                    className="col-span-2 px-3 py-2 text-sm font-semibold border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none placeholder-gray-600"
+                />
+                <input
+                    type="number"
+                    placeholder="Price (ETB)"
+                    value={localPrice}
+                    onChange={(e) => setLocalPrice(e.target.value)}
+                    onBlur={() => updateItem(index, 'price', localPrice)}
+                    onFocus={handleFocus}
+                    className="px-3 py-2 text-sm border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none placeholder-gray-600 font-mono"
+                />
+                <select
+                    value={localCategory}
+                    onChange={(e) => {
+                        setLocalCategory(e.target.value);
+                        updateItem(index, 'category', e.target.value);
+                    }}
+                    onFocus={handleFocus}
+                    className="px-3 py-2 text-sm border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none"
+                >
+                    {CATEGORIES.map((cat) => (
+                        <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                </select>
+            </div>
+        </div>
+    );
 }
 
 interface AdminOverlayProps {
@@ -483,7 +574,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
 
     return (
         <div
-            className="fixed inset-0 z-[100] flex flex-col bg-[#0a0a0a]"
+            className="fixed inset-0 z-[100] flex flex-col bg-[#0a0a0a] overscroll-none transform-gpu"
             style={{
                 paddingTop: 'calc(var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px))',
             }}
@@ -522,7 +613,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
             </div>
 
             {/* Content Body - Flexible area preventing button pushout */}
-            <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4">
+            <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4 scroll-smooth transform-gpu">
                 {view === 'upload' ? (
                     <>
                         {/* Status Message rendered inline */}
@@ -560,53 +651,19 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                         {images.length > 0 && (
                             <div className="flex flex-col gap-4 mb-4">
                                 {images.map((item, index) => (
-                                    <div key={index} className="flex flex-col gap-2 p-3 bg-[#1c1c1e] rounded-xl border border-[#2a2a2a]">
-                                        {/* Top row: image + delete */}
-                                        <div className="flex items-center justify-between gap-3">
-                                            <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-[#0a0a0a]">
-                                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                <img src={item.preview} alt="preview" className="w-full h-full object-cover" />
-                                            </div>
-                                            <p className="flex-1 text-[10px] text-gray-400 truncate font-mono">{item.fileName}</p>
-                                            <button
-                                                onClick={() => removeItem(index)}
-                                                className="p-1 text-gray-500 hover:text-red-500 flex-shrink-0 transition-colors"
-                                            >
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                    <path d="M18 6 6 18" /><path d="m6 6 12 12" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                        {/* Fields — 2-col grid */}
-                                        <div className="grid grid-cols-2 gap-2">
-                                            <input
-                                                type="text"
-                                                placeholder="Title / Brand Name"
-                                                value={item.title}
-                                                onChange={(e) => updateItem(index, 'title', e.target.value)}
-                                                className="col-span-2 px-3 py-2 text-sm font-semibold border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none placeholder-gray-600"
-                                            />
-                                            <input
-                                                type="number"
-                                                placeholder="Price (ETB)"
-                                                value={item.price}
-                                                onChange={(e) => updateItem(index, 'price', e.target.value)}
-                                                className="px-3 py-2 text-sm border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none placeholder-gray-600 font-mono"
-                                            />
-                                            <select
-                                                value={item.category}
-                                                onChange={(e) => updateItem(index, 'category', e.target.value)}
-                                                className="px-3 py-2 text-sm border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none"
-                                            >
-                                                {CATEGORIES.map((cat) => (
-                                                    <option key={cat} value={cat}>{cat}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    </div>
+                                    <UploadItemRow
+                                        key={index}
+                                        item={item}
+                                        index={index}
+                                        updateItem={updateItem}
+                                        removeItem={removeItem}
+                                    />
                                 ))}
                             </div>
                         )}
+
+                        {/* Keyboard spacer */}
+                        <div className="h-48 w-full opacity-0 pointer-events-none"></div>
                     </>
                 ) : (
                     <>

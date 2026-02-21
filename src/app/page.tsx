@@ -95,7 +95,7 @@ export default function Home() {
             </h2>
             <p className="text-[#cba153] font-medium text-lg mt-1 mb-2">Spring Drop 2026</p>
             <p className="text-gray-300 text-sm mb-6 tracking-wide uppercase">-20% OFF ALL NEW STYLES</p>
-            <button className="w-max px-6 py-2 rounded-full border border-gray-400 text-gray-200 text-sm font-medium hover:bg-white hover:text-black transition-all">
+            <button className="w-max px-6 py-2 rounded-full border border-gray-400 text-gray-200 text-sm font-medium hover:bg-white hover:text-black transform-gpu active:scale-95 transition-all duration-200">
               Shop Now
             </button>
           </div>
@@ -111,14 +111,14 @@ export default function Home() {
 
       {/* Categories Scroller */}
       <section className="mt-8 px-4">
-        <div className="flex overflow-x-auto gap-3 pb-4 scrollbar-hide">
+        <div className="flex overflow-x-auto gap-3 pb-4 scrollbar-hide transform-gpu scroll-smooth">
           {CATEGORIES.map((category) => {
             const isSelected = selectedCategory === category.name;
             return (
               <button
                 key={category.name}
                 onClick={() => setSelectedCategory(category.name)}
-                className={`flex flex-col items-center justify-between min-w-[80px] h-[90px] p-2 rounded-2xl transition-all ${isSelected
+                className={`flex flex-col items-center justify-between min-w-[80px] h-[90px] p-2 rounded-2xl transform-gpu active:scale-95 transition-all duration-200 ${isSelected
                   ? 'bg-[#111111] border border-[#cba153]'
                   : 'bg-[#1a1a1a] border border-[#2a2a2a] hover:bg-[#222222]'
                   }`}
@@ -157,7 +157,7 @@ export default function Home() {
       {isOwner && (
         <button
           onClick={() => setAdminOpen(true)}
-          className="fixed bottom-24 right-4 z-40 flex items-center gap-2 bg-[#cba153] hover:bg-[#b8860b] active:scale-95 text-black font-bold px-4 py-3 rounded-2xl shadow-xl shadow-[#cba153]/20 transition-all"
+          className="fixed bottom-24 right-4 z-40 flex items-center gap-2 bg-[#cba153] hover:bg-[#b8860b] transform-gpu active:scale-90 text-black font-bold px-4 py-3 rounded-2xl shadow-xl shadow-[#cba153]/20 transition-all duration-200"
         >
           <span className="text-lg">⚡</span>
           <span className="text-sm">Manage Store</span>
