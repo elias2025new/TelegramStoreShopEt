@@ -66,16 +66,16 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
     };
 
     return (
-        <div className="flex flex-col gap-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800">
+        <div className="flex flex-col gap-3 p-3 bg-[#1c1c1e] rounded-xl border border-[#2a2a2a]">
             <div className={`flex gap-3 transition-opacity ${showDeleteConfirm ? 'opacity-20 pointer-events-none' : ''}`}>
                 <div
-                    className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-gray-200 dark:bg-gray-800 cursor-pointer group"
+                    className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-[#111111] cursor-pointer group"
                     onClick={() => onChangeImage(product.id)}
                 >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={product.image_url || ''} alt={product.name} className="w-full h-full object-cover group-hover:opacity-75 transition-opacity" />
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#cba153" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
                         </svg>
                     </div>
@@ -86,22 +86,22 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
                         value={localName}
                         onChange={(e) => setLocalName(e.target.value)}
                         placeholder="Product Name"
-                        className="w-full px-2 py-1.5 text-sm font-semibold border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                        className="w-full px-2 py-1.5 text-sm font-semibold border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none transition-all placeholder-gray-500"
                     />
                     <div className="flex gap-1.5">
                         <div className="flex-[1.4] relative">
-                            <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-[8px] text-gray-400 font-bold uppercase pointer-events-none">Price</span>
+                            <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-[10px] text-[#cba153] font-bold pointer-events-none">ETB</span>
                             <input
                                 type="number"
                                 value={localPrice}
                                 onChange={(e) => setLocalPrice(e.target.value)}
-                                className="w-full pl-7 pr-1 py-1.5 text-sm font-bold border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                                className="w-full pl-8 pr-1 py-1.5 text-sm font-bold border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none transition-all placeholder-gray-500"
                             />
                         </div>
                         <select
                             value={localCategory}
                             onChange={(e) => setLocalCategory(e.target.value)}
-                            className="flex-1 min-w-[80px] px-1 py-1.5 text-[11px] border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                            className="flex-1 min-w-[80px] px-1 py-1.5 text-[11px] border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none transition-all"
                         >
                             {CATEGORIES.map((cat) => (
                                 <option key={cat} value={cat}>{cat}</option>
@@ -111,7 +111,7 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
                 </div>
                 <button
                     onClick={() => setShowDeleteConfirm(true)}
-                    className="self-start p-2 text-gray-400 hover:text-red-500 transition-colors"
+                    className="self-start p-2 text-gray-500 hover:text-red-500 transition-colors"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" />
@@ -121,11 +121,11 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
 
             {hasChanges && !showDeleteConfirm && (
                 <div className="flex items-center justify-between pt-1">
-                    <span className="text-[11px] text-amber-600 dark:text-amber-400 font-medium">⚠️ Unsaved changes</span>
+                    <span className="text-[11px] text-[#cba153] font-medium">⚠️ Unsaved changes</span>
                     <button
                         onClick={handleSave}
                         disabled={isSaving}
-                        className={`px-4 py-1.5 rounded-lg text-xs font-bold text-white transition-all ${isSaving ? 'bg-gray-400' : 'bg-green-600 hover:bg-green-700 active:scale-95 shadow-sm'
+                        className={`px-4 py-1.5 rounded-lg text-xs font-bold text-black transition-all ${isSaving ? 'bg-gray-600' : 'bg-[#cba153] hover:bg-[#b8860b] active:scale-95 shadow-[0_2px_10px_rgba(203,161,83,0.2)]'
                             }`}
                     >
                         {isSaving ? 'Saving...' : 'Save Changes'}
@@ -134,13 +134,13 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
             )}
 
             {showDeleteConfirm && (
-                <div className="flex flex-col gap-2 pt-1 border-t border-red-50 dark:border-red-900/30">
+                <div className="flex flex-col gap-2 pt-1 border-t border-red-900/30">
                     <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-red-600 dark:text-red-400">Delete this product?</span>
+                        <span className="text-xs font-bold text-red-500">Delete this product?</span>
                         <div className="flex gap-2">
                             <button
                                 onClick={() => setShowDeleteConfirm(false)}
-                                className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-all font-bold"
+                                className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#2a2a2a] hover:bg-[#333333] text-white transition-all"
                             >
                                 Cancel
                             </button>
@@ -483,18 +483,18 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
 
     return (
         <div
-            className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-gray-950"
+            className="fixed inset-0 z-[100] flex flex-col bg-[#0a0a0a]"
             style={{
                 paddingTop: 'calc(var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px))',
             }}
         >
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[#2a2a2a] bg-[#0a0a0a]">
                 <div className="flex flex-col">
                     <div className="flex items-center gap-2">
-                        <h2 className="text-lg font-bold text-gray-900 dark:text-white">⚡ Manage Store</h2>
+                        <h2 className="text-lg font-bold text-[#cba153]">⚡ Store Admin</h2>
                         {draftRestored && view === 'upload' && (
-                            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 animate-pulse">
+                            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-[#cba153]/20 text-[#cba153] animate-pulse">
                                 Draft restored
                             </span>
                         )}
@@ -503,16 +503,16 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                 <div className="flex items-center gap-2">
                     <button
                         onClick={() => setView(view === 'upload' ? 'manage' : 'upload')}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${view === 'manage'
-                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                            : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
+                        className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${view === 'manage'
+                            ? 'bg-[#cba153]/20 text-[#cba153] border border-[#cba153]/30'
+                            : 'bg-[#1c1c1e] text-gray-300 border border-[#2a2a2a]'
                             }`}
                     >
-                        {view === 'upload' ? '⚙️ Configure' : '➕ Batch Upload'}
+                        {view === 'upload' ? '⚙️ Manage' : '➕ Upload'}
                     </button>
                     <button
                         onClick={onClose}
-                        className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300"
+                        className="p-2 rounded-full hover:bg-[#1c1c1e] transition-colors text-white"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M18 6 6 18" /><path d="m6 6 12 12" />
@@ -521,16 +521,23 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                 </div>
             </div>
 
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto p-4">
+            {/* Content Body - Flexible area preventing button pushout */}
+            <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4">
                 {view === 'upload' ? (
                     <>
-                        <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-3">Batch Upload Products</h3>
+                        {/* Status Message rendered inline */}
+                        {uploadStatus && (
+                            <div className={`p-3 rounded-lg text-sm mb-4 border ${uploadStatus.startsWith('✅') ? 'bg-green-900/20 text-green-400 border-green-900/50' : uploadStatus.startsWith('❌') ? 'bg-red-900/20 text-red-400 border-red-900/50' : 'bg-[#cba153]/10 text-[#cba153] border-[#cba153]/30'}`}>
+                                {uploadStatus}
+                            </div>
+                        )}
+
+                        <h3 className="font-semibold text-white mb-3">Batch Upload Products</h3>
 
                         {/* Image Picker */}
                         <button
                             onClick={() => fileInputRef.current?.click()}
-                            className="w-full border-2 border-dashed border-blue-300 dark:border-blue-700 rounded-xl p-6 flex flex-col items-center gap-2 text-blue-500 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors mb-4"
+                            className="w-full border-2 border-dashed border-[#444] rounded-xl p-6 flex flex-col items-center gap-2 text-[#cba153] hover:bg-[#111111] hover:border-[#cba153] transition-colors mb-4"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
@@ -538,7 +545,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                                 <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
                             </svg>
                             <span className="text-sm font-medium">Select Photos from Gallery</span>
-                            <span className="text-xs text-gray-400">Tap to select multiple images</span>
+                            <span className="text-xs text-gray-500">Tap to select multiple images</span>
                         </button>
                         <input
                             ref={fileInputRef}
@@ -553,43 +560,43 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                         {images.length > 0 && (
                             <div className="flex flex-col gap-4 mb-4">
                                 {images.map((item, index) => (
-                                    <div key={index} className="flex flex-col gap-2 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800">
+                                    <div key={index} className="flex flex-col gap-2 p-3 bg-[#1c1c1e] rounded-xl border border-[#2a2a2a]">
                                         {/* Top row: image + delete */}
                                         <div className="flex items-center justify-between gap-3">
-                                            <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-gray-200 dark:bg-gray-800">
+                                            <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-[#0a0a0a]">
                                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                                 <img src={item.preview} alt="preview" className="w-full h-full object-cover" />
                                             </div>
-                                            <p className="flex-1 text-[10px] text-gray-400 dark:text-gray-500 truncate">{item.fileName}</p>
+                                            <p className="flex-1 text-[10px] text-gray-400 truncate font-mono">{item.fileName}</p>
                                             <button
                                                 onClick={() => removeItem(index)}
-                                                className="p-1 text-red-400 hover:text-red-600 flex-shrink-0"
+                                                className="p-1 text-gray-500 hover:text-red-500 flex-shrink-0 transition-colors"
                                             >
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                                     <path d="M18 6 6 18" /><path d="m6 6 12 12" />
                                                 </svg>
                                             </button>
                                         </div>
-                                        {/* Fields — 2-col grid, add future fields here */}
+                                        {/* Fields — 2-col grid */}
                                         <div className="grid grid-cols-2 gap-2">
                                             <input
                                                 type="text"
                                                 placeholder="Title / Brand Name"
                                                 value={item.title}
                                                 onChange={(e) => updateItem(index, 'title', e.target.value)}
-                                                className="col-span-2 px-3 py-2 text-sm font-semibold border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                                className="col-span-2 px-3 py-2 text-sm font-semibold border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none placeholder-gray-600"
                                             />
                                             <input
                                                 type="number"
                                                 placeholder="Price (ETB)"
                                                 value={item.price}
                                                 onChange={(e) => updateItem(index, 'price', e.target.value)}
-                                                className="px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                                className="px-3 py-2 text-sm border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none placeholder-gray-600 font-mono"
                                             />
                                             <select
                                                 value={item.category}
                                                 onChange={(e) => updateItem(index, 'category', e.target.value)}
-                                                className="px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                                className="px-3 py-2 text-sm border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none"
                                             >
                                                 {CATEGORIES.map((cat) => (
                                                     <option key={cat} value={cat}>{cat}</option>
@@ -603,10 +610,17 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                     </>
                 ) : (
                     <>
-                        <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-3">Active Products</h3>
+                        {/* Status Message rendered inline */}
+                        {uploadStatus && (
+                            <div className={`p-3 rounded-lg text-sm mb-4 border ${uploadStatus.startsWith('✅') ? 'bg-green-900/20 text-green-400 border-green-900/50' : uploadStatus.startsWith('❌') ? 'bg-red-900/20 text-red-400 border-red-900/50' : 'bg-[#cba153]/10 text-[#cba153] border-[#cba153]/30'}`}>
+                                {uploadStatus}
+                            </div>
+                        )}
+
+                        <h3 className="font-semibold text-white mb-3">Active Products</h3>
                         {isLoadingProducts ? (
                             <div className="flex justify-center py-10">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#cba153]"></div>
                             </div>
                         ) : existingProducts.length === 0 ? (
                             <div className="text-center py-10 text-gray-500">No products found.</div>
@@ -635,23 +649,17 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                         />
                     </>
                 )}
-
-                {uploadStatus && (
-                    <div className={`p-3 rounded-lg text-sm mb-4 ${uploadStatus.startsWith('✅') ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : uploadStatus.startsWith('❌') ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'}`}>
-                        {uploadStatus}
-                    </div>
-                )}
             </div>
 
-            {/* Footer */}
-            {images.length > 0 && (
-                <div className="p-4 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
+            {/* Footer - Fixed at bottom below the scrollable area */}
+            {images.length > 0 && view === 'upload' && (
+                <div className="p-4 border-t border-[#2a2a2a] bg-[#0a0a0a] pb-safe">
                     <button
                         onClick={handlePublish}
                         disabled={isUploading}
-                        className={`w-full py-3.5 px-4 rounded-xl font-bold text-white transition-all ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 active:scale-[0.98] shadow-lg shadow-blue-500/30'}`}
+                        className={`w-full py-3.5 px-4 rounded-xl font-extrabold text-black transition-all ${isUploading ? 'bg-gray-600 cursor-not-allowed' : 'bg-[#cba153] hover:bg-[#b8860b] active:scale-[0.98] shadow-[0_4px_20px_rgba(203,161,83,0.3)]'}`}
                     >
-                        {isUploading ? 'Publishing...' : `Publish ${images.length} Product${images.length > 1 ? 's' : ''}`}
+                        {isUploading ? 'Publishing...' : `PUBLISH ${images.length} PRODUCT${images.length > 1 ? 'S' : ''}`}
                     </button>
                 </div>
             )}

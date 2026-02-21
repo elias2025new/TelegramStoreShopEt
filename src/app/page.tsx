@@ -20,8 +20,7 @@ const CATEGORIES = [
 
 export default function Home() {
   const { totalItems } = useCart();
-  const { isOwner } = useAdmin();
-  const [adminOpen, setAdminOpen] = useState(false);
+  const { isOwner, adminOpen, setAdminOpen } = useAdmin();
   const [selectedCategory, setSelectedCategory] = useState<string>('New');
   const queryClient = useQueryClient();
   const [userPhotoUrl, setUserPhotoUrl] = useState<string | null>(null);

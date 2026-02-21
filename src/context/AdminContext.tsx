@@ -8,18 +8,23 @@ interface AdminContextType {
     isOwner: boolean;
     storeId: string | null;
     isLoading: boolean;
+    adminOpen: boolean;
+    setAdminOpen: (open: boolean) => void;
 }
 
 const AdminContext = createContext<AdminContextType>({
     isOwner: false,
     storeId: null,
     isLoading: true,
+    adminOpen: false,
+    setAdminOpen: () => { },
 });
 
 export function AdminProvider({ children }: { children: ReactNode }) {
     const [isOwner, setIsOwner] = useState(false);
     const [storeId, setStoreId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [adminOpen, setAdminOpen] = useState(false);
 
     useEffect(() => {
         async function checkOwnership() {
@@ -58,7 +63,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     }, []);
 
     return (
-        <AdminContext.Provider value={{ isOwner, storeId, isLoading }}>
+        <AdminContext.Provider value={{ isOwner, storeId, isLoading, adminOpen, setAdminOpen }}>
             {children}
         </AdminContext.Provider>
     );

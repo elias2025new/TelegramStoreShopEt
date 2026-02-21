@@ -3,9 +3,11 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Grid, Heart, User } from 'lucide-react';
+import { useAdmin } from '@/context/AdminContext';
 
 export default function BottomNav() {
     const pathname = usePathname();
+    const { adminOpen } = useAdmin();
 
     const tabs = [
         { name: 'Home', href: '/', icon: Home },
@@ -15,7 +17,7 @@ export default function BottomNav() {
     ];
 
     return (
-        pathname.startsWith('/product') ? null : (
+        (pathname.startsWith('/product') || adminOpen) ? null : (
             <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#0a0a0a]/90 backdrop-blur-md border-t border-[#2a2a2a] px-6 py-4 pb-safe-area-bottom">
                 <div className="flex items-center justify-between max-w-md mx-auto">
                     {tabs.map((tab) => {
