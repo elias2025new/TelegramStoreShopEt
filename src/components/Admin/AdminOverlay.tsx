@@ -131,7 +131,10 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
 
             {hasChanges && !showDeleteConfirm && (
                 <div className="flex items-center justify-between pt-1">
-                    <span className="text-[11px] text-[#cba153] font-medium">⚠️ Unsaved changes</span>
+                    <div className="flex items-center gap-1.5">
+                        <img src="https://img.icons8.com/ios-filled/50/cba153/warning-shield.png" alt="warning" className="w-3 h-3" />
+                        <span className="text-[11px] text-[#cba153] font-medium">Unsaved changes</span>
+                    </div>
                     <button
                         onClick={handleSave}
                         disabled={isSaving}
@@ -163,8 +166,9 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
                         </div>
                     </div>
                 </div>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 }
 
@@ -583,7 +587,8 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
             <div className="flex items-center justify-between px-4 py-3 border-b border-[#2a2a2a] bg-[#0a0a0a]">
                 <div className="flex flex-col">
                     <div className="flex items-center gap-2">
-                        <h2 className="text-lg font-bold text-[#cba153]">⚡ Store Admin</h2>
+                        <img src="https://img.icons8.com/ios-filled/50/cba153/manager.png" alt="admin" className="w-5 h-5" />
+                        <h2 className="text-lg font-bold text-[#cba153]">Store Admin</h2>
                         {draftRestored && view === 'upload' && (
                             <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-[#cba153]/20 text-[#cba153] animate-pulse">
                                 Draft restored
@@ -594,12 +599,17 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                 <div className="flex items-center gap-2">
                     <button
                         onClick={() => setView(view === 'upload' ? 'manage' : 'upload')}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${view === 'manage'
+                        className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${view === 'manage'
                             ? 'bg-[#cba153]/20 text-[#cba153] border border-[#cba153]/30'
                             : 'bg-[#1c1c1e] text-gray-300 border border-[#2a2a2a]'
                             }`}
                     >
-                        {view === 'upload' ? '⚙️ Manage' : '➕ Upload'}
+                        <img
+                            src={view === 'upload' ? "https://img.icons8.com/ios-filled/50/cba153/settings.png" : "https://img.icons8.com/ios-filled/50/cba153/plus-math.png"}
+                            alt="icon"
+                            className="w-4 h-4"
+                        />
+                        {view === 'upload' ? 'Manage' : 'Upload'}
                     </button>
                     <button
                         onClick={onClose}
@@ -618,8 +628,13 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                     <>
                         {/* Status Message rendered inline */}
                         {uploadStatus && (
-                            <div className={`p-3 rounded-lg text-sm mb-4 border ${uploadStatus.startsWith('✅') ? 'bg-green-900/20 text-green-400 border-green-900/50' : uploadStatus.startsWith('❌') ? 'bg-red-900/20 text-red-400 border-red-900/50' : 'bg-[#cba153]/10 text-[#cba153] border-[#cba153]/30'}`}>
-                                {uploadStatus}
+                            <div className={`p-3 rounded-lg text-sm mb-4 border flex items-center gap-2 ${uploadStatus.startsWith('SUCCESS') ? 'bg-green-900/20 text-green-400 border-green-900/50' : uploadStatus.startsWith('ERROR') ? 'bg-red-900/20 text-red-400 border-red-900/50' : 'bg-[#cba153]/10 text-[#cba153] border-[#cba153]/30'}`}>
+                                <img
+                                    src={uploadStatus.startsWith('SUCCESS') ? "https://img.icons8.com/ios-filled/50/2ecc71/checkmark.png" : uploadStatus.startsWith('ERROR') ? "https://img.icons8.com/ios-filled/50/ff4d4d/cancel.png" : "https://img.icons8.com/ios-filled/50/cba153/warning-shield.png"}
+                                    alt="status"
+                                    className="w-4 h-4"
+                                />
+                                {uploadStatus.replace('SUCCESS: ', '').replace('ERROR: ', '')}
                             </div>
                         )}
 
@@ -669,8 +684,13 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                     <>
                         {/* Status Message rendered inline */}
                         {uploadStatus && (
-                            <div className={`p-3 rounded-lg text-sm mb-4 border ${uploadStatus.startsWith('✅') ? 'bg-green-900/20 text-green-400 border-green-900/50' : uploadStatus.startsWith('❌') ? 'bg-red-900/20 text-red-400 border-red-900/50' : 'bg-[#cba153]/10 text-[#cba153] border-[#cba153]/30'}`}>
-                                {uploadStatus}
+                            <div className={`p-3 rounded-lg text-sm mb-4 border flex items-center gap-2 ${uploadStatus.startsWith('SUCCESS') ? 'bg-green-900/20 text-green-400 border-green-900/50' : uploadStatus.startsWith('ERROR') ? 'bg-red-900/20 text-red-400 border-red-900/50' : 'bg-[#cba153]/10 text-[#cba153] border-[#cba153]/30'}`}>
+                                <img
+                                    src={uploadStatus.startsWith('SUCCESS') ? "https://img.icons8.com/ios-filled/50/2ecc71/checkmark.png" : uploadStatus.startsWith('ERROR') ? "https://img.icons8.com/ios-filled/50/ff4d4d/cancel.png" : "https://img.icons8.com/ios-filled/50/cba153/warning-shield.png"}
+                                    alt="status"
+                                    className="w-4 h-4"
+                                />
+                                {uploadStatus.replace('SUCCESS: ', '').replace('ERROR: ', '')}
                             </div>
                         )}
 
@@ -709,17 +729,19 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
             </div>
 
             {/* Footer - Fixed at bottom below the scrollable area */}
-            {images.length > 0 && view === 'upload' && (
-                <div className="p-4 border-t border-[#2a2a2a] bg-[#0a0a0a] pb-safe">
-                    <button
-                        onClick={handlePublish}
-                        disabled={isUploading}
-                        className={`w-full py-3.5 px-4 rounded-xl font-extrabold text-black transition-all ${isUploading ? 'bg-gray-600 cursor-not-allowed' : 'bg-[#cba153] hover:bg-[#b8860b] active:scale-[0.98] shadow-[0_4px_20px_rgba(203,161,83,0.3)]'}`}
-                    >
-                        {isUploading ? 'Publishing...' : `PUBLISH ${images.length} PRODUCT${images.length > 1 ? 'S' : ''}`}
-                    </button>
-                </div>
-            )}
-        </div>
+            {
+                images.length > 0 && view === 'upload' && (
+                    <div className="p-4 border-t border-[#2a2a2a] bg-[#0a0a0a] pb-safe">
+                        <button
+                            onClick={handlePublish}
+                            disabled={isUploading}
+                            className={`w-full py-3.5 px-4 rounded-xl font-extrabold text-black transition-all ${isUploading ? 'bg-gray-600 cursor-not-allowed' : 'bg-[#cba153] hover:bg-[#b8860b] active:scale-[0.98] shadow-[0_4px_20px_rgba(203,161,83,0.3)]'}`}
+                        >
+                            {isUploading ? 'Publishing...' : `PUBLISH ${images.length} PRODUCT${images.length > 1 ? 'S' : ''}`}
+                        </button>
+                    </div>
+                )
+            }
+        </div >
     );
 }

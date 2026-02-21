@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Grid, Heart, User } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 
 export default function BottomNav() {
@@ -10,10 +9,26 @@ export default function BottomNav() {
     const { adminOpen } = useAdmin();
 
     const tabs = [
-        { name: 'Home', href: '/', icon: Home },
-        { name: 'Categories', href: '/categories', icon: Grid },
-        { name: 'Favorites', href: '/favorites', icon: Heart },
-        { name: 'Profile', href: '/profile', icon: User },
+        {
+            name: 'Home',
+            href: '/',
+            icon: "home"
+        },
+        {
+            name: 'Categories',
+            href: '/categories',
+            icon: "square-grid"
+        },
+        {
+            name: 'Favorites',
+            href: '/favorites',
+            icon: "hearts"
+        },
+        {
+            name: 'Profile',
+            href: '/profile',
+            icon: "male-user"
+        },
     ];
 
     return (
@@ -30,10 +45,10 @@ export default function BottomNav() {
                                 className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all ${isActive ? 'text-[#cba153]' : 'text-gray-500 hover:text-gray-300'
                                     }`}
                             >
-                                <Icon
-                                    size={24}
-                                    strokeWidth={isActive ? 2.5 : 2}
-                                    className={isActive ? 'fill-[#cba153]/20' : ''}
+                                <img
+                                    src={`https://img.icons8.com/ios-filled/50/${isActive ? 'cba153' : '6b7280'}/${tab.icon}.png`}
+                                    alt={tab.name}
+                                    className="w-6 h-6 transition-all"
                                 />
                             </Link>
                         );

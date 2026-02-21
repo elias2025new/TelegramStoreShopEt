@@ -33,7 +33,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                         className="absolute top-2 right-2 z-10 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-sm text-gray-800 transform-gpu active:scale-90 transition-transform duration-200 ease-out"
                         onClick={(e) => e.preventDefault()}
                     >
-                        <Heart size={16} fill="currentColor" />
+                        <img src="https://img.icons8.com/ios-filled/50/222222/hearts.png" alt="heart" className="w-4 h-4" />
                     </button>
 
                     {product.image_url ? (

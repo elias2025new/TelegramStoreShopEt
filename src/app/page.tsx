@@ -11,7 +11,7 @@ import AdminOverlay from '@/components/Admin/AdminOverlay';
 import { ShoppingCart, Bell, User as UserIcon } from 'lucide-react';
 
 const CATEGORIES = [
-  { name: 'New', icon: '✨' },
+  { name: 'New', image: 'https://img.icons8.com/ios-filled/50/cba153/sparkling-diamond.png' },
   { name: 'Men', image: '/men-cat.png' }, // Placeholders for now
   { name: 'Women', image: '/women-cat.png' },
   { name: 'Footwear', image: '/footwear-cat.png' },
@@ -79,7 +79,7 @@ export default function Home() {
         </div>
         <div className="flex items-center gap-4">
           <Link href="/cart" className="relative text-white hover:text-[#cba153] transition-colors">
-            <ShoppingCart size={24} />
+            <img src="https://img.icons8.com/ios-filled/50/ffffff/shopping-cart.png" alt="cart" className="w-6 h-6 hover:brightness-75" />
             {totalItems > 0 && (
               <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
                 {totalItems}
@@ -87,7 +87,7 @@ export default function Home() {
             )}
           </Link>
           <button className="relative text-white hover:text-[#cba153] transition-colors">
-            <Bell size={24} />
+            <img src="https://img.icons8.com/ios-filled/50/ffffff/bell.png" alt="notifications" className="w-6 h-6 hover:brightness-75" />
             <span className="absolute 1 top-0 right-1 h-2.5 w-2.5 rounded-full bg-red-500 border-2 border-black"></span>
           </button>
         </div>
@@ -138,8 +138,8 @@ export default function Home() {
                   }`}
               >
                 <div className="flex-1 flex items-center justify-center">
-                  {category.icon ? (
-                    <span className="text-2xl">{category.icon}</span>
+                  {category.image ? (
+                    <img src={category.image} alt={category.name} className="w-10 h-10 object-contain" />
                   ) : (
                     <div className="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center text-xs text-gray-500 overflow-hidden relative">
                       {/* Dummy images */}
@@ -158,7 +158,10 @@ export default function Home() {
 
       {/* Product Section Header */}
       <div className="px-6 mt-6 flex justify-between items-center">
-        <h2 className="text-xl font-medium text-white">Bestsellers <span className="text-xl">🔥</span></h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-xl font-medium text-white">Bestsellers</h2>
+          <img src="https://img.icons8.com/ios-filled/50/ff4d4d/fire-element.png" alt="fire" className="w-5 h-5" />
+        </div>
         <button className="text-gray-400 hover:text-white">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
         </button>
