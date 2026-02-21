@@ -67,7 +67,11 @@ export default function Home() {
                   onClick={() => setAdminOpen(true)}
                   className="px-2 py-0.5 bg-[#cba153]/10 text-[#cba153] border border-[#cba153]/30 rounded text-[10px] font-bold tracking-wide transform-gpu active:scale-90 transition-all duration-200 flex items-center gap-1"
                 >
-                  <span className="text-[10px]">⚙️</span> Admin
+                  <img
+                    src="https://img.icons8.com/ios-filled/50/cba153/manager.png"
+                    alt="admin"
+                    className="w-3 h-3 shrink-0"
+                  /> Admin
                 </button>
               )}
             </div>
