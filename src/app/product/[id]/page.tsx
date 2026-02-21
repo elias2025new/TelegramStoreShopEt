@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { use, useState } from 'react';
 import { useCart } from '@/context/CartContext';
 import PageTransition from '@/components/PageTransition';
+import CartIcon from '@/components/CartIcon';
 
 type Product = Database['public']['Tables']['products']['Row'];
 
@@ -106,7 +107,9 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                             <path d="M19 12H5M12 19l-7-7 7-7" />
                         </svg>
                     </Link>
-                    {/* Optional right action like Share or Favorite could go here */}
+                    <div className="pointer-events-auto bg-black/40 backdrop-blur-md rounded-full border border-white/10 hover:bg-black/60 transition-colors">
+                        <CartIcon />
+                    </div>
                 </div>
 
                 {/* Image Area - Fixed height proportion */}
@@ -191,8 +194,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                                 onClick={handleAddToCart}
                                 disabled={isAdded}
                                 className={`flex-1 font-extrabold text-[15px] h-12 rounded-full shadow-[0_4px_20px_rgba(203,161,83,0.3)] active:scale-95 transition-all flex items-center justify-center gap-2 ${isAdded
-                                        ? 'bg-green-600 text-white shadow-[0_4px_20px_rgba(22,163,74,0.3)]'
-                                        : 'bg-[#cba153] hover:bg-[#b8860b] text-black'
+                                    ? 'bg-green-600 text-white shadow-[0_4px_20px_rgba(22,163,74,0.3)]'
+                                    : 'bg-[#cba153] hover:bg-[#b8860b] text-black'
                                     }`}
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

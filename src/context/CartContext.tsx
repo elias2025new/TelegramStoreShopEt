@@ -1,7 +1,8 @@
 
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import Toast from '@/components/Toast';
 import { Database } from '@/types/supabase';
 
 type Product = Database['public']['Tables']['products']['Row'];
@@ -18,14 +19,22 @@ interface CartContextType {
     clearCart: () => void;
     totalItems: number;
     totalPrice: number;
+    showToast: (message: string) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
     const [items, setItems] = useState<CartItem[]>([]);
+    const [toast, setToast] = useState({ message: '', isVisible: false });
 
-    // TODO: Persist to localStorage if needed
+    const showToast = useCallback((message: string) => {
+        setToast({ message, isVisible: true });
+    }, []);
+
+    const hideToast = useCallback(() => {
+        setToast(prev => ({ ...prev, isVisible: false }));
+    }, []);
 
     const addToCart = (product: Product, quantity: number) => {
         setItems((prev) => {
@@ -39,6 +48,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             }
             return [...prev, { product, quantity }];
         });
+        showToast(`Added ${quantity} item${quantity > 1 ? 's' : ''} to cart`);
     };
 
     const removeFromCart = (productId: string) => {
@@ -53,8 +63,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const totalPrice = items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
 
     return (
-        <CartContext.Provider value={{ items, addToCart, removeFromCart, clearCart, totalItems, totalPrice }}>
+        <CartContext.Provider value={{ items, addToCart, removeFromCart, clearCart, totalItems, totalPrice, showToast }}>
             {children}
+            <Toast
+                message={toast.message}
+                isVisible={toast.isVisible}
+                onClose={hideToast}
+            />
         </CartContext.Provider>
     );
 }

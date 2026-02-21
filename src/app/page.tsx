@@ -11,6 +11,7 @@ import ProductGrid from '@/components/ProductGrid';
 import AdminOverlay from '@/components/Admin/AdminOverlay';
 import { User as UserIcon } from 'lucide-react';
 import PageTransition from '@/components/PageTransition';
+import CartIcon from '@/components/CartIcon';
 
 const CATEGORIES = [
   { name: 'New', icon: 'sparkling-diamond' },
@@ -21,7 +22,7 @@ const CATEGORIES = [
 ];
 
 function HomeContent() {
-  const { totalItems } = useCart();
+  const { totalPrice } = useCart();
   const { isOwner, adminOpen, setAdminOpen } = useAdmin();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -93,17 +94,10 @@ function HomeContent() {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/cart" className="relative text-white hover:text-[#cba153] transition-colors">
-              <img src="https://img.icons8.com/ios-filled/50/ffffff/shopping-cart.png" alt="cart" className="w-6 h-6 hover:brightness-75" />
-              {totalItems > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
-                  {totalItems}
-                </span>
-              )}
-            </Link>
+            <CartIcon />
             <button className="relative text-white hover:text-[#cba153] transition-colors">
               <img src="https://img.icons8.com/ios-filled/50/ffffff/bell.png" alt="notifications" className="w-6 h-6 hover:brightness-75" />
-              <span className="absolute 1 top-0 right-1 h-2.5 w-2.5 rounded-full bg-red-500 border-2 border-black"></span>
+              <span className="absolute top-0 right-1 h-2.5 w-2.5 rounded-full bg-red-500 border-2 border-black"></span>
             </button>
           </div>
         </header>

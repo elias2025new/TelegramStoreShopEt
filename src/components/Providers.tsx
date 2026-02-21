@@ -1,8 +1,8 @@
 
 'use client';
 
+import React, { useState, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useState, useEffect } from 'react';
 import Script from 'next/script';
 import { CartProvider } from '@/context/CartContext';
 import { AdminProvider } from '@/context/AdminContext';
