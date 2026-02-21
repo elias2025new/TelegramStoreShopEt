@@ -2,6 +2,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Database } from '@/types/supabase';
+import { Heart } from 'lucide-react';
 
 type Product = Database['public']['Tables']['products']['Row'];
 
@@ -10,41 +11,75 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
+    // Generate a visual pseudo-discount for the UI demo based on ID string length
+    const discount = product.id ? ((product.id.length % 3) + 1) * 10 : 20;
+    const oldPrice = product.price * (1 + (discount / 100));
+    // Generate a visual rating placeholder
+    const rating = product.id ? (4 + (product.id.length % 10) / 10).toFixed(1) : "4.5";
+
     return (
-        <Link href={`/product/${product.id}`} className="block group">
-            <div className="bg-white dark:bg-gray-900 rounded-lg overflow-hidden shadow-sm border border-gray-100 dark:border-gray-800 transition-all hover:shadow-md">
-                <div className="relative aspect-square w-full bg-gray-100 dark:bg-gray-800">
+        <Link href={`/product/${product.id}`} className="block group h-full">
+            <div className="bg-[#1c1c1e] rounded-xl overflow-hidden border border-[#2a2a2a] transition-all hover:bg-[#222222] flex flex-col h-full">
+
+                {/* Image Section */}
+                <div className="relative aspect-[4/5] w-full bg-[#111111]">
+                    {/* Discount Badge */}
+                    <div className="absolute top-2 left-2 z-10 bg-white/10 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-bold text-white">
+                        -{discount}%
+                    </div>
+
+                    {/* Favorite Button */}
+                    <button
+                        className="absolute top-2 right-2 z-10 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-sm hover:scale-110 text-gray-800 transition-transform"
+                        onClick={(e) => e.preventDefault()}
+                    >
+                        <Heart size={16} fill="currentColor" />
+                    </button>
+
                     {product.image_url ? (
                         <Image
                             src={product.image_url}
                             alt={product.name}
                             fill
-                            className="object-cover object-center group-hover:opacity-90 transition-opacity"
+                            className="object-cover object-center"
                             sizes="(max-width: 768px) 50vw, 33vw"
                         />
                     ) : (
-                        <div className="flex items-center justify-center h-full text-gray-400">
+                        <div className="flex items-center justify-center h-full text-gray-600">
                             No Image
                         </div>
                     )}
                 </div>
-                <div className="p-3">
-                    <h3 className="text-sm font-medium text-gray-900 dark:text-white line-clamp-1">
+
+                {/* Content Section */}
+                <div className="p-3 flex flex-col flex-grow">
+                    <h3 className="text-sm font-medium text-white line-clamp-1">
                         {product.name}
                     </h3>
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 line-clamp-1">
-                        {product.category}
-                    </p>
-                    <div className="mt-2 flex items-center justify-between">
-                        <span className="text-base font-bold text-gray-900 dark:text-white">
-                            {new Intl.NumberFormat('en-ET', { style: 'currency', currency: 'ETB' }).format(product.price)}
+
+                    <div className="mt-1 flex items-baseline gap-2">
+                        <span className="text-sm font-bold text-white">
+                            {new Intl.NumberFormat('en-ET', { style: 'currency', currency: 'ETB', maximumFractionDigits: 0 }).format(product.price)}
                         </span>
-                        <button className="bg-blue-600 text-white p-1.5 rounded-full hover:bg-blue-700 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <circle cx="9" cy="21" r="1" />
-                                <circle cx="20" cy="21" r="1" />
-                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-                            </svg>
+                        <span className="text-[10px] text-gray-500 line-through">
+                            {new Intl.NumberFormat('en-ET', { style: 'currency', currency: 'ETB', maximumFractionDigits: 0 }).format(oldPrice)}
+                        </span>
+                    </div>
+
+                    <div className="mt-auto pt-2 flex items-center justify-between">
+                        <div className="flex items-center gap-1">
+                            <div className="flex text-[#cba153]">
+                                <span className="text-[10px]">★★★★</span>
+                                <span className="text-[10px] text-gray-600">★</span>
+                            </div>
+                            <span className="text-[10px] text-gray-400">{rating}</span>
+                        </div>
+
+                        <button
+                            className="text-xs text-gray-300 font-medium px-2 py-1 bg-[#2a2a2a] rounded hover:text-white transition-colors"
+                            onClick={(e) => { e.preventDefault(); /* Add to cart logic here */ }}
+                        >
+                            + Add
                         </button>
                     </div>
                 </div>

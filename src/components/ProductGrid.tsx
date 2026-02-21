@@ -33,9 +33,9 @@ export default function ProductGrid({ selectedCategory = 'All' }: ProductGridPro
 
     if (isLoading) {
         return (
-            <div className="grid grid-cols-2 gap-4 p-4 animate-pulse">
+            <div className="grid grid-cols-2 gap-3 px-4 pb-24">
                 {[...Array(6)].map((_, i) => (
-                    <div key={i} className="bg-gray-200 dark:bg-gray-800 rounded-lg h-48"></div>
+                    <div key={i} className="bg-[#1c1c1e] rounded-xl h-56 animate-pulse border border-[#2a2a2a]"></div>
                 ))}
             </div>
         );
@@ -74,7 +74,7 @@ export default function ProductGrid({ selectedCategory = 'All' }: ProductGridPro
     }
 
     return (
-        <div className="grid grid-cols-2 gap-4 p-4 pb-24">
+        <div className="grid grid-cols-2 gap-3 px-4 pb-32">
             {filtered.map((product) => (
                 <ProductCard key={product.id} product={product} />
             ))}
