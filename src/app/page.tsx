@@ -40,8 +40,8 @@ export default function Home() {
     <main className="min-h-screen bg-black pb-24 font-sans">
       {/* Header */}
       <header
-        className="sticky z-40 bg-black/80 backdrop-blur-md px-6 py-4 flex items-center justify-between"
-        style={{ top: 'calc(var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px))' }}
+        className="sticky top-0 z-50 bg-black/80 backdrop-blur-md px-6 pb-4 flex items-center justify-between"
+        style={{ paddingTop: 'calc(1rem + var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px))' }}
       >
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full border-2 border-[#cba153] flex items-center justify-center overflow-hidden bg-[#1a1a1a]">
