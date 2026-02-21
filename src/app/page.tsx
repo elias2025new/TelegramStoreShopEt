@@ -13,11 +13,11 @@ import { User as UserIcon } from 'lucide-react';
 import PageTransition from '@/components/PageTransition';
 
 const CATEGORIES = [
-  { name: 'New', image: 'https://img.icons8.com/ios-filled/50/cba153/sparkling-diamond.png' },
-  { name: 'Men', image: '/men-cat.png' }, // Placeholders for now
-  { name: 'Women', image: '/women-cat.png' },
-  { name: 'Footwear', image: '/footwear-cat.png' },
-  { name: 'Accessories', image: '/acc-cat.png' }
+  { name: 'New', icon: 'sparkling-diamond' },
+  { name: 'Men', icon: 'male' },
+  { name: 'Women', icon: 'female' },
+  { name: 'Footwear', icon: 'shoes' },
+  { name: 'Accessories', icon: 'shopping-bag' }
 ];
 
 function HomeContent() {
@@ -153,14 +153,11 @@ function HomeContent() {
                     }`}
                 >
                   <div className="flex-1 flex items-center justify-center">
-                    {category.image ? (
-                      <img src={category.image} alt={category.name} className="w-10 h-10 object-contain" />
-                    ) : (
-                      <div className="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center text-xs text-gray-500 overflow-hidden relative">
-                        {/* Dummy images */}
-                        img
-                      </div>
-                    )}
+                    <img
+                      src={`https://img.icons8.com/ios-filled/50/${isSelected ? 'cba153' : '6b7280'}/${category.icon}.png`}
+                      alt={category.name}
+                      className="w-10 h-10 object-contain"
+                    />
                   </div>
                   <span className={`text-xs mt-1 ${isSelected ? 'text-[#cba153] font-medium' : 'text-gray-400'}`}>
                     {category.name}
