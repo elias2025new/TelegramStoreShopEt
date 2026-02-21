@@ -41,10 +41,21 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-white dark:bg-gray-950 p-4 animate-pulse">
-                <div className="h-64 bg-gray-200 dark:bg-gray-800 rounded-lg w-full mb-4"></div>
-                <div className="h-8 bg-gray-200 dark:bg-gray-800 rounded w-3/4 mb-4"></div>
-                <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/2"></div>
+            <div className="min-h-screen bg-[#0a0a0a] p-4 animate-pulse">
+                {/* Back button skeleton */}
+                <div className="w-12 h-12 bg-[#1c1c1e] rounded-full mb-8"></div>
+                {/* Main image skeleton */}
+                <div className="h-[55vh] bg-[#111111] rounded-2xl w-full mb-6 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                </div>
+                {/* Content skeletons */}
+                <div className="h-8 bg-[#1c1c1e] rounded-lg w-3/4 mb-4"></div>
+                <div className="h-4 bg-[#1c1c1e] rounded-lg w-1/2 mb-8"></div>
+                <div className="space-y-3">
+                    <div className="h-4 bg-[#1c1c1e] rounded-lg w-full"></div>
+                    <div className="h-4 bg-[#1c1c1e] rounded-lg w-full"></div>
+                    <div className="h-4 bg-[#1c1c1e] rounded-lg w-4/5"></div>
+                </div>
             </div>
         );
     }
@@ -60,19 +71,23 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         );
     }
 
+    const [isAdded, setIsAdded] = useState(false);
+
     const handleAddToCart = () => {
         addToCart(product, quantity);
+        setIsAdded(true);
+        setTimeout(() => setIsAdded(false), 2000);
 
         if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-            window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+            window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+            // Optionally still show popup, but immediate visual feedback is better
+            /*
             window.Telegram.WebApp.showPopup({
                 title: 'Added to Cart',
                 message: `${quantity} x ${product.name} added.`,
                 buttons: [{ type: 'ok' }]
             });
-        } else {
-            // Fallback for browser testing
-            console.log(`${quantity} x ${product.name} added to cart!`);
+            */
         }
     };
 
@@ -174,14 +189,24 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                             {/* Add to Cart Button */}
                             <button
                                 onClick={handleAddToCart}
-                                className="flex-1 bg-[#cba153] hover:bg-[#b8860b] text-black font-extrabold text-[15px] h-12 rounded-full shadow-[0_4px_20px_rgba(203,161,83,0.3)] active:scale-95 transition-all flex items-center justify-center gap-2"
+                                disabled={isAdded}
+                                className={`flex-1 font-extrabold text-[15px] h-12 rounded-full shadow-[0_4px_20px_rgba(203,161,83,0.3)] active:scale-95 transition-all flex items-center justify-center gap-2 ${isAdded
+                                        ? 'bg-green-600 text-white shadow-[0_4px_20px_rgba(22,163,74,0.3)]'
+                                        : 'bg-[#cba153] hover:bg-[#b8860b] text-black'
+                                    }`}
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                    <circle cx="8" cy="21" r="1" />
-                                    <circle cx="19" cy="21" r="1" />
-                                    <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+                                    {isAdded ? (
+                                        <path d="M20 6L9 17L4 12" />
+                                    ) : (
+                                        <>
+                                            <circle cx="8" cy="21" r="1" />
+                                            <circle cx="19" cy="21" r="1" />
+                                            <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+                                        </>
+                                    )}
                                 </svg>
-                                ADD TO CART
+                                {isAdded ? 'ADDED!' : 'ADD TO CART'}
                             </button>
                         </div>
                     </div>

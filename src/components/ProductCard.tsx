@@ -1,8 +1,7 @@
-
 import Image from 'next/image';
 import Link from 'next/link';
 import { Database } from '@/types/supabase';
-import { Heart } from 'lucide-react';
+import { useCart } from '@/context/CartContext';
 
 type Product = Database['public']['Tables']['products']['Row'];
 
@@ -11,11 +10,22 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
+    const { addToCart } = useCart();
     // Generate a visual pseudo-discount for the UI demo based on ID string length
     const discount = product.id ? ((product.id.length % 3) + 1) * 10 : 20;
     const oldPrice = product.price * (1 + (discount / 100));
     // Generate a visual rating placeholder
     const rating = product.id ? (4 + (product.id.length % 10) / 10).toFixed(1) : "4.5";
+
+    const handleQuickAdd = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        addToCart(product, 1);
+
+        if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+            window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+        }
+    };
 
     return (
         <Link href={`/product/${product.id}`} className="block group h-full transform-gpu active:scale-[0.98] transition-all duration-200">
@@ -31,7 +41,10 @@ export default function ProductCard({ product }: ProductCardProps) {
                     {/* Favorite Button */}
                     <button
                         className="absolute top-2 right-2 z-10 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-sm text-gray-800 transform-gpu active:scale-90 transition-transform duration-200 ease-out"
-                        onClick={(e) => e.preventDefault()}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                        }}
                     >
                         <img src="https://img.icons8.com/ios-filled/50/222222/hearts.png" alt="heart" className="w-4 h-4" />
                     </button>
@@ -76,8 +89,8 @@ export default function ProductCard({ product }: ProductCardProps) {
                         </div>
 
                         <button
-                            className="text-xs text-gray-300 font-medium px-2 py-1 bg-[#2a2a2a] rounded hover:text-white transform-gpu active:scale-90 transition-all duration-200"
-                            onClick={(e) => { e.preventDefault(); /* Add to cart logic here */ }}
+                            className="text-xs text-[#cba153] font-bold px-3 py-1.5 bg-[#cba153]/10 border border-[#cba153]/20 rounded-lg hover:bg-[#cba153]/20 transform-gpu active:scale-90 transition-all duration-200"
+                            onClick={handleQuickAdd}
                         >
                             + Add
                         </button>
