@@ -25,12 +25,14 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string>('New');
   const queryClient = useQueryClient();
   const [userPhotoUrl, setUserPhotoUrl] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string>('Guest');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       import('@twa-dev/sdk').then((WebApp) => {
         if (WebApp.default.initDataUnsafe?.user) {
           setUserPhotoUrl(WebApp.default.initDataUnsafe.user.photo_url || null);
+          setUserName(WebApp.default.initDataUnsafe.user.first_name || 'Guest');
         }
       }).catch(console.error);
     }
@@ -55,7 +57,7 @@ export default function Home() {
             <h1 className="text-[#cba153] font-serif font-bold tracking-wider text-sm whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px]">
               CROWN SHOES & CLOTHES
             </h1>
-            <p className="text-gray-400 text-xs mt-0.5">Hey, guests,</p>
+            <p className="text-gray-400 text-xs mt-0.5">Hey {userName},</p>
           </div>
         </div>
         <div className="flex items-center gap-4">
