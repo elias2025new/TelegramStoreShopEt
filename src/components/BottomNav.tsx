@@ -17,7 +17,7 @@ export default function BottomNav() {
         {
             name: 'Categories',
             href: '/categories',
-            icon: "square-grid"
+            icon: "grid"
         },
         {
             name: 'Favorites',
@@ -27,7 +27,7 @@ export default function BottomNav() {
         {
             name: 'Profile',
             href: '/profile',
-            icon: "male-user"
+            icon: "user-male"
         },
     ];
 
