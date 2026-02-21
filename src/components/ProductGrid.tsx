@@ -8,6 +8,10 @@ import { Database } from '@/types/supabase';
 
 type Product = Database['public']['Tables']['products']['Row'];
 
+interface ProductGridProps {
+    selectedCategory?: string;
+}
+
 async function fetchProducts() {
     const { data, error } = await supabase
         .from('products')
@@ -21,7 +25,7 @@ async function fetchProducts() {
     return data as Product[];
 }
 
-export default function ProductGrid() {
+export default function ProductGrid({ selectedCategory = 'All' }: ProductGridProps) {
     const { data: products, isLoading, error } = useQuery({
         queryKey: ['products'],
         queryFn: fetchProducts,
@@ -53,9 +57,25 @@ export default function ProductGrid() {
         );
     }
 
+    const filtered =
+        selectedCategory === 'All'
+            ? products
+            : products.filter(
+                (p) =>
+                    p.category?.toLowerCase() === selectedCategory.toLowerCase()
+            );
+
+    if (filtered.length === 0) {
+        return (
+            <div className="p-8 text-center text-gray-500">
+                No products in &quot;{selectedCategory}&quot;.
+            </div>
+        );
+    }
+
     return (
         <div className="grid grid-cols-2 gap-4 p-4 pb-24">
-            {products.map((product) => (
+            {filtered.map((product) => (
                 <ProductCard key={product.id} product={product} />
             ))}
         </div>

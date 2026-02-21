@@ -8,15 +8,18 @@ import { useAdmin } from '@/context/AdminContext';
 import ProductGrid from '@/components/ProductGrid';
 import AdminOverlay from '@/components/Admin/AdminOverlay';
 
+const CATEGORIES = ['All', 'Electronics', 'Fashion', 'Home', 'Beauty'];
+
 export default function Home() {
   const { totalItems } = useCart();
   const { isOwner } = useAdmin();
   const [adminOpen, setAdminOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const queryClient = useQueryClient();
 
   return (
     <main className="min-h-screen bg-white dark:bg-gray-950 pb-20">
-      {/* ... header ... */}
+      {/* Header */}
       <header className="sticky top-0 z-10 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 px-4 py-3">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-teal-400 bg-clip-text text-transparent">
@@ -57,12 +60,13 @@ export default function Home() {
 
       {/* Categories Scroller */}
       <div className="px-4 py-3 overflow-x-auto whitespace-nowrap scrollbar-hide">
-        {['All', 'Electronics', 'Fashion', 'Home', 'Beauty'].map((category, i) => (
+        {CATEGORIES.map((category) => (
           <button
             key={category}
-            className={`mr-2 px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${i === 0
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+            onClick={() => setSelectedCategory(category)}
+            className={`mr-2 px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${selectedCategory === category
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
           >
             {category}
@@ -71,7 +75,7 @@ export default function Home() {
       </div>
 
       {/* Product Grid */}
-      <ProductGrid />
+      <ProductGrid selectedCategory={selectedCategory} />
 
       {/* Floating Admin Button — visible only to store owner */}
       {isOwner && (
