@@ -42,8 +42,7 @@ export default function Home() {
     <main className="min-h-screen bg-black pb-24 font-sans">
       {/* Header */}
       <header
-        className="sticky top-0 z-50 bg-black/80 backdrop-blur-md px-6 pb-4 flex items-center justify-between"
-        style={{ paddingTop: 'calc(1rem + var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px))' }}
+        className="sticky top-0 z-50 bg-black/80 backdrop-blur-md px-6 py-4 flex items-center justify-between"
       >
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full border-2 border-[#cba153] flex items-center justify-center overflow-hidden bg-[#1a1a1a]">
@@ -57,7 +56,7 @@ export default function Home() {
             <h1 className="text-[#cba153] font-serif font-bold tracking-wider text-sm whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px]">
               CROWN SHOES & CLOTHES
             </h1>
-            <p className="text-gray-400 text-xs mt-0.5">Hey {userName},</p>
+            <p className="text-gray-400 text-xs mt-0.5">Hey {userName}</p>
           </div>
         </div>
         <div className="flex items-center gap-4">
