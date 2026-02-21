@@ -574,7 +574,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
 
     return (
         <div
-            className="fixed inset-0 z-[100] flex flex-col bg-[#0a0a0a] overscroll-none transform-gpu"
+            className="fixed inset-0 z-[100] flex flex-col bg-[#0a0a0a]"
             style={{
                 paddingTop: 'calc(var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px))',
             }}

@@ -16,11 +16,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`antialiased bg-black text-white overscroll-none`}
+        className={`antialiased bg-black text-white`}
       >
         <Providers>
           <div
-            className="mx-auto max-w-md min-h-screen bg-black shadow-sm flex flex-col relative overscroll-none transform-gpu"
+            className="mx-auto max-w-md min-h-screen bg-black shadow-sm flex flex-col relative"
             style={{
               paddingTop: 'calc(var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px))',
             }}

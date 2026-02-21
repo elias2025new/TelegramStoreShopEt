@@ -60,7 +60,17 @@ export default function Home() {
             <h1 className="text-[#cba153] font-serif font-bold tracking-wider text-sm whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px]">
               CROWN SHOES & CLOTHES
             </h1>
-            <p className="text-gray-400 text-xs mt-0.5">Hey {userName}</p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <p className="text-gray-400 text-xs">Hey {userName}</p>
+              {isOwner && (
+                <button
+                  onClick={() => setAdminOpen(true)}
+                  className="px-2 py-0.5 bg-[#cba153]/10 text-[#cba153] border border-[#cba153]/30 rounded text-[10px] font-bold tracking-wide transform-gpu active:scale-90 transition-all duration-200 flex items-center gap-1"
+                >
+                  <span className="text-[10px]">⚙️</span> Admin
+                </button>
+              )}
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-4">
@@ -153,16 +163,7 @@ export default function Home() {
       {/* Product Grid */}
       <ProductGrid selectedCategory={selectedCategory === 'New' ? 'All' : selectedCategory} />
 
-      {/* Floating Admin Button — visible only to store owner */}
-      {isOwner && (
-        <button
-          onClick={() => setAdminOpen(true)}
-          className="fixed bottom-24 right-4 z-40 flex items-center gap-2 bg-[#cba153] hover:bg-[#b8860b] transform-gpu active:scale-90 text-black font-bold px-4 py-3 rounded-2xl shadow-xl shadow-[#cba153]/20 transition-all duration-200"
-        >
-          <span className="text-lg">⚡</span>
-          <span className="text-sm">Manage Store</span>
-        </button>
-      )}
+      {/* Floating Admin Button Removed */}
 
       {/* Admin Overlay */}
       <AdminOverlay
