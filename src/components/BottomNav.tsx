@@ -37,7 +37,6 @@ export default function BottomNav() {
                 <div className="flex items-center justify-between max-w-md mx-auto">
                     {tabs.map((tab) => {
                         const isActive = pathname === tab.href;
-                        const Icon = tab.icon;
                         return (
                             <Link
                                 key={tab.name}

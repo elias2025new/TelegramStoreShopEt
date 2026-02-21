@@ -1,14 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCart } from '@/context/CartContext';
 import { useAdmin } from '@/context/AdminContext';
 import ProductGrid from '@/components/ProductGrid';
 import AdminOverlay from '@/components/Admin/AdminOverlay';
-import { ShoppingCart, Bell, User as UserIcon } from 'lucide-react';
+import { User as UserIcon } from 'lucide-react';
 import PageTransition from '@/components/PageTransition';
 
 const CATEGORIES = [
@@ -19,10 +20,22 @@ const CATEGORIES = [
   { name: 'Accessories', image: '/acc-cat.png' }
 ];
 
-export default function Home() {
+function HomeContent() {
   const { totalItems } = useCart();
   const { isOwner, adminOpen, setAdminOpen } = useAdmin();
-  const [selectedCategory, setSelectedCategory] = useState<string>('New');
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const selectedCategory = searchParams.get('category') || 'New';
+
+  const setSelectedCategory = (category: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (category === 'New') {
+      params.delete('category');
+    } else {
+      params.set('category', category);
+    }
+    router.replace(`/?${params.toString()}`, { scroll: false });
+  };
   const queryClient = useQueryClient();
   const [userPhotoUrl, setUserPhotoUrl] = useState<string | null>(null);
   const [userName, setUserName] = useState<string>('Guest');
@@ -173,8 +186,6 @@ export default function Home() {
         <ProductGrid selectedCategory={selectedCategory === 'New' ? 'All' : selectedCategory} />
       </PageTransition>
 
-      {/* Floating Admin Button Removed */}
-
       {/* Admin Overlay */}
       <AdminOverlay
         isOpen={adminOpen}
@@ -185,5 +196,13 @@ export default function Home() {
         }}
       />
     </main>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-black" />}>
+      <HomeContent />
+    </Suspense>
   );
 }

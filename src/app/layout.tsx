@@ -15,6 +15,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://img.icons8.com" />
+        <link rel="dns-prefetch" href="https://img.icons8.com" />
+      </head>
       <body
         className={`antialiased bg-black text-white`}
       >

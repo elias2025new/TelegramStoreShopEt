@@ -7,6 +7,7 @@ import { supabase } from '@/utils/supabase/client';
 import { useAdmin } from '@/context/AdminContext';
 import { useQueryClient } from '@tanstack/react-query';
 
+
 const DRAFT_KEY = 'admin_product_draft';
 const CATEGORIES = ['Electronics', 'Fashion', 'Home', 'Beauty', 'Food & Drink', 'Other'];
 
