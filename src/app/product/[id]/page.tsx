@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/utils/supabase/client';
 import { Database } from '@/types/supabase';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { use, useState, useCallback } from 'react';
 import { useCart } from '@/context/CartContext';
