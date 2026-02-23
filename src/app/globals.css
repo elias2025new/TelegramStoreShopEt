@@ -35,8 +35,6 @@ body {
   /* Prevent bounce on edge */
   -webkit-overflow-scrolling: touch;
   /* Momentum scrolling on iOS */
-  scroll-behavior: smooth;
-  /* Native smooth anchors */
   touch-action: pan-x pan-y;
   /* Prevent double-tap zoom delay */
 }
