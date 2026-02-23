@@ -39,6 +39,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     });
 
     const [quantity, setQuantity] = useState(1);
+    const [isAdded, setIsAdded] = useState(false);
 
     if (isLoading) {
         return (
@@ -72,7 +73,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         );
     }
 
-    const [isAdded, setIsAdded] = useState(false);
 
     const handleAddToCart = () => {
         addToCart(product, quantity);
