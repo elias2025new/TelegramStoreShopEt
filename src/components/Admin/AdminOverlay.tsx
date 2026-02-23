@@ -297,13 +297,13 @@ function UploadItemRow({ item, index, updateItem, removeItem }: UploadItemRowPro
                         onChange={(e) => setLocalTitle(e.target.value)}
                         onBlur={() => updateItem(index, 'title', localTitle)}
                         onFocus={handleFocus}
-                        className="col-span-2 px-3 py-2 text-sm font-semibold border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none placeholder-gray-600"
+                        className="px-3 py-2 text-sm font-semibold border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none placeholder-gray-600"
                     />
                     {/* Description trigger button — same size as title field */}
                     <button
                         type="button"
                         onClick={openDescModal}
-                        className="col-span-2 px-3 py-2 text-sm border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-left truncate focus:outline-none hover:border-[#cba153]/50 transition-colors"
+                        className="px-3 py-2 text-sm border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-left truncate focus:outline-none hover:border-[#cba153]/50 transition-colors"
                     >
                         {localDescription
                             ? <span className="text-white truncate">{localDescription}</span>
@@ -443,7 +443,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                     base64,
                     title: file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '),
                     price: '',
-                    category: 'Other',
+                    category: '',
                     description: '',
                     fileName: file.name,
                 };
