@@ -76,7 +76,7 @@ export default function ProductGrid({ selectedCategory = 'All' }: ProductGridPro
     }
 
     return (
-        <div className="grid grid-cols-2 gap-3 px-4 pb-32 transform-gpu">
+        <div className="grid grid-cols-2 gap-2 px-3 pb-32 transform-gpu">
             {filtered.map((product) => (
                 <ProductCard key={product.id} product={product} />
             ))}

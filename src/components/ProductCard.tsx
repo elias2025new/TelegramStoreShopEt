@@ -33,21 +33,21 @@ export default function ProductCard({ product }: ProductCardProps) {
             <div className="bg-[#1c1c1e] rounded-xl overflow-hidden border border-[#2a2a2a] transition-colors hover:bg-[#222222] flex flex-col h-full">
 
                 {/* Image Section */}
-                <div className="relative aspect-[4/5] w-full bg-[#111111]">
+                <div className="relative aspect-square w-full bg-[#111111]">
                     {/* Discount Badge */}
-                    <div className="absolute top-2 left-2 z-10 bg-white/10 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-bold text-white">
+                    <div className="absolute top-1.5 left-1.5 z-10 bg-white/10 backdrop-blur-md px-1.5 py-[1px] rounded text-[9px] font-bold text-white">
                         -{discount}%
                     </div>
 
                     {/* Favorite Button */}
                     <button
-                        className="absolute top-2 right-2 z-10 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-sm text-gray-800 transform-gpu active:scale-90 transition-transform duration-200 ease-out"
+                        className="absolute top-1.5 right-1.5 z-10 w-6 h-6 bg-white/90 rounded-full flex items-center justify-center shadow-sm text-gray-800 transform-gpu active:scale-90 transition-transform duration-200 ease-out"
                         onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
                         }}
                     >
-                        <img src="https://img.icons8.com/ios-filled/50/222222/hearts.png" alt="heart" className="w-4 h-4" />
+                        <img src="https://img.icons8.com/ios-filled/50/222222/hearts.png" alt="heart" className="w-3.5 h-3.5" />
                     </button>
 
                     {product.image_url ? (
@@ -66,31 +66,31 @@ export default function ProductCard({ product }: ProductCardProps) {
                 </div>
 
                 {/* Content Section */}
-                <div className="p-3 flex flex-col flex-grow">
-                    <h3 className="text-sm font-medium text-white line-clamp-1">
+                <div className="p-2 flex flex-col flex-grow">
+                    <h3 className="text-xs font-medium text-white line-clamp-1">
                         {product.name}
                     </h3>
 
-                    <div className="mt-1 flex items-baseline gap-2">
-                        <span className="text-sm font-bold text-white">
+                    <div className="mt-0.5 flex items-baseline gap-1.5">
+                        <span className="text-xs font-bold text-white">
                             {new Intl.NumberFormat('en-ET', { style: 'currency', currency: 'ETB', maximumFractionDigits: 0 }).format(product.price)}
                         </span>
-                        <span className="text-[10px] text-gray-500 line-through">
+                        <span className="text-[9px] text-gray-500 line-through">
                             {new Intl.NumberFormat('en-ET', { style: 'currency', currency: 'ETB', maximumFractionDigits: 0 }).format(oldPrice)}
                         </span>
                     </div>
 
-                    <div className="mt-auto pt-2 flex items-center justify-between">
-                        <div className="flex items-center gap-1">
+                    <div className="mt-auto pt-1.5 flex items-center justify-between">
+                        <div className="flex items-center gap-0.5">
                             <div className="flex text-[#cba153]">
-                                <span className="text-[10px]">★★★★</span>
-                                <span className="text-[10px] text-gray-600">★</span>
+                                <span className="text-[8px]">★★★★</span>
+                                <span className="text-[8px] text-gray-600">★</span>
                             </div>
-                            <span className="text-[10px] text-gray-400">{rating}</span>
+                            <span className="text-[9px] text-gray-400">{rating}</span>
                         </div>
 
                         <button
-                            className="text-xs text-[#cba153] font-bold px-3 py-1.5 bg-[#cba153]/10 border border-[#cba153]/20 rounded-lg hover:bg-[#cba153]/20 transform-gpu active:scale-90 transition-all duration-200"
+                            className="text-[10px] text-[#cba153] font-bold px-2 py-1 bg-[#cba153]/10 border border-[#cba153]/20 rounded-md hover:bg-[#cba153]/20 transform-gpu active:scale-90 transition-all duration-200"
                             onClick={handleQuickAdd}
                         >
                             + Add
