@@ -94,7 +94,7 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
                         value={localName}
                         onChange={(e) => setLocalName(e.target.value)}
                         onFocus={handleFocus}
-                        placeholder="Product Name"
+                        placeholder="Title/brand"
                         className="w-full px-2 py-1.5 text-sm font-semibold border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none transition-all placeholder-gray-500"
                     />
                     <div className="flex gap-1.5">
@@ -180,6 +180,7 @@ interface ImageItem {
     title: string;
     price: string;
     category: string;
+    description: string;
     fileName: string;
 }
 
@@ -188,13 +189,14 @@ interface SerializedItem {
     title: string;
     price: string;
     category: string;
+    description: string;
     fileName: string;
 }
 
 interface UploadItemRowProps {
     item: ImageItem;
     index: number;
-    updateItem: (index: number, field: 'title' | 'price' | 'category', value: string) => void;
+    updateItem: (index: number, field: 'title' | 'price' | 'category' | 'description', value: string) => void;
     removeItem: (index: number) => void;
 }
 
@@ -202,12 +204,16 @@ function UploadItemRow({ item, index, updateItem, removeItem }: UploadItemRowPro
     const [localTitle, setLocalTitle] = useState(item.title);
     const [localPrice, setLocalPrice] = useState(item.price);
     const [localCategory, setLocalCategory] = useState(item.category);
+    const [localDescription, setLocalDescription] = useState(item.description);
+    const [descModalOpen, setDescModalOpen] = useState(false);
+    const [modalDraft, setModalDraft] = useState('');
 
     useEffect(() => {
         setLocalTitle(item.title);
         setLocalPrice(item.price);
         setLocalCategory(item.category);
-    }, [item.title, item.price, item.category]);
+        setLocalDescription(item.description);
+    }, [item.title, item.price, item.category, item.description]);
 
     const handleFocus = (e: React.FocusEvent<HTMLElement>) => {
         const target = e.target as HTMLElement;
@@ -216,59 +222,120 @@ function UploadItemRow({ item, index, updateItem, removeItem }: UploadItemRowPro
         }, 300);
     };
 
+    const openDescModal = () => {
+        setModalDraft(localDescription);
+        setDescModalOpen(true);
+    };
+
+    const saveDesc = () => {
+        setLocalDescription(modalDraft);
+        updateItem(index, 'description', modalDraft);
+        setDescModalOpen(false);
+    };
+
     return (
-        <div className="flex flex-col gap-2 p-3 bg-[#1c1c1e] rounded-xl border border-[#2a2a2a]">
-            {/* Top row: image + delete */}
-            <div className="flex items-center justify-between gap-3">
-                <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-[#0a0a0a]">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={item.preview} alt="preview" className="w-full h-full object-cover" />
+        <>
+            {/* Description Modal */}
+            {descModalOpen && (
+                <div
+                    className="fixed inset-0 z-[200] flex items-end justify-center bg-black/70 backdrop-blur-sm"
+                    onClick={() => setDescModalOpen(false)}
+                >
+                    <div
+                        className="w-full max-w-lg bg-[#1c1c1e] rounded-t-2xl p-5 pb-8 border-t border-[#3a3a3a] flex flex-col gap-3"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm font-semibold text-white">Description</span>
+                            <button onClick={() => setDescModalOpen(false)} className="text-gray-500 hover:text-white transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M18 6 6 18" /><path d="m6 6 12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <textarea
+                            autoFocus
+                            value={modalDraft}
+                            onChange={(e) => setModalDraft(e.target.value)}
+                            placeholder="Enter a product description..."
+                            rows={5}
+                            className="w-full px-3 py-2 text-sm border border-[#3a3a3a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none placeholder-gray-600 resize-none"
+                        />
+                        <button
+                            onClick={saveDesc}
+                            className="w-full py-2.5 rounded-xl font-bold text-sm text-black bg-[#cba153] hover:bg-[#b8860b] active:scale-95 transition-all"
+                        >
+                            Save
+                        </button>
+                    </div>
                 </div>
-                <p className="flex-1 text-[10px] text-gray-400 truncate font-mono">{item.fileName}</p>
-                <button
-                    onClick={() => removeItem(index)}
-                    className="p-1 text-gray-500 hover:text-red-500 flex-shrink-0 transition-colors"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M18 6 6 18" /><path d="m6 6 12 12" />
-                    </svg>
-                </button>
+            )}
+
+            <div className="flex flex-col gap-2 p-3 bg-[#1c1c1e] rounded-xl border border-[#2a2a2a]">
+                {/* Top row: image + delete */}
+                <div className="flex items-center justify-between gap-3">
+                    <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-[#0a0a0a]">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={item.preview} alt="preview" className="w-full h-full object-cover" />
+                    </div>
+                    <p className="flex-1 text-[10px] text-gray-400 truncate font-mono">{item.fileName}</p>
+                    <button
+                        onClick={() => removeItem(index)}
+                        className="p-1 text-gray-500 hover:text-red-500 flex-shrink-0 transition-colors"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M18 6 6 18" /><path d="m6 6 12 12" />
+                        </svg>
+                    </button>
+                </div>
+                {/* Fields — 2-col grid */}
+                <div className="grid grid-cols-2 gap-2">
+                    <input
+                        type="text"
+                        placeholder="Title/brand"
+                        value={localTitle}
+                        onChange={(e) => setLocalTitle(e.target.value)}
+                        onBlur={() => updateItem(index, 'title', localTitle)}
+                        onFocus={handleFocus}
+                        className="col-span-2 px-3 py-2 text-sm font-semibold border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none placeholder-gray-600"
+                    />
+                    {/* Description trigger button — same size as title field */}
+                    <button
+                        type="button"
+                        onClick={openDescModal}
+                        className="col-span-2 px-3 py-2 text-sm border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-left truncate focus:outline-none hover:border-[#cba153]/50 transition-colors"
+                    >
+                        {localDescription
+                            ? <span className="text-white truncate">{localDescription}</span>
+                            : <span className="text-gray-600">Description (optional)</span>
+                        }
+                    </button>
+                    <input
+                        type="number"
+                        placeholder="Price (ETB)"
+                        value={localPrice}
+                        onChange={(e) => setLocalPrice(e.target.value)}
+                        onBlur={() => updateItem(index, 'price', localPrice)}
+                        onFocus={handleFocus}
+                        className="px-3 py-2 text-sm border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none placeholder-gray-600 font-mono"
+                    />
+                    <select
+                        value={localCategory}
+                        onChange={(e) => {
+                            setLocalCategory(e.target.value);
+                            updateItem(index, 'category', e.target.value);
+                        }}
+                        onFocus={handleFocus}
+                        className="px-3 py-2 text-sm border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none"
+                    >
+                        <option value="" disabled>Category</option>
+                        {CATEGORIES.map((cat) => (
+                            <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                    </select>
+                </div>
             </div>
-            {/* Fields — 2-col grid */}
-            <div className="grid grid-cols-2 gap-2">
-                <input
-                    type="text"
-                    placeholder="Title / Brand Name"
-                    value={localTitle}
-                    onChange={(e) => setLocalTitle(e.target.value)}
-                    onBlur={() => updateItem(index, 'title', localTitle)}
-                    onFocus={handleFocus}
-                    className="col-span-2 px-3 py-2 text-sm font-semibold border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none placeholder-gray-600"
-                />
-                <input
-                    type="number"
-                    placeholder="Price (ETB)"
-                    value={localPrice}
-                    onChange={(e) => setLocalPrice(e.target.value)}
-                    onBlur={() => updateItem(index, 'price', localPrice)}
-                    onFocus={handleFocus}
-                    className="px-3 py-2 text-sm border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none placeholder-gray-600 font-mono"
-                />
-                <select
-                    value={localCategory}
-                    onChange={(e) => {
-                        setLocalCategory(e.target.value);
-                        updateItem(index, 'category', e.target.value);
-                    }}
-                    onFocus={handleFocus}
-                    className="px-3 py-2 text-sm border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none"
-                >
-                    {CATEGORIES.map((cat) => (
-                        <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                </select>
-            </div>
-        </div>
+        </>
     );
 }
 
@@ -330,6 +397,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                 title: s.title || '',
                 price: s.price,
                 category: s.category,
+                description: s.description || '',
                 fileName: s.fileName,
             }));
 
@@ -351,6 +419,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
             title: item.title,
             price: item.price,
             category: item.category,
+            description: item.description,
             fileName: item.fileName,
         }));
         try {
@@ -375,6 +444,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                     title: file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '),
                     price: '',
                     category: 'Other',
+                    description: '',
                     fileName: file.name,
                 };
             })
@@ -384,7 +454,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
         e.target.value = '';
     }, []);
 
-    const updateItem = (index: number, field: 'title' | 'price' | 'category', value: string) => {
+    const updateItem = (index: number, field: 'title' | 'price' | 'category' | 'description', value: string) => {
         setImages((prev) => prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)));
     };
 
@@ -549,6 +619,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                         name: item.title.trim(),
                         price: parseFloat(item.price),
                         category: item.category,
+                        description: item.description || null,
                         image_url: urlData.publicUrl,
                     };
                 })

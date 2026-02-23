@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -40,6 +40,11 @@ function HomeContent() {
   const queryClient = useQueryClient();
   const [userPhotoUrl, setUserPhotoUrl] = useState<string | null>(null);
   const [userName, setUserName] = useState<string>('Guest');
+  const productSectionRef = useRef<HTMLDivElement>(null);
+
+  const scrollToProducts = () => {
+    productSectionRef.current?.scrollIntoView({ behavior: 'auto', block: 'start' });
+  };
 
   const slides = [
     { id: 3, image: '/images/promo3.png', title: 'URBAN\nELEGANCE', subtitle: 'Exclusive Drops', promo: 'SHOP THE LOOK' },
@@ -171,7 +176,10 @@ function HomeContent() {
               <p className="text-gray-200 text-sm mb-6 tracking-wide uppercase drop-shadow-md">
                 {slides[currentSlide].promo}
               </p>
-              <button className="w-max px-6 py-2 rounded-full border border-gray-400 bg-black/30 backdrop-blur-sm text-white text-sm font-medium hover:bg-white hover:text-black transform-gpu active:scale-95 transition-all duration-200">
+              <button
+                onClick={scrollToProducts}
+                className="w-max px-6 py-2 rounded-full border border-gray-400 bg-black/30 backdrop-blur-sm text-white text-sm font-medium hover:bg-white hover:text-black transform-gpu active:scale-95 transition-all duration-200"
+              >
                 Shop Now
               </button>
             </div>
@@ -221,7 +229,7 @@ function HomeContent() {
         </section>
 
         {/* Product Section Header */}
-        <div className="px-6 mt-6 flex justify-between items-center">
+        <div ref={productSectionRef} className="px-6 mt-6 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-medium text-white">Bestsellers</h2>
             <img src="https://img.icons8.com/ios-filled/50/ff4d4d/fire-element.png" alt="fire" className="w-5 h-5" />
