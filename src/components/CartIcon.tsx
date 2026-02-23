@@ -19,18 +19,29 @@ export default function CartIcon() {
     }, [totalItems, controls]);
 
     return (
-        <Link href="/cart" className="relative group p-1">
-            <motion.div animate={controls} className="relative">
-                <img
-                    src="https://img.icons8.com/ios-filled/50/ffffff/shopping-cart.png"
-                    alt="cart"
-                    className="w-6 h-6 group-hover:brightness-75 transition-all"
-                />
+        <Link href="/cart" className="relative group flex items-center justify-center">
+            <motion.div animate={controls} className="relative flex items-center justify-center">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="text-white group-hover:text-[#cba153] transition-colors"
+                >
+                    <circle cx="8" cy="21" r="1" />
+                    <circle cx="19" cy="21" r="1" />
+                    <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+                </svg>
                 {totalItems > 0 && (
                     <motion.span
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white border border-black"
+                        className="absolute -top-2 -right-2 flex h-4.5 w-4.5 min-w-[18px] min-h-[18px] items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white border-2 border-black shadow-lg px-1"
                     >
                         {totalItems}
                     </motion.span>

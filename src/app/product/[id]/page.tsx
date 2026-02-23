@@ -107,7 +107,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                             <path d="M19 12H5M12 19l-7-7 7-7" />
                         </svg>
                     </Link>
-                    <div className="pointer-events-auto bg-black/40 backdrop-blur-md rounded-full border border-white/10 hover:bg-black/60 transition-colors">
+                    <div className="pointer-events-auto p-3 bg-black/40 backdrop-blur-md rounded-full border border-white/10 hover:bg-black/60 transition-colors">
                         <CartIcon />
                     </div>
                 </div>
