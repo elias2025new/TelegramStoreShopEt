@@ -43,7 +43,7 @@ function HomeContent() {
   const productSectionRef = useRef<HTMLDivElement>(null);
 
   const scrollToProducts = () => {
-    productSectionRef.current?.scrollIntoView({ behavior: 'auto', block: 'start' });
+    productSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   const slides = [
@@ -178,9 +178,9 @@ function HomeContent() {
               </p>
               <button
                 onClick={scrollToProducts}
-                className="w-max px-6 py-2 rounded-full border border-gray-400 bg-black/30 backdrop-blur-sm text-white text-sm font-medium hover:bg-white hover:text-black transform-gpu active:scale-95 transition-all duration-200"
+                className="w-max px-6 py-2 rounded-full border border-[#cba153]/60 bg-black/30 backdrop-blur-sm text-white text-sm font-semibold hover:bg-[#cba153] hover:text-black hover:border-[#cba153] transform-gpu active:scale-90 transition-all duration-300 animate-pulse"
               >
-                Shop Now
+                Shop Now ↓
               </button>
             </div>
 

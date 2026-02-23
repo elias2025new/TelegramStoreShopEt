@@ -441,7 +441,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                     file,
                     preview: base64,
                     base64,
-                    title: file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '),
+                    title: '',
                     price: '',
                     category: '',
                     description: '',
