@@ -42,9 +42,9 @@ function HomeContent() {
   const [userName, setUserName] = useState<string>('Guest');
 
   const slides = [
+    { id: 3, image: '/images/promo3.png', title: 'URBAN\nELEGANCE', subtitle: 'Exclusive Drops', promo: 'SHOP THE LOOK' },
     { id: 1, image: '/images/promo1.png', title: 'OWN THE\nSTREET', subtitle: 'Spring Drop 2026', promo: '-20% OFF ALL NEW STYLES' },
     { id: 2, image: '/images/promo2.png', title: 'ELEVATE\nYOUR LOOK', subtitle: 'Premium Collection', promo: 'NEW ARRIVALS' },
-    { id: 3, image: '/images/promo3.png', title: 'URBAN\nELEGANCE', subtitle: 'Exclusive Drops', promo: 'SHOP THE LOOK' },
   ];
   const [currentSlide, setCurrentSlide] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
