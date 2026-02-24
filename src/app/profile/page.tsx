@@ -30,6 +30,7 @@ export default function ProfilePage() {
                 <header
                     className="sticky top-0 z-50 bg-[#f8f9fa]/80 dark:bg-black/80 backdrop-blur-md px-6 flex items-center justify-between border-b border-gray-200 dark:border-white/10 transition-colors duration-300"
                     style={{
+                        marginTop: 'calc(-1 * (var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px)))',
                         paddingTop: 'calc(1.75rem + var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px))',
                         paddingBottom: '1rem'
                     }}
@@ -77,8 +78,8 @@ export default function ProfilePage() {
                                     <button
                                         onClick={() => toggleTheme('light')}
                                         className={`relative flex flex-col pt-5 pb-4 px-4 items-center gap-2 rounded-2xl border transition-all duration-200 ${theme === 'light'
-                                                ? 'bg-blue-50/50 border-blue-200 dark:bg-[#1a1a1a] dark:border-[#cba153]'
-                                                : 'bg-gray-50 border-gray-100 hover:bg-gray-100 dark:bg-[#161618] dark:border-[#222] dark:hover:bg-[#1c1c1e]'
+                                            ? 'bg-blue-50/50 border-blue-200 dark:bg-[#1a1a1a] dark:border-[#cba153]'
+                                            : 'bg-gray-50 border-gray-100 hover:bg-gray-100 dark:bg-[#161618] dark:border-[#222] dark:hover:bg-[#1c1c1e]'
                                             }`}
                                     >
                                         <div className={`p-3 rounded-full ${theme === 'light' ? 'bg-white shadow-sm dark:bg-[#222]' : 'bg-white dark:bg-[#222]'}`}>
@@ -95,8 +96,8 @@ export default function ProfilePage() {
                                     <button
                                         onClick={() => toggleTheme('dark')}
                                         className={`relative flex flex-col pt-5 pb-4 px-4 items-center gap-2 rounded-2xl border transition-all duration-200 ${theme === 'dark'
-                                                ? 'bg-blue-50/50 border-blue-200 dark:bg-[#1a1a1a] dark:border-[#cba153]'
-                                                : 'bg-gray-50 border-gray-100 hover:bg-gray-100 dark:bg-[#161618] dark:border-[#222] dark:hover:bg-[#1c1c1e]'
+                                            ? 'bg-blue-50/50 border-blue-200 dark:bg-[#1a1a1a] dark:border-[#cba153]'
+                                            : 'bg-gray-50 border-gray-100 hover:bg-gray-100 dark:bg-[#161618] dark:border-[#222] dark:hover:bg-[#1c1c1e]'
                                             }`}
                                     >
                                         <div className={`p-3 rounded-full ${theme === 'dark' ? 'bg-white shadow-sm dark:bg-[#222]' : 'bg-white dark:bg-[#222]'}`}>
