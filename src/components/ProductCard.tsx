@@ -35,12 +35,12 @@ export default function ProductCard({ product }: ProductCardProps) {
 
     return (
         <Link href={`/product/${product.id}`} className="block group h-full transform-gpu active:scale-[0.98] transition-all duration-200">
-            <div className="bg-[#1c1c1e] rounded-xl overflow-hidden border border-[#2a2a2a] transition-colors hover:bg-[#222222] flex flex-col h-full">
+            <div className="bg-white dark:bg-[#1c1c1e] rounded-xl overflow-hidden border border-gray-100 dark:border-[#2a2a2a] transition-colors hover:bg-gray-50 dark:hover:bg-[#222222] flex flex-col h-full shadow-sm dark:shadow-none">
 
                 {/* Image Section */}
-                <div className="relative aspect-square w-full bg-[#111111]">
+                <div className="relative aspect-square w-full bg-gray-50 dark:bg-[#111111]">
                     {/* Discount Badge */}
-                    <div className="absolute top-1.5 left-1.5 z-10 bg-white/10 backdrop-blur-md px-1.5 py-[1px] rounded text-[9px] font-bold text-white">
+                    <div className="absolute top-1.5 left-1.5 z-10 bg-black/10 dark:bg-white/10 backdrop-blur-md px-1.5 py-[1px] rounded text-[9px] font-bold text-gray-900 dark:text-white">
                         -{discount}%
                     </div>
 
@@ -80,15 +80,15 @@ export default function ProductCard({ product }: ProductCardProps) {
 
                 {/* Content Section */}
                 <div className="p-2 flex flex-col flex-grow">
-                    <h3 className="text-xs font-medium text-white line-clamp-1">
+                    <h3 className="text-xs font-medium text-gray-900 dark:text-white line-clamp-1">
                         {product.name}
                     </h3>
 
                     <div className="mt-0.5 flex items-baseline gap-1.5">
-                        <span className="text-xs font-bold text-white">
+                        <span className="text-xs font-bold text-gray-900 dark:text-white">
                             {new Intl.NumberFormat('en-ET', { style: 'currency', currency: 'ETB', maximumFractionDigits: 0 }).format(product.price)}
                         </span>
-                        <span className="text-[9px] text-gray-500 line-through">
+                        <span className="text-[9px] text-gray-400 dark:text-gray-500 line-through">
                             {new Intl.NumberFormat('en-ET', { style: 'currency', currency: 'ETB', maximumFractionDigits: 0 }).format(oldPrice)}
                         </span>
                     </div>

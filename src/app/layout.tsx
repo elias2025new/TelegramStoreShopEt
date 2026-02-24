@@ -21,11 +21,11 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://img.icons8.com" />
       </head>
       <body
-        className={`antialiased bg-black text-white`}
+        className={`antialiased bg-[#f0f2f5] dark:bg-black text-gray-900 dark:text-white transition-colors duration-300`}
       >
         <Providers>
           <div
-            className="mx-auto max-w-md min-h-screen bg-black shadow-sm flex flex-col relative"
+            className="mx-auto max-w-md min-h-screen bg-[#f8f9fa] dark:bg-black shadow-sm flex flex-col relative transition-colors duration-300"
             style={{
               paddingTop: 'calc(var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px))',
             }}

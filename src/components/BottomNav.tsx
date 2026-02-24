@@ -23,7 +23,7 @@ export default function BottomNav() {
 
     return (
         <div className="fixed inset-x-0 bottom-0 z-50 flex justify-center pointer-events-none pb-14 px-6 will-change-transform">
-            <div className="bg-[#0f1115]/95 backdrop-blur-2xl border border-white/10 rounded-[28px] px-1.5 py-1 shadow-[0_12px_40px_rgba(0,0,0,0.7)] transform-gpu pointer-events-auto w-full max-w-[310px]">
+            <div className="bg-white/95 dark:bg-[#0f1115]/95 backdrop-blur-2xl border border-gray-200/50 dark:border-white/10 rounded-[28px] px-1.5 py-1 shadow-[0_12px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.7)] transform-gpu pointer-events-auto w-full max-w-[310px] transition-colors duration-300">
                 <div className="flex items-center justify-around relative">
                     {tabs.map((tab) => {
                         const isActive = pathname === tab.href;
@@ -31,7 +31,7 @@ export default function BottomNav() {
                             <Link
                                 key={tab.name}
                                 href={tab.href}
-                                className={`relative flex flex-col items-center justify-center py-2 px-4 rounded-2xl transition-colors duration-300 ${isActive ? 'text-[#cba153]' : 'text-gray-500 hover:text-gray-300'
+                                className={`relative flex flex-col items-center justify-center py-2 px-4 rounded-2xl transition-colors duration-300 ${isActive ? 'text-[#cba153]' : 'text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300'
                                     }`}
                                 onClick={() => {
                                     if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
@@ -42,7 +42,7 @@ export default function BottomNav() {
                                 {isActive && (
                                     <motion.div
                                         layoutId="nav-bg"
-                                        className="absolute inset-0 bg-white/[0.05] rounded-[20px] -z-10"
+                                        className="absolute inset-0 bg-black/[0.04] dark:bg-white/[0.05] rounded-[20px] -z-10"
                                         transition={{
                                             type: "spring",
                                             stiffness: 500,

@@ -11,32 +11,32 @@ export default function FavoritesPage() {
 
     return (
         <PageTransition>
-            <main className="min-h-screen bg-black pb-36 font-sans">
+            <main className="min-h-screen bg-[#f8f9fa] dark:bg-black pb-36 font-sans transition-colors duration-300">
                 {/* Header */}
                 <header
-                    className="sticky top-0 z-50 bg-black/80 backdrop-blur-md px-6 flex items-center justify-between"
+                    className="sticky top-0 z-50 bg-[#f8f9fa]/80 dark:bg-black/80 backdrop-blur-md px-6 flex items-center justify-between border-b border-gray-200 dark:border-white/10 transition-colors duration-300"
                     style={{
                         paddingTop: 'calc(1.75rem + var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px))',
                         paddingBottom: '1rem'
                     }}
                 >
                     <div className="flex items-center gap-3">
-                        <Link href="/" className="p-2 -ml-2 rounded-full hover:bg-white/10 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+                        <Link href="/" className="p-2 -ml-2 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-900 dark:text-white">
                                 <path d="m15 18-6-6 6-6" />
                             </svg>
                         </Link>
-                        <h1 className="text-xl font-bold text-[#cba153] font-serif tracking-wide">Favorites</h1>
+                        <h1 className="text-xl font-bold text-gray-900 dark:text-[#cba153] font-serif tracking-wide">Favorites</h1>
                     </div>
                 </header>
 
                 <div className="px-6 mt-6">
                     {favorites.length === 0 ? (
                         <div className="flex flex-col items-center justify-center pt-24 text-center">
-                            <div className="w-20 h-20 bg-[#1a1a1a] rounded-full flex items-center justify-center mb-6">
+                            <div className="w-20 h-20 bg-gray-100 dark:bg-[#1a1a1a] rounded-full flex items-center justify-center mb-6">
                                 <img src="https://img.icons8.com/ios-filled/100/6b7280/hearts.png" alt="empty favorites" className="w-10 h-10 opacity-30" />
                             </div>
-                            <h2 className="text-lg font-medium text-white mb-2">No Favorites Yet</h2>
+                            <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Favorites Yet</h2>
                             <p className="text-gray-500 text-sm max-w-[240px]">
                                 Items you heart will appear here for quick access later.
                             </p>

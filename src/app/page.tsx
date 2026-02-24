@@ -7,9 +7,10 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCart } from '@/context/CartContext';
 import { useAdmin } from '@/context/AdminContext';
+import { useTheme } from '@/context/ThemeContext';
 import ProductGrid from '@/components/ProductGrid';
 import AdminOverlay from '@/components/Admin/AdminOverlay';
-import { User as UserIcon } from 'lucide-react';
+import { User as UserIcon, Bell } from 'lucide-react';
 import PageTransition from '@/components/PageTransition';
 import CartIcon from '@/components/CartIcon';
 
@@ -24,6 +25,7 @@ const CATEGORIES = [
 function HomeContent() {
   const { totalPrice } = useCart();
   const { isOwner, adminOpen, setAdminOpen } = useAdmin();
+  const { theme } = useTheme();
   const router = useRouter();
   const searchParams = useSearchParams();
   const selectedCategory = searchParams.get('category') || 'New';
@@ -98,11 +100,11 @@ function HomeContent() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-black pb-36 font-sans">
+    <main className="min-h-screen bg-[#f8f9fa] dark:bg-black pb-36 font-sans transition-colors duration-300">
       <PageTransition>
         {/* Header */}
         <header
-          className="sticky top-0 z-50 bg-black/80 backdrop-blur-md pl-3 pr-6 flex items-center justify-between"
+          className="sticky top-0 z-50 bg-white/90 dark:bg-black/80 backdrop-blur-md pl-3 pr-6 flex items-center justify-between border-b border-gray-200/50 dark:border-transparent transition-colors duration-300"
           style={{
             marginTop: 'calc(-1 * (var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px)))',
             paddingTop: 'calc(1.75rem + var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px))',
@@ -110,7 +112,7 @@ function HomeContent() {
           }}
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full border-2 border-[#cba153] flex items-center justify-center overflow-hidden bg-[#1a1a1a]">
+            <div className="w-10 h-10 rounded-full border-2 border-[#cba153] flex items-center justify-center overflow-hidden bg-gray-100 dark:bg-[#1a1a1a]">
               {userPhotoUrl ? (
                 <Image src={userPhotoUrl} alt="Profile" width={40} height={40} className="w-full h-full object-cover" />
               ) : (
@@ -122,7 +124,7 @@ function HomeContent() {
                 CROWN SHOES & CLOTHES
               </h1>
               <div className="flex items-center gap-2 mt-0.5">
-                <p className="text-gray-400 text-xs">Hey {userName}</p>
+                <p className="text-gray-500 dark:text-gray-400 text-xs">Hey {userName}</p>
                 {isOwner && (
                   <button
                     onClick={() => setAdminOpen(true)}
@@ -140,9 +142,9 @@ function HomeContent() {
           </div>
           <div className="flex items-center gap-4">
             <CartIcon />
-            <button className="relative text-white hover:text-[#cba153] transition-colors">
-              <img src="https://img.icons8.com/ios-filled/50/ffffff/bell.png" alt="notifications" className="w-6 h-6 hover:brightness-75" />
-              <span className="absolute top-0 right-1 h-2.5 w-2.5 rounded-full bg-red-500 border-2 border-black"></span>
+            <button className="relative text-gray-800 dark:text-white hover:text-[#cba153] dark:hover:text-[#cba153] transition-colors">
+              <Bell size={24} />
+              <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-red-500 border-2 border-white dark:border-black"></span>
             </button>
           </div>
         </header>
@@ -200,7 +202,7 @@ function HomeContent() {
         </section>
 
         {/* Categories Scroller */}
-        <section className="mt-8 sticky top-[84px] z-40 bg-black/90 backdrop-blur-lg pt-4 pb-2 px-4 -mx-4 w-[calc(100%+2rem)] border-b border-white/10 shadow-lg">
+        <section className="mt-8 sticky top-[84px] z-40 bg-[#f8f9fa]/95 dark:bg-black/90 backdrop-blur-lg pt-4 pb-2 px-4 -mx-4 w-[calc(100%+2rem)] border-b border-gray-200 dark:border-white/10 shadow-sm dark:shadow-lg transition-colors duration-300">
           <div className="flex overflow-x-auto gap-3 pb-4 scrollbar-hide transform-gpu scroll-smooth">
             {CATEGORIES.map((category) => {
               const isSelected = selectedCategory === category.name;
@@ -209,18 +211,18 @@ function HomeContent() {
                   key={category.name}
                   onClick={() => setSelectedCategory(category.name)}
                   className={`flex flex-col items-center justify-between min-w-[80px] h-[90px] p-2 rounded-2xl transform-gpu active:scale-95 transition-all duration-200 ${isSelected
-                    ? 'bg-[#111111] border border-[#cba153]'
-                    : 'bg-[#1a1a1a] border border-[#2a2a2a] hover:bg-[#222222]'
+                    ? 'bg-white dark:bg-[#111111] border-2 border-[#cba153] shadow-sm'
+                    : 'bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#2a2a2a] hover:bg-gray-50 dark:hover:bg-[#222222]'
                     }`}
                 >
                   <div className="flex-1 flex items-center justify-center">
                     <img
-                      src={`https://img.icons8.com/ios-filled/50/${isSelected ? 'cba153' : '6b7280'}/${category.icon}.png`}
+                      src={`https://img.icons8.com/ios-filled/50/${isSelected ? 'cba153' : (theme === 'light' ? '6b7280' : '6b7280')}/${category.icon}.png`}
                       alt={category.name}
-                      className="w-10 h-10 object-contain"
+                      className={`w-10 h-10 object-contain ${isSelected || theme === 'dark' ? '' : 'opacity-70'}`}
                     />
                   </div>
-                  <span className={`text-xs mt-1 ${isSelected ? 'text-[#cba153] font-medium' : 'text-gray-400'}`}>
+                  <span className={`text-xs mt-1 ${isSelected ? 'text-[#cba153] font-bold' : 'text-gray-500 dark:text-gray-400 font-medium'}`}>
                     {category.name}
                   </span>
                 </button>
@@ -233,10 +235,10 @@ function HomeContent() {
         {selectedCategory === 'New' && (
           <div ref={productSectionRef} className="px-6 mt-6 flex justify-between items-center scroll-mt-[190px]">
             <div className="flex items-center gap-2">
-              <h2 className="text-xl font-medium text-white">Bestsellers</h2>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Bestsellers</h2>
               <img src="https://img.icons8.com/ios-filled/50/ff4d4d/fire-element.png" alt="fire" className="w-5 h-5" />
             </div>
-            <button className="text-gray-400 hover:text-white">
+            <button className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
             </button>
           </div>

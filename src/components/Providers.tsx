@@ -7,6 +7,7 @@ import Script from 'next/script';
 import { CartProvider } from '@/context/CartContext';
 import { AdminProvider } from '@/context/AdminContext';
 import { FavoritesProvider } from '@/context/FavoritesContext';
+import { ThemeProvider } from '@/context/ThemeContext';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
     const [queryClient] = useState(() => new QueryClient());
@@ -82,8 +83,10 @@ export default function Providers({ children }: { children: React.ReactNode }) {
             <AdminProvider>
                 <CartProvider>
                     <FavoritesProvider>
-                        <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
-                        {children}
+                        <ThemeProvider>
+                            <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
+                            {children}
+                        </ThemeProvider>
                     </FavoritesProvider>
                 </CartProvider>
             </AdminProvider>
