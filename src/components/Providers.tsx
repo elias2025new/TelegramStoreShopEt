@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Script from 'next/script';
 import { CartProvider } from '@/context/CartContext';
 import { AdminProvider } from '@/context/AdminContext';
+import { FavoritesProvider } from '@/context/FavoritesContext';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
     const [queryClient] = useState(() => new QueryClient());
@@ -80,8 +81,10 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         <QueryClientProvider client={queryClient}>
             <AdminProvider>
                 <CartProvider>
-                    <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
-                    {children}
+                    <FavoritesProvider>
+                        <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
+                        {children}
+                    </FavoritesProvider>
                 </CartProvider>
             </AdminProvider>
         </QueryClientProvider>

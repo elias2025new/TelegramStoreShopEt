@@ -3,6 +3,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Database } from '@/types/supabase';
 import { useCart } from '@/context/CartContext';
+import { useFavorites } from '@/context/FavoritesContext';
+import { useRouter } from 'next/navigation';
 
 type Product = Database['public']['Tables']['products']['Row'];
 
@@ -12,6 +14,9 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
     const { addToCart } = useCart();
+    const { toggleFavorite, isFavorite } = useFavorites();
+    const router = useRouter();
+    const active = isFavorite(product.id);
     // Generate a visual pseudo-discount for the UI demo based on ID string length
     const discount = product.id ? ((product.id.length % 3) + 1) * 10 : 20;
     const oldPrice = product.price * (1 + (discount / 100));
@@ -41,13 +46,21 @@ export default function ProductCard({ product }: ProductCardProps) {
 
                     {/* Favorite Button */}
                     <button
-                        className="absolute top-1.5 right-1.5 z-10 w-6 h-6 bg-white/90 rounded-full flex items-center justify-center shadow-sm text-gray-800 transform-gpu active:scale-90 transition-transform duration-200 ease-out"
+                        className={`absolute top-1.5 right-1.5 z-10 w-6 h-6 rounded-full flex items-center justify-center shadow-sm transform-gpu active:scale-90 transition-all duration-200 ease-out ${active ? 'bg-[#cba153] scale-110' : 'bg-white/90'
+                            }`}
                         onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
+                            toggleFavorite(product);
+                            // Navigate to favorites as requested
+                            router.push('/favorites');
                         }}
                     >
-                        <img src="https://img.icons8.com/ios-filled/50/222222/hearts.png" alt="heart" className="w-3.5 h-3.5" />
+                        <img
+                            src={active ? "https://img.icons8.com/ios-filled/50/ffffff/hearts.png" : "https://img.icons8.com/ios-filled/50/222222/hearts.png"}
+                            alt="heart"
+                            className="w-3.5 h-3.5"
+                        />
                     </button>
 
                     {product.image_url ? (
