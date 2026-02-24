@@ -98,7 +98,7 @@ function HomeContent() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-black pb-24 font-sans">
+    <main className="min-h-screen bg-black pb-32 font-sans">
       <PageTransition>
         {/* Header */}
         <header
@@ -199,7 +199,7 @@ function HomeContent() {
         </section>
 
         {/* Categories Scroller */}
-        <section className="mt-8 px-4">
+        <section className="mt-8 sticky top-[72px] z-40 bg-black/80 backdrop-blur-md pt-4 pb-2 px-4 -mx-4 w-[calc(100%+2rem)] border-b border-white/5">
           <div className="flex overflow-x-auto gap-3 pb-4 scrollbar-hide transform-gpu scroll-smooth">
             {CATEGORIES.map((category) => {
               const isSelected = selectedCategory === category.name;
