@@ -32,8 +32,8 @@ export default function BottomNav() {
     ];
 
     return (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-[380px] will-change-transform">
-            <div className="bg-[#111111]/80 backdrop-blur-xl border border-white/10 rounded-[32px] px-3 py-2 shadow-[0_8px_32px_rgba(0,0,0,0.5)] transform-gpu">
+        <div className="fixed inset-x-0 bottom-0 z-50 flex justify-center pointer-events-none pb-10 px-6 will-change-transform">
+            <div className="bg-[#111111]/80 backdrop-blur-xl border border-white/10 rounded-[32px] px-3 py-2 shadow-[0_8px_32px_rgba(0,0,0,0.5)] transform-gpu pointer-events-auto w-full max-w-[380px]">
                 <div className="flex items-center justify-between relative">
                     {tabs.map((tab) => {
                         const isActive = pathname === tab.href;

@@ -52,7 +52,7 @@ export default function CartPage() {
 
     return (
         <PageTransition>
-            <main className="min-h-[100dvh] bg-white dark:bg-gray-950 pb-36">
+            <main className="min-h-[100dvh] bg-white dark:bg-gray-950 pb-40">
                 <header className="sticky top-0 z-10 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 px-4 py-3 flex items-center gap-4 pt-[calc(0.75rem+var(--tg-safe-area-inset-top,0px)+var(--tg-content-safe-area-inset-top,0px))]">
                     <Link href="/" className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-700 dark:text-gray-200">
