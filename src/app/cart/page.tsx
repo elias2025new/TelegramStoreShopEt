@@ -12,22 +12,10 @@ export default function CartPage() {
     const router = useRouter();
 
     const handleCheckout = () => {
-        const orderData = {
-            items: items.map(item => ({
-                id: item.product.id,
-                name: item.product.name,
-                quantity: item.quantity,
-                price: item.product.price
-            })),
-            total: totalPrice,
-            currency: 'ETB'
-        };
-
         if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-            window.Telegram.WebApp.sendData(JSON.stringify(orderData));
+            window.Telegram.WebApp.showAlert('Checkout is not available right now. We are working on it!');
         } else {
-            console.log('Checkout Data:', orderData);
-            alert('Checkout data logged to console (Telegram WebApp not detected)');
+            alert('Checkout is not available right now. We are working on it!');
         }
     };
 
