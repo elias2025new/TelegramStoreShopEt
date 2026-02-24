@@ -200,7 +200,7 @@ function HomeContent() {
 
         {/* Categories Scroller */}
         <section className="mt-8 sticky top-[72px] z-40 bg-black/80 backdrop-blur-md pt-4 pb-2 px-4 -mx-4 w-[calc(100%+2rem)] border-b border-white/5">
-          <div className="flex overflow-x-auto gap-3 pb-4 scrollbar-hide transform-gpu scroll-smooth overscroll-x-contain touch-pan-x">
+          <div className="flex overflow-x-auto gap-3 pb-4 scrollbar-hide transform-gpu scroll-smooth">
             {CATEGORIES.map((category) => {
               const isSelected = selectedCategory === category.name;
               return (
