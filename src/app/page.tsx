@@ -230,7 +230,7 @@ function HomeContent() {
         </section>
 
         {/* Product Section Header */}
-        <div ref={productSectionRef} className="px-6 mt-6 flex justify-between items-center">
+        <div ref={productSectionRef} className="px-6 mt-6 flex justify-between items-center scroll-mt-[190px]">
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-medium text-white">Bestsellers</h2>
             <img src="https://img.icons8.com/ios-filled/50/ff4d4d/fire-element.png" alt="fire" className="w-5 h-5" />
