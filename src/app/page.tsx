@@ -154,6 +154,7 @@ function HomeContent() {
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEndHandler}
+            style={{ touchAction: 'pan-y' }}
           >
             {/* Background Image */}
             <Image
