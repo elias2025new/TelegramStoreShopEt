@@ -105,7 +105,7 @@ function HomeContent() {
           className="sticky top-0 z-50 bg-black/80 backdrop-blur-md px-6 flex items-center justify-between"
           style={{
             marginTop: 'calc(-1 * (var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px)))',
-            paddingTop: 'calc(1rem + var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px))',
+            paddingTop: 'calc(1.75rem + var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px))',
             paddingBottom: '1rem'
           }}
         >
