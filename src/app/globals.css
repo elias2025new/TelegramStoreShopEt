@@ -26,19 +26,22 @@ body {
   padding: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
 }
 
 /* Base Mobile Overhaul */
+html {
+  /* Only on html – body must stay as scroll container or vertical scroll breaks */
+  overflow-x: hidden;
+}
+
 html,
 body {
   overscroll-behavior-y: none;
   overscroll-behavior-x: none;
-  overflow-x: hidden;
   /* Prevent bounce on edge */
   -webkit-overflow-scrolling: touch;
   /* Momentum scrolling on iOS */
-  touch-action: pan-y;
+  touch-action: pan-x pan-y;
   /* Prevent double-tap zoom delay */
 }
 
