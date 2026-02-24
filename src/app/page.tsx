@@ -118,7 +118,7 @@ function HomeContent() {
               )}
             </div>
             <div>
-              <h1 className="text-[#cba153] font-serif font-bold tracking-wider text-sm whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px]">
+              <h1 className="text-[#cba153] font-serif font-bold tracking-wider text-sm whitespace-nowrap">
                 CROWN SHOES & CLOTHES
               </h1>
               <div className="flex items-center gap-2 mt-0.5">
