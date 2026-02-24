@@ -17,10 +17,7 @@ export default function BottomNav() {
         { name: 'Profile', href: '/profile', icon: "user-male" },
     ];
 
-    if (adminOpen) return null;
-
-    // Don't show on specific pages if needed, but per user request we keep it persistent
-    // const isProductPage = pathname.startsWith('/product/');
+    if (adminOpen || pathname === '/cart') return null;
 
     return (
         <div className="fixed inset-x-0 bottom-0 z-50 flex justify-center pointer-events-none pb-14 px-6 will-change-transform">
