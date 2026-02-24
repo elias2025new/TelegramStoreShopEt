@@ -98,7 +98,7 @@ function HomeContent() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-black pb-32 font-sans">
+    <main className="min-h-screen bg-black pb-32 font-sans overflow-x-hidden">
       <PageTransition>
         {/* Header */}
         <header

@@ -26,6 +26,7 @@ body {
   padding: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 /* Base Mobile Overhaul */
@@ -33,10 +34,11 @@ html,
 body {
   overscroll-behavior-y: none;
   overscroll-behavior-x: none;
+  overflow-x: hidden;
   /* Prevent bounce on edge */
   -webkit-overflow-scrolling: touch;
   /* Momentum scrolling on iOS */
-  touch-action: pan-x pan-y;
+  touch-action: pan-y;
   /* Prevent double-tap zoom delay */
 }
 
