@@ -16,8 +16,10 @@ export default function BottomNav() {
         { name: 'Favorites', href: '/favorites', icon: "hearts" },
         { name: 'Profile', href: '/profile', icon: "user-male" },
     ];
+    const isCartPage = pathname === '/cart' || pathname.startsWith('/cart/');
+    const isProductPage = pathname.startsWith('/product/');
 
-    if (adminOpen || pathname === '/cart') return null;
+    if (adminOpen || isCartPage || isProductPage) return null;
 
     return (
         <div className="fixed inset-x-0 bottom-0 z-50 flex justify-center pointer-events-none pb-14 px-6 will-change-transform">
