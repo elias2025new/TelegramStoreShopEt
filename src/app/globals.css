@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Tailwind v4: activate dark: utilities via the .dark class on <html>, not just OS media query */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #000000;
   --foreground: #ffffff;
