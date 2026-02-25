@@ -6,10 +6,34 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import PageTransition from '@/components/PageTransition';
+import DeleteConfirmModal from '@/components/DeleteConfirmModal';
+import { useState } from 'react';
 
 export default function CartPage() {
     const { items, removeFromCart, totalPrice, clearCart } = useCart();
     const router = useRouter();
+
+    const [pendingDeleteId, setPendingDeleteId] = useState<number | string | null>(null);
+
+    const pendingItem = items.find((i) => i.product.id === pendingDeleteId);
+
+    const handleDeleteClick = (id: number | string) => {
+        if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+            window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+        }
+        setPendingDeleteId(id);
+    };
+
+    const handleConfirmDelete = () => {
+        if (pendingDeleteId !== null) {
+            removeFromCart(pendingDeleteId as number);
+        }
+        setPendingDeleteId(null);
+    };
+
+    const handleCancelDelete = () => {
+        setPendingDeleteId(null);
+    };
 
     const handleCheckout = () => {
         if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
@@ -30,7 +54,7 @@ export default function CartPage() {
                     </svg>
                 </div>
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Your Cart is Empty</h2>
-                <p className="text-gray-500 dark:text-gray-400 mb-6">Looks like you haven't added anything yet.</p>
+                <p className="text-gray-500 dark:text-gray-400 mb-6">Looks like you haven&apos;t added anything yet.</p>
                 <Link href="/" className="bg-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-700 transition-colors">
                     Start Shopping
                 </Link>
@@ -70,8 +94,8 @@ export default function CartPage() {
                                         {new Intl.NumberFormat('en-ET', { style: 'currency', currency: 'ETB', maximumFractionDigits: 0 }).format(item.product.price * item.quantity)}
                                     </span>
                                     <button
-                                        onClick={() => removeFromCart(item.product.id)}
-                                        className="text-red-500 hover:text-red-600 p-1"
+                                        onClick={() => handleDeleteClick(item.product.id)}
+                                        className="text-red-500 hover:text-red-600 p-1 active:scale-90 transition-transform"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                             <path d="M3 6h18" />
@@ -100,6 +124,14 @@ export default function CartPage() {
                     </button>
                 </div>
             </main>
+
+            {/* Delete confirmation modal */}
+            <DeleteConfirmModal
+                isOpen={pendingDeleteId !== null}
+                productName={pendingItem?.product.name ?? ''}
+                onConfirm={handleConfirmDelete}
+                onCancel={handleCancelDelete}
+            />
         </PageTransition>
     );
 }
