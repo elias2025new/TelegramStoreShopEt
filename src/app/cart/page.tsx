@@ -26,7 +26,7 @@ export default function CartPage() {
 
     const handleConfirmDelete = () => {
         if (pendingDeleteId !== null) {
-            removeFromCart(pendingDeleteId as number);
+            removeFromCart(pendingDeleteId as string);
         }
         setPendingDeleteId(null);
     };
