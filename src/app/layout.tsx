@@ -15,17 +15,30 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         <link rel="preconnect" href="https://img.icons8.com" />
         <link rel="dns-prefetch" href="https://img.icons8.com" />
+        {/* Blocking inline script: apply stored theme before first paint to prevent flash */}
+        <script dangerouslySetInnerHTML={{
+          __html: `
+          (function(){
+            try {
+              var t = localStorage.getItem('theme');
+              var resolved = (t === 'light') ? 'light' : 'dark';
+              document.documentElement.classList.toggle('dark', resolved === 'dark');
+              document.documentElement.classList.toggle('light', resolved === 'light');
+              document.documentElement.style.setProperty('color-scheme', resolved);
+            } catch(e){}
+          })()
+        `}} />
       </head>
       <body
-        className={`antialiased bg-[#f0f2f5] dark:bg-black text-gray-900 dark:text-white transition-colors duration-300`}
+        className={`antialiased bg-[#f0f2f5] dark:bg-black text-gray-900 dark:text-white`}
       >
         <Providers>
           <div
-            className="mx-auto max-w-md min-h-screen bg-[#f8f9fa] dark:bg-black shadow-sm flex flex-col relative transition-colors duration-300"
+            className="mx-auto max-w-md min-h-screen bg-[#f8f9fa] dark:bg-black shadow-sm flex flex-col relative"
             style={{
               paddingTop: 'calc(var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px))',
             }}
