@@ -8,6 +8,8 @@ import { CartProvider } from '@/context/CartContext';
 import { AdminProvider } from '@/context/AdminContext';
 import { FavoritesProvider } from '@/context/FavoritesContext';
 import { ThemeProvider } from '@/context/ThemeContext';
+import { LocationProvider, useLocation } from '@/context/LocationContext';
+import LocationPermissionModal from '@/components/LocationPermissionModal';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
     const [queryClient] = useState(() => new QueryClient());
@@ -84,12 +86,48 @@ export default function Providers({ children }: { children: React.ReactNode }) {
                 <CartProvider>
                     <FavoritesProvider>
                         <ThemeProvider>
-                            <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
-                            {children}
+                            <LocationProvider>
+                                <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
+                                <LocationModalGate />
+                                {children}
+                            </LocationProvider>
                         </ThemeProvider>
                     </FavoritesProvider>
                 </CartProvider>
             </AdminProvider>
         </QueryClientProvider>
+    );
+}
+
+// Separate inner component so it can access LocationContext
+function LocationModalGate() {
+    const { locationAsked, enableLocation, markAsked } = useLocation();
+    const [show, setShow] = useState(false);
+
+    useEffect(() => {
+        // Only show if location hasn't been asked yet
+        if (!locationAsked) {
+            // Small delay to let the app render first
+            const t = setTimeout(() => setShow(true), 800);
+            return () => clearTimeout(t);
+        }
+    }, [locationAsked]);
+
+    const handleAllow = async () => {
+        setShow(false);
+        await enableLocation();
+    };
+
+    const handleDismiss = () => {
+        setShow(false);
+        markAsked();
+    };
+
+    return (
+        <LocationPermissionModal
+            isOpen={show}
+            onAllow={handleAllow}
+            onDismiss={handleDismiss}
+        />
     );
 }

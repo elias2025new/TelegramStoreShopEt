@@ -3,12 +3,14 @@
 import React, { useEffect, useState } from 'react';
 import PageTransition from '@/components/PageTransition';
 import { useTheme } from '@/context/ThemeContext';
-import { Check, Moon, Sun, Monitor } from 'lucide-react';
+import { useLocation } from '@/context/LocationContext';
+import { Check, Moon, Sun, Monitor, MapPin } from 'lucide-react';
 import Image from 'next/image';
 import { User as UserIcon } from 'lucide-react';
 
 export default function ProfilePage() {
     const { theme, toggleTheme } = useTheme();
+    const { locationName, locationEnabled, enableLocation, disableLocation } = useLocation();
     const [userPhotoUrl, setUserPhotoUrl] = useState<string | null>(null);
     const [userName, setUserName] = useState<string>('Guest');
 
@@ -111,6 +113,34 @@ export default function ProfilePage() {
                                         )}
                                     </button>
                                 </div>
+                            </div>
+
+                            {/* Divider */}
+                            <div className="h-px w-full bg-gray-100 dark:bg-white/5 mx-5 w-[calc(100%-40px)]"></div>
+
+                            {/* Location Setting */}
+                            <div className="p-5 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
+                                        <MapPin size={16} className="text-green-500 dark:text-green-400" />
+                                    </div>
+                                    <div>
+                                        <h4 className="text-sm font-bold text-gray-900 dark:text-white">Location Services</h4>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[160px]">
+                                            {locationEnabled ? locationName || 'Fetching...' : 'Off'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => locationEnabled ? disableLocation() : enableLocation()}
+                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${locationEnabled ? 'bg-green-500 dark:bg-green-500' : 'bg-gray-200 dark:bg-gray-700'
+                                        }`}
+                                >
+                                    <span
+                                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${locationEnabled ? 'translate-x-6' : 'translate-x-1'
+                                            }`}
+                                    />
+                                </button>
                             </div>
 
                             {/* Divider */}

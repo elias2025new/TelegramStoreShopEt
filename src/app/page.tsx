@@ -8,6 +8,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useCart } from '@/context/CartContext';
 import { useAdmin } from '@/context/AdminContext';
 import { useTheme } from '@/context/ThemeContext';
+import { useLocation } from '@/context/LocationContext';
 import ProductGrid from '@/components/ProductGrid';
 import AdminOverlay from '@/components/Admin/AdminOverlay';
 import { User as UserIcon, Bell } from 'lucide-react';
@@ -26,6 +27,7 @@ function HomeContent() {
   const { totalPrice } = useCart();
   const { isOwner, adminOpen, setAdminOpen } = useAdmin();
   const { theme } = useTheme();
+  const { locationName, locationEnabled } = useLocation();
   const router = useRouter();
   const searchParams = useSearchParams();
   const selectedCategory = searchParams.get('category') || 'New';
@@ -138,6 +140,14 @@ function HomeContent() {
                   </button>
                 )}
               </div>
+              {locationEnabled && locationName && (
+                <div className="flex items-center gap-1 mt-0.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" className="text-[#cba153] shrink-0">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                  </svg>
+                  <span className="text-[10px] text-gray-500 dark:text-gray-400 leading-none truncate max-w-[120px]">{locationName}</span>
+                </div>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-4">
