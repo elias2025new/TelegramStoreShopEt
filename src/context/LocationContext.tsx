@@ -63,6 +63,46 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     const enableLocation = useCallback(async () => {
         localStorage.setItem('location_asked', 'true');
         setLocationAsked(true);
+
+        const telegram = (window as any).Telegram?.WebApp;
+
+        // Try Telegram's native LocationManager first (v7.2+)
+        if (telegram?.LocationManager) {
+            const lm = telegram.LocationManager;
+
+            const handleLocationFetch = () => {
+                if (!lm.isLocationAvailable) {
+                    lm.openSettings();
+                    return;
+                }
+
+                lm.getLocation(async (data: any) => {
+                    if (data && data.latitude && data.longitude) {
+                        try {
+                            const name = await reverseGeocode(data.latitude, data.longitude);
+                            setLocationName(name);
+                            setLocationEnabled(true);
+                            localStorage.setItem('location_enabled', 'true');
+                            localStorage.setItem('location_name', name);
+                        } catch {
+                            setLocationEnabled(false);
+                        }
+                    } else {
+                        // User denied permission or error
+                        setLocationEnabled(false);
+                    }
+                });
+            };
+
+            if (!lm.isInited) {
+                lm.init(() => handleLocationFetch());
+            } else {
+                handleLocationFetch();
+            }
+            return;
+        }
+
+        // Fallback to standard Geolocation API
         try {
             const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
                 navigator.geolocation.getCurrentPosition(resolve, reject, {

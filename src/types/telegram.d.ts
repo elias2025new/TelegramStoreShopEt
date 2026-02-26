@@ -6,5 +6,6 @@ declare global {
         Telegram?: {
             WebApp: any;
         };
+        TelegramWebviewProxy?: any;
     }
 }
