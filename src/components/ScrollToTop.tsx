@@ -6,28 +6,37 @@ import { usePathname } from 'next/navigation';
 export default function ScrollToTop() {
     const pathname = usePathname();
     const scrollPositions = useRef<Record<string, number>>({});
-    const lastPathname = useRef<string>(pathname);
 
+    // Active tracking: always listen for scroll and update the current path's position
     useEffect(() => {
-        // Save current scroll position for the page we are LEAVING
-        const currentPath = lastPathname.current;
-        const currentScroll = window.scrollY;
+        const handleScroll = () => {
+            scrollPositions.current[pathname] = window.scrollY;
+        };
 
-        // Restore scroll position for the page we are ENTERING
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [pathname]);
+
+    // Restoration: when pathname changes, restore the saved position
+    useEffect(() => {
         const savedPosition = scrollPositions.current[pathname];
 
         if (savedPosition !== undefined) {
-            // Restore saved position
-            window.scrollTo(0, savedPosition);
+            // Use requestAnimationFrame to ensure the scroll happens after Next.js 
+            // has processed the route change and potentially reset the scroll to 0.
+            const restore = () => {
+                window.scrollTo({
+                    top: savedPosition,
+                    behavior: 'instant'
+                });
+            };
+
+            const frameId = requestAnimationFrame(restore);
+            return () => cancelAnimationFrame(frameId);
         } else {
-            // Default to top for new pages
+            // New page: scroll to top immediately
             window.scrollTo(0, 0);
         }
-
-        // After restoring/scrolling, save the PREVIOUS page's position
-        // so it doesn't get overwritten by the scroll reset
-        scrollPositions.current[currentPath] = currentScroll;
-        lastPathname.current = pathname;
     }, [pathname]);
 
     return null;
