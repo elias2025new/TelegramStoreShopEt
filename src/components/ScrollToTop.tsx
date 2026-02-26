@@ -1,7 +1,10 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useLayoutEffect, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
+
+// Isomorphic layout effect to avoid SSR warnings
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export default function ScrollToTop() {
     const pathname = usePathname();
@@ -17,22 +20,16 @@ export default function ScrollToTop() {
         return () => window.removeEventListener('scroll', handleScroll);
     }, [pathname]);
 
-    // Restoration: when pathname changes, restore the saved position
-    useEffect(() => {
+    // Restoration: when pathname changes, restore the saved position IMMEDIATELY
+    useIsomorphicLayoutEffect(() => {
         const savedPosition = scrollPositions.current[pathname];
 
         if (savedPosition !== undefined) {
-            // Use requestAnimationFrame to ensure the scroll happens after Next.js 
-            // has processed the route change and potentially reset the scroll to 0.
-            const restore = () => {
-                window.scrollTo({
-                    top: savedPosition,
-                    behavior: 'instant'
-                });
-            };
-
-            const frameId = requestAnimationFrame(restore);
-            return () => cancelAnimationFrame(frameId);
+            // Synchronous restoration before paint to prevent flicker
+            window.scrollTo({
+                top: savedPosition,
+                behavior: 'instant'
+            });
         } else {
             // New page: scroll to top immediately
             window.scrollTo(0, 0);

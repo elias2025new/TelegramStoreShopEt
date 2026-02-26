@@ -16,12 +16,12 @@ export default function PageTransition({ children }: PageTransitionProps) {
         <AnimatePresence mode="popLayout" initial={false}>
             <motion.div
                 key={pathname}
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
+                exit={{ opacity: 0, y: -8 }}
                 transition={{
-                    duration: 0.3,
-                    ease: [0.32, 0.72, 0, 1]
+                    duration: 0.25,
+                    ease: "easeOut"
                 }}
                 className="w-full flex-1 flex flex-col"
             >
