@@ -28,6 +28,26 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const [items, setItems] = useState<CartItem[]>([]);
     const [toast, setToast] = useState({ message: '', isVisible: false });
 
+    // Load cart from localStorage on mount
+    useEffect(() => {
+        const savedCart = localStorage.getItem('cart_items');
+        if (savedCart) {
+            try {
+                const parsedCart = JSON.parse(savedCart);
+                if (Array.isArray(parsedCart)) {
+                    setItems(parsedCart);
+                }
+            } catch (error) {
+                console.error('Failed to parse cart items:', error);
+            }
+        }
+    }, []);
+
+    // Save cart to localStorage whenever it changes
+    useEffect(() => {
+        localStorage.setItem('cart_items', JSON.stringify(items));
+    }, [items]);
+
     const showToast = useCallback((message: string) => {
         setToast({ message, isVisible: true });
     }, []);
@@ -57,6 +77,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     const clearCart = () => {
         setItems([]);
+        localStorage.removeItem('cart_items');
     };
 
     const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);

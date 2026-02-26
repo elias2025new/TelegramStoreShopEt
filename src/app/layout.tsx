@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Providers from "@/components/Providers";
 import BottomNav from "@/components/BottomNav";
+import ScrollToTop from "@/components/ScrollToTop";
 
 export const metadata: Metadata = {
   title: "CROWN SHOES & CLOTHES",
@@ -37,6 +38,7 @@ export default function RootLayout({
         className={`antialiased bg-[#f0f2f5] dark:bg-black text-gray-900 dark:text-white`}
       >
         <Providers>
+          <ScrollToTop />
           <div
             className="mx-auto max-w-md min-h-screen bg-[#f8f9fa] dark:bg-black shadow-sm flex flex-col relative"
             style={{

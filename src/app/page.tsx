@@ -212,27 +212,27 @@ function HomeContent() {
         </section>
 
         {/* Categories Scroller */}
-        <section className="mt-8 sticky top-[84px] z-40 bg-[#f8f9fa]/95 dark:bg-black/90 backdrop-blur-lg pt-4 pb-2 px-4 -mx-4 w-[calc(100%+2rem)] border-b border-gray-200 dark:border-white/10 shadow-sm dark:shadow-lg transition-colors duration-300">
-          <div className="flex overflow-x-auto gap-3 pb-4 scrollbar-hide transform-gpu scroll-smooth">
+        <section className="mt-8 sticky top-[100px] z-40 bg-white/95 dark:bg-black/95 backdrop-blur-xl pt-4 pb-0 px-4 -mx-4 w-[calc(100%+2rem)] border-b border-gray-200/50 dark:border-white/5 transition-colors duration-300">
+          <div className="flex overflow-x-auto gap-4 pb-4 scrollbar-hide transform-gpu scroll-smooth">
             {CATEGORIES.map((category) => {
               const isSelected = selectedCategory === category.name;
               return (
                 <button
                   key={category.name}
                   onClick={() => setSelectedCategory(category.name)}
-                  className={`flex flex-col items-center justify-between min-w-[80px] h-[90px] p-2 rounded-2xl transform-gpu active:scale-95 transition-all duration-200 ${isSelected
-                    ? 'bg-white dark:bg-[#111111] border-2 border-[#cba153] shadow-sm'
-                    : 'bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#2a2a2a] hover:bg-gray-50 dark:hover:bg-[#222222]'
+                  className={`flex flex-col items-center justify-center min-w-[85px] h-[85px] p-2 rounded-[24px] transform-gpu active:scale-95 transition-all duration-300 ${isSelected
+                    ? 'bg-[#cba153] dark:bg-[#cba153] shadow-[0_8px_20px_rgba(203,161,83,0.3)] border-transparent'
+                    : 'bg-white dark:bg-[#111111] border border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-[#161616] shadow-sm'
                     }`}
                 >
-                  <div className="flex-1 flex items-center justify-center">
+                  <div className={`p-2 rounded-xl mb-1 ${isSelected ? 'bg-black/10' : 'bg-transparent'}`}>
                     <img
-                      src={`https://img.icons8.com/ios-filled/50/${isSelected ? 'cba153' : (theme === 'light' ? '6b7280' : '6b7280')}/${category.icon}.png`}
+                      src={`https://img.icons8.com/ios-filled/50/${isSelected ? 'ffffff' : (theme === 'light' ? '6b7280' : '9ca3af')}/${category.icon}.png`}
                       alt={category.name}
-                      className={`w-10 h-10 object-contain ${isSelected || theme === 'dark' ? '' : 'opacity-70'}`}
+                      className={`w-7 h-7 object-contain ${isSelected ? 'brightness-0 invert' : ''}`}
                     />
                   </div>
-                  <span className={`text-xs mt-1 ${isSelected ? 'text-[#cba153] font-bold' : 'text-gray-500 dark:text-gray-400 font-medium'}`}>
+                  <span className={`text-[11px] uppercase tracking-wider font-black ${isSelected ? 'text-white' : 'text-gray-500 dark:text-gray-400'}`}>
                     {category.name}
                   </span>
                 </button>
