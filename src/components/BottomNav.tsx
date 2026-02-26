@@ -31,6 +31,7 @@ export default function BottomNav() {
                             <Link
                                 key={tab.name}
                                 href={tab.href}
+                                scroll={false}
                                 className={`relative flex flex-col items-center justify-center py-2 px-4 rounded-2xl ${isActive ? 'text-[#cba153]' : 'text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300'
                                     }`}
                                 onClick={() => {

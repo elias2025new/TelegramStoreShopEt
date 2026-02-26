@@ -6,32 +6,51 @@ import { usePathname } from 'next/navigation';
 // Isomorphic layout effect to avoid SSR warnings
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
+// Global map to persist scroll positions throughout the session
+const globalScrollPositions: Record<string, number> = {};
+
 export default function ScrollToTop() {
     const pathname = usePathname();
-    const scrollPositions = useRef<Record<string, number>>({});
 
-    // Active tracking: always listen for scroll and update the current path's position
+    // Active tracking: update the global map whenever the user scrolls
     useEffect(() => {
         const handleScroll = () => {
-            scrollPositions.current[pathname] = window.scrollY;
+            globalScrollPositions[pathname] = window.scrollY;
         };
 
-        window.addEventListener('scroll', handleScroll);
+        window.addEventListener('scroll', handleScroll, { passive: true });
         return () => window.removeEventListener('scroll', handleScroll);
     }, [pathname]);
 
-    // Restoration: when pathname changes, restore the saved position IMMEDIATELY
+    // Restoration logic: triggered immediately on pathname change
     useIsomorphicLayoutEffect(() => {
-        const savedPosition = scrollPositions.current[pathname];
+        const savedPosition = globalScrollPositions[pathname];
 
-        if (savedPosition !== undefined) {
-            // Synchronous restoration before paint to prevent flicker
+        // Restoration function
+        const performScroll = (pos: number) => {
             window.scrollTo({
-                top: savedPosition,
+                top: pos,
                 behavior: 'instant'
             });
+        };
+
+        if (savedPosition !== undefined && savedPosition > 0) {
+            // 1. Immediate attempt (useLayoutEffect runs before paint)
+            performScroll(savedPosition);
+
+            // 2. Multi-frame safety net: browsers/Next.js can sometimes force a scroll 
+            // after the initial mount of a route. We try again in the next frames.
+            const raf1 = requestAnimationFrame(() => {
+                performScroll(savedPosition);
+                const raf2 = requestAnimationFrame(() => {
+                    performScroll(savedPosition);
+                });
+                return () => cancelAnimationFrame(raf2);
+            });
+
+            return () => cancelAnimationFrame(raf1);
         } else {
-            // New page: scroll to top immediately
+            // For new pages (not in our map), always top-out
             window.scrollTo(0, 0);
         }
     }, [pathname]);
