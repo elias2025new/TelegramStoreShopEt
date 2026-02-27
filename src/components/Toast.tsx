@@ -27,7 +27,7 @@ export default function Toast({ message, isVisible, onClose }: ToastProps) {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -16, scale: 0.92, transition: { duration: 0.22, ease: 'easeIn' } }}
                     transition={{ type: 'spring', stiffness: 480, damping: 28, mass: 0.8 }}
-                    className="fixed top-24 right-4 z-[200] overflow-hidden rounded-2xl shadow-2xl"
+                    className="fixed top-20 left-1/2 -translate-x-1/2 z-[200] overflow-hidden rounded-2xl shadow-2xl"
                     style={{ filter: 'drop-shadow(0 8px 24px rgba(203,161,83,0.35))' }}
                 >
                     {/* Glass body */}
