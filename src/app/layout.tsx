@@ -4,6 +4,7 @@ import "./globals.css";
 import Providers from "@/components/Providers";
 import BottomNav from "@/components/BottomNav";
 import ScrollToTop from "@/components/ScrollToTop";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   title: "CROWN SHOES & CLOTHES",
@@ -49,6 +50,7 @@ export default function RootLayout({
           </div>
           <BottomNav />
         </Providers>
+        <Analytics />
       </body>
     </html>
   );
