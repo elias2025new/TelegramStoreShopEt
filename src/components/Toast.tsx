@@ -21,10 +21,10 @@ export default function Toast({ message, isVisible, onClose }: ToastProps) {
         <AnimatePresence>
             {isVisible && (
                 <motion.div
-                    initial={{ opacity: 0, y: 50, scale: 0.9 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-                    className="fixed top-20 left-1/2 -translate-x-1/2 z-[200] px-6 py-3 bg-[#cba153] text-black rounded-full font-bold shadow-2xl flex items-center gap-2 whitespace-nowrap w-max max-w-[90vw]"
+                    initial={{ opacity: 0, x: 50, scale: 0.9 }}
+                    animate={{ opacity: 1, x: 0, scale: 1 }}
+                    exit={{ opacity: 0, x: 20, scale: 0.9, transition: { duration: 0.2 } }}
+                    className="fixed top-24 right-4 z-[200] px-5 py-2.5 bg-[#cba153] text-black rounded-xl font-bold shadow-2xl flex items-center gap-2 whitespace-nowrap w-max max-w-[90vw] border border-black/10"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
                         <polyline points="20 6 9 17 4 12" />

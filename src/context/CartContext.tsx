@@ -68,7 +68,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             }
             return [...prev, { product, quantity }];
         });
-        showToast(`Added ${quantity} item${quantity > 1 ? 's' : ''} to cart`);
+        showToast(`Added to cart`);
     };
 
     const removeFromCart = (productId: string) => {
