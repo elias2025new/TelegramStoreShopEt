@@ -102,8 +102,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     return (
         <PageTransition>
             <main className="min-h-screen bg-gray-50 dark:bg-[#080808] text-gray-900 dark:text-white font-sans relative pb-32">
-                {/* Dynamic Background Gradient */}
-                <div className="fixed inset-0 bg-[radial-gradient(circle_at_top_right,#1a1a1a,transparent_70%),radial-gradient(circle_at_bottom_left,#000,transparent_70%)] pointer-events-none" />
+                {/* Dynamic Background Gradient - Only in Dark Mode */}
+                <div className="fixed inset-0 bg-[radial-gradient(circle_at_top_right,#1a1a1a,transparent_70%),radial-gradient(circle_at_bottom_left,#000,transparent_70%)] pointer-events-none hidden dark:block" />
 
                 {/* Sticky Header with Glassmorphism */}
                 <header

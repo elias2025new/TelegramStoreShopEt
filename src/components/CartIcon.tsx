@@ -31,7 +31,7 @@ export default function CartIcon() {
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="text-white group-hover:text-[#cba153] transition-colors"
+                    className="text-gray-900 dark:text-white group-hover:text-[#cba153] transition-colors"
                 >
                     <circle cx="8" cy="21" r="1" />
                     <circle cx="19" cy="21" r="1" />
@@ -41,7 +41,7 @@ export default function CartIcon() {
                     <motion.span
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        className="absolute -top-2 -right-2 flex h-4.5 w-4.5 min-w-[18px] min-h-[18px] items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white border-2 border-black shadow-lg px-1"
+                        className="absolute -top-2 -right-2 flex h-4.5 w-4.5 min-w-[18px] min-h-[18px] items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white border-2 border-white dark:border-black shadow-lg px-1"
                     >
                         {totalItems}
                     </motion.span>
