@@ -101,21 +101,20 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
 // Separate inner component so it can access LocationContext
 function LocationModalGate() {
-    const { locationAsked, locationHydrated, enableLocation, markAsked } = useLocation();
+    const { enableLocation, markAsked } = useLocation();
     const [show, setShow] = useState(false);
 
     useEffect(() => {
-        // Wait until localStorage has been read before deciding to show the modal.
-        // Without this guard, locationAsked is briefly `false` on every load
-        // (before the async useEffect in LocationContext fires), causing the
-        // modal to flash even for users who already answered it.
-        if (!locationHydrated) return;
-        if (!locationAsked) {
-            // Small delay to let the app render first
+        // Read localStorage DIRECTLY (synchronous, always available client-side).
+        // This avoids the race where React context state (locationAsked/locationHydrated)
+        // hasn't been committed yet when this effect first fires, which caused the
+        // modal to appear every load.
+        const alreadyAsked = localStorage.getItem('location_asked') === 'true';
+        if (!alreadyAsked) {
             const t = setTimeout(() => setShow(true), 800);
             return () => clearTimeout(t);
         }
-    }, [locationAsked, locationHydrated]);
+    }, []); // intentionally empty — run once on mount, that's all we need
 
     const handleAllow = async () => {
         setShow(false);
@@ -135,3 +134,4 @@ function LocationModalGate() {
         />
     );
 }
+
