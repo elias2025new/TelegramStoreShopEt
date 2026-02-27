@@ -6,6 +6,7 @@ interface LocationContextType {
     locationName: string | null;
     locationEnabled: boolean;
     locationAsked: boolean;
+    locationHydrated: boolean;  // true once localStorage has been read
     enableLocation: () => Promise<void>;
     disableLocation: () => void;
     markAsked: () => void;
@@ -15,6 +16,7 @@ const LocationContext = createContext<LocationContextType>({
     locationName: null,
     locationEnabled: false,
     locationAsked: false,
+    locationHydrated: false,
     enableLocation: async () => { },
     disableLocation: () => { },
     markAsked: () => { },
@@ -63,6 +65,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     const [locationName, setLocationName] = useState<string | null>(null);
     const [locationEnabled, setLocationEnabled] = useState(false);
     const [locationAsked, setLocationAsked] = useState(false);
+    const [locationHydrated, setLocationHydrated] = useState(false);
 
     // Track last geocoded coords to avoid spamming the API
     const lastCoordsRef = useRef<{ lat: number; lon: number } | null>(null);
@@ -79,6 +82,8 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
             setLocationEnabled(true);
             setLocationName(cached);
         }
+        // Signal that localStorage has been read — modal gate can now decide
+        setLocationHydrated(true);
     }, []);
 
     // ─── Start live watching once location is enabled ─────────────────────────
@@ -207,7 +212,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
 
     return (
         <LocationContext.Provider
-            value={{ locationName, locationEnabled, locationAsked, enableLocation, disableLocation, markAsked }}
+            value={{ locationName, locationEnabled, locationAsked, locationHydrated, enableLocation, disableLocation, markAsked }}
         >
             {children}
         </LocationContext.Provider>
