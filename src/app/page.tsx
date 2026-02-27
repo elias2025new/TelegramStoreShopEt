@@ -183,8 +183,8 @@ function HomeContent() {
                   src={slides[currentSlide].image}
                   alt="Promo Banner"
                   fill
-                  className="object-cover object-[65%_20%] opacity-90 transition-opacity duration-700 ease-in-out"
-                  priority
+                  className="object-cover"
+                  priority={currentSlide === 0}
                 />
                 {/* Gradient Overlay for Text Visibility */}
                 <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent z-10 pointer-events-none"></div>
