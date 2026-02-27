@@ -5,6 +5,7 @@ import { Database } from '@/types/supabase';
 import { useCart } from '@/context/CartContext';
 import { useFavorites } from '@/context/FavoritesContext';
 import { useRouter } from 'next/navigation';
+import { useTelegram } from '@/hooks/useTelegram';
 
 type Product = Database['public']['Tables']['products']['Row'];
 
@@ -16,6 +17,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     const { addToCart } = useCart();
     const { toggleFavorite, isFavorite } = useFavorites();
     const router = useRouter();
+    const { hapticFeedback } = useTelegram();
     const active = isFavorite(product.id);
     // Generate a visual pseudo-discount for the UI demo based on ID string length
     const discount = product.id ? ((product.id.length % 3) + 1) * 10 : 20;
@@ -27,18 +29,15 @@ export default function ProductCard({ product }: ProductCardProps) {
         e.preventDefault();
         e.stopPropagation();
         addToCart(product, 1);
-
-        if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-            window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
-        }
+        hapticFeedback('light');
     };
 
     return (
         <Link href={`/product/${product.id}`} className="block group h-full transform-gpu active:scale-[0.98] transition-all duration-200">
-            <div className="bg-white dark:bg-[#1c1c1e] rounded-xl overflow-hidden border border-gray-100 dark:border-[#2a2a2a] transition-colors hover:bg-gray-50 dark:hover:bg-[#222222] flex flex-col h-full shadow-sm dark:shadow-none">
+            <div className="bg-card-bg rounded-xl overflow-hidden border border-border-color transition-colors hover:brightness-95 dark:hover:brightness-110 flex flex-col h-full shadow-sm dark:shadow-none">
 
                 {/* Image Section */}
-                <div className="relative aspect-square w-full bg-gray-50 dark:bg-[#111111]">
+                <div className="relative aspect-square w-full bg-background/50">
                     {/* Discount Badge */}
                     <div className="absolute top-1.5 left-1.5 z-10 bg-black/10 dark:bg-white/10 backdrop-blur-md px-1.5 py-[1px] rounded text-[9px] font-bold text-gray-900 dark:text-white">
                         -{discount}%
@@ -52,8 +51,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                             e.preventDefault();
                             e.stopPropagation();
                             toggleFavorite(product);
-                            // Navigate to favorites as requested
-                            router.push('/favorites');
+                            hapticFeedback('medium');
                         }}
                     >
                         <img

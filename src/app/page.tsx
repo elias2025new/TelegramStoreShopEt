@@ -12,6 +12,7 @@ import { useLocation } from '@/context/LocationContext';
 import ProductGrid from '@/components/ProductGrid';
 import AdminOverlay from '@/components/Admin/AdminOverlay';
 import { User as UserIcon, Bell } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import PageTransition from '@/components/PageTransition';
 import CartIcon from '@/components/CartIcon';
 
@@ -162,40 +163,69 @@ function HomeContent() {
         {/* Hero Section */}
         <section className="px-4 mt-2">
           <div
-            className="relative w-full h-[280px] rounded-2xl overflow-hidden bg-[#1a1a1a]"
+            className="relative w-full h-[280px] rounded-2xl overflow-hidden bg-gray-100 dark:bg-[#0a0a0a] shadow-lg dark:shadow-none"
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEndHandler}
             style={{ touchAction: 'pan-y' }}
           >
-            {/* Background Image */}
-            <Image
-              src={slides[currentSlide].image}
-              alt="Promo Banner"
-              fill
-              className="object-cover object-[65%_20%] opacity-90 transition-opacity duration-700 ease-in-out"
-              priority
-            />
-            {/* Gradient Overlay for Text Visibility */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent z-10 pointer-events-none"></div>
-
-            <div className="absolute inset-0 z-20 flex flex-col justify-center px-6 animate-in fade-in slide-in-from-bottom-2 duration-700" key={currentSlide}>
-              <h2 className="text-[#ebe0cd] text-4xl font-black leading-tight tracking-wide font-sans mb-1 whitespace-pre-line drop-shadow-md">
-                {slides[currentSlide].title}
-              </h2>
-              <p className="text-[#cba153] font-medium text-lg mt-1 mb-2 drop-shadow-md">
-                {slides[currentSlide].subtitle}
-              </p>
-              <p className="text-gray-200 text-sm mb-6 tracking-wide uppercase drop-shadow-md">
-                {slides[currentSlide].promo}
-              </p>
-              <button
-                onClick={scrollToProducts}
-                className="w-max px-6 py-2 rounded-full border border-[#cba153]/60 bg-black/30 backdrop-blur-sm text-white text-sm font-semibold hover:bg-[#cba153] hover:text-black hover:border-[#cba153] transform-gpu active:scale-90 transition-all duration-300 animate-pulse"
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentSlide}
+                initial={{ opacity: 0, scale: 1.05 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className="absolute inset-0"
               >
-                Shop Now ↓
-              </button>
-            </div>
+                {/* Background Image */}
+                <Image
+                  src={slides[currentSlide].image}
+                  alt="Promo Banner"
+                  fill
+                  className="object-cover object-[65%_20%] opacity-90 transition-opacity duration-700 ease-in-out"
+                  priority
+                />
+                {/* Gradient Overlay for Text Visibility */}
+                <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent z-10 pointer-events-none"></div>
+
+                <div className="absolute inset-0 z-20 flex flex-col justify-center px-6">
+                  <motion.h2
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.2, duration: 0.6 }}
+                    className="text-[#ebe0cd] text-4xl font-black leading-tight tracking-wide font-sans mb-1 whitespace-pre-line drop-shadow-md"
+                  >
+                    {slides[currentSlide].title}
+                  </motion.h2>
+                  <motion.p
+                    initial={{ y: 15, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.3, duration: 0.6 }}
+                    className="text-[#cba153] font-medium text-lg mt-1 mb-2 drop-shadow-md"
+                  >
+                    {slides[currentSlide].subtitle}
+                  </motion.p>
+                  <motion.p
+                    initial={{ y: 10, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.4, duration: 0.6 }}
+                    className="text-gray-200 text-sm mb-6 tracking-wide uppercase drop-shadow-md"
+                  >
+                    {slides[currentSlide].promo}
+                  </motion.p>
+                  <motion.button
+                    initial={{ y: 10, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.5, duration: 0.6 }}
+                    onClick={scrollToProducts}
+                    className="w-max px-6 py-2 rounded-full border border-[#cba153]/60 bg-black/30 backdrop-blur-sm text-white text-sm font-semibold hover:bg-[#cba153] hover:text-black hover:border-[#cba153] transform-gpu active:scale-90 transition-all duration-300"
+                  >
+                    Shop Now ↓
+                  </motion.button>
+                </div>
+              </motion.div>
+            </AnimatePresence>
 
             {/* Carousel Indicators */}
             <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-20">
@@ -203,7 +233,7 @@ function HomeContent() {
                 <button
                   key={index}
                   onClick={() => setCurrentSlide(index)}
-                  className={`h-1 rounded-full transition-all duration-300 ${currentSlide === index ? 'w-6 bg-[#cba153]' : 'w-2 bg-gray-500'}`}
+                  className={`h-1 rounded-full transition-all duration-300 ${currentSlide === index ? 'w-6 bg-[#cba153]' : 'w-2 bg-gray-500/50'}`}
                   aria-label={`Go to slide ${index + 1}`}
                 />
               ))}

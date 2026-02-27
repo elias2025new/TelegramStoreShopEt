@@ -35,9 +35,15 @@ export default function ProductGrid({ selectedCategory = 'All' }: ProductGridPro
 
     if (isLoading) {
         return (
-            <div className="grid grid-cols-2 gap-3 px-4 pb-24">
+            <div className="grid grid-cols-2 gap-2 px-3 pb-24">
                 {[...Array(6)].map((_, i) => (
-                    <div key={i} className="bg-[#1c1c1e] rounded-xl h-56 animate-pulse border border-[#2a2a2a]"></div>
+                    <div key={i} className="bg-white dark:bg-[#1c1c1e] rounded-xl border border-gray-100 dark:border-[#2a2a2a] flex flex-col h-[260px] animate-pulse">
+                        <div className="aspect-square w-full bg-gray-100 dark:bg-[#111111] rounded-t-xl" />
+                        <div className="p-2 space-y-2">
+                            <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-3/4" />
+                            <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-1/2" />
+                        </div>
+                    </div>
                 ))}
             </div>
         );
