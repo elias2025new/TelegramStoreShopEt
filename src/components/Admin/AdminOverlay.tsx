@@ -74,10 +74,10 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
     };
 
     return (
-        <div className="flex flex-col gap-3 p-3 bg-[#1c1c1e] rounded-xl border border-[#2a2a2a]">
+        <div className="flex flex-col gap-3 p-3 bg-white dark:bg-[#1c1c1e] rounded-xl border border-gray-200 dark:border-[#2a2a2a]">
             <div className={`flex gap-3 transition-opacity ${showDeleteConfirm ? 'opacity-20 pointer-events-none' : ''}`}>
                 <div
-                    className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-[#111111] cursor-pointer group"
+                    className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-[#111111] cursor-pointer group"
                     onClick={() => onChangeImage(product.id)}
                 >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -95,7 +95,7 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
                         onChange={(e) => setLocalName(e.target.value)}
                         onFocus={handleFocus}
                         placeholder="Title/brand"
-                        className="w-full px-2 py-1.5 text-sm font-semibold border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none transition-all placeholder-gray-500"
+                        className="w-full px-2 py-1.5 text-sm font-semibold border border-gray-200 dark:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none transition-all placeholder-gray-400 dark:placeholder-gray-500"
                     />
                     <div className="flex gap-1.5">
                         <div className="flex-[1.4] relative">
@@ -105,14 +105,14 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
                                 value={localPrice}
                                 onChange={(e) => setLocalPrice(e.target.value)}
                                 onFocus={handleFocus}
-                                className="w-full pl-8 pr-1 py-1.5 text-sm font-bold border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none transition-all placeholder-gray-500"
+                                className="w-full pl-8 pr-1 py-1.5 text-sm font-bold border border-gray-200 dark:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none transition-all"
                             />
                         </div>
                         <select
                             value={localCategory}
                             onChange={(e) => setLocalCategory(e.target.value)}
                             onFocus={handleFocus}
-                            className="flex-1 min-w-[80px] px-1 py-1.5 text-[11px] border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none transition-all"
+                            className="flex-1 min-w-[80px] px-1 py-1.5 text-[11px] border border-gray-200 dark:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none transition-all"
                         >
                             {CATEGORIES.map((cat) => (
                                 <option key={cat} value={cat}>{cat}</option>
@@ -154,7 +154,7 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
                         <div className="flex gap-2">
                             <button
                                 onClick={() => setShowDeleteConfirm(false)}
-                                className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#2a2a2a] hover:bg-[#333333] text-white transition-all"
+                                className="px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-200 dark:bg-[#2a2a2a] hover:bg-gray-300 dark:hover:bg-[#333333] text-gray-800 dark:text-white transition-all"
                             >
                                 Cancel
                             </button>
@@ -242,11 +242,11 @@ function UploadItemRow({ item, index, updateItem, removeItem }: UploadItemRowPro
                     onClick={() => setDescModalOpen(false)}
                 >
                     <div
-                        className="w-full max-w-lg bg-[#1c1c1e] rounded-t-2xl p-5 pb-8 border-t border-[#3a3a3a] flex flex-col gap-3"
+                        className="w-full max-w-lg bg-white dark:bg-[#1c1c1e] rounded-t-2xl p-5 pb-8 border-t border-gray-200 dark:border-[#3a3a3a] flex flex-col gap-3"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex items-center justify-between">
-                            <span className="text-sm font-semibold text-white">Description</span>
+                            <span className="text-sm font-semibold text-gray-900 dark:text-white">Description</span>
                             <button onClick={() => setDescModalOpen(false)} className="text-gray-500 hover:text-white transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M18 6 6 18" /><path d="m6 6 12 12" />
@@ -259,7 +259,7 @@ function UploadItemRow({ item, index, updateItem, removeItem }: UploadItemRowPro
                             onChange={(e) => setModalDraft(e.target.value)}
                             placeholder="Enter a product description..."
                             rows={5}
-                            className="w-full px-3 py-2 text-sm border border-[#3a3a3a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none placeholder-gray-600 resize-none"
+                            className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-[#3a3a3a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none placeholder-gray-400 dark:placeholder-gray-600 resize-none"
                         />
                         <button
                             onClick={saveDesc}
@@ -271,10 +271,10 @@ function UploadItemRow({ item, index, updateItem, removeItem }: UploadItemRowPro
                 </div>
             )}
 
-            <div className="flex flex-col gap-2 p-3 bg-[#1c1c1e] rounded-xl border border-[#2a2a2a]">
+            <div className="flex flex-col gap-2 p-3 bg-white dark:bg-[#1c1c1e] rounded-xl border border-gray-200 dark:border-[#2a2a2a]">
                 {/* Top row: image + delete */}
                 <div className="flex items-center justify-between gap-3">
-                    <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-[#0a0a0a]">
+                    <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-[#0a0a0a]">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={item.preview} alt="preview" className="w-full h-full object-cover" />
                     </div>
@@ -297,13 +297,13 @@ function UploadItemRow({ item, index, updateItem, removeItem }: UploadItemRowPro
                         onChange={(e) => setLocalTitle(e.target.value)}
                         onBlur={() => updateItem(index, 'title', localTitle)}
                         onFocus={handleFocus}
-                        className="px-3 py-2 text-sm font-semibold border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none placeholder-gray-600"
+                        className="px-3 py-2 text-sm font-semibold border border-gray-200 dark:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none placeholder-gray-400 dark:placeholder-gray-600"
                     />
                     {/* Description trigger button — same size as title field */}
                     <button
                         type="button"
                         onClick={openDescModal}
-                        className="px-3 py-2 text-sm border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-left truncate focus:outline-none hover:border-[#cba153]/50 transition-colors"
+                        className="px-3 py-2 text-sm border border-gray-200 dark:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-left truncate focus:outline-none hover:border-[#cba153]/50 transition-colors"
                     >
                         {localDescription
                             ? <span className="text-white truncate">{localDescription}</span>
@@ -317,7 +317,7 @@ function UploadItemRow({ item, index, updateItem, removeItem }: UploadItemRowPro
                         onChange={(e) => setLocalPrice(e.target.value)}
                         onBlur={() => updateItem(index, 'price', localPrice)}
                         onFocus={handleFocus}
-                        className="px-3 py-2 text-sm border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none placeholder-gray-600 font-mono"
+                        className="px-3 py-2 text-sm border border-gray-200 dark:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none placeholder-gray-400 dark:placeholder-gray-600 font-mono"
                     />
                     <select
                         value={localCategory}
@@ -326,7 +326,7 @@ function UploadItemRow({ item, index, updateItem, removeItem }: UploadItemRowPro
                             updateItem(index, 'category', e.target.value);
                         }}
                         onFocus={handleFocus}
-                        className="px-3 py-2 text-sm border border-[#2a2a2a] rounded-lg bg-[#0a0a0a] text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none"
+                        className="px-3 py-2 text-sm border border-gray-200 dark:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none"
                     >
                         <option value="" disabled>Category</option>
                         {CATEGORIES.map((cat) => (
@@ -650,13 +650,13 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
 
     return (
         <div
-            className="fixed inset-0 z-[100] flex flex-col bg-[#0a0a0a]"
+            className="fixed inset-0 z-[100] flex flex-col bg-gray-50 dark:bg-[#0a0a0a]"
             style={{
                 paddingTop: 'calc(var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px))',
             }}
         >
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-[#2a2a2a] bg-[#0a0a0a]">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#0a0a0a]">
                 <div className="flex flex-col">
                     <div className="flex items-center gap-2">
                         <img src="https://img.icons8.com/ios-filled/50/cba153/manager.png" alt="admin" className="w-5 h-5" />
@@ -673,7 +673,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                         onClick={() => setView(view === 'upload' ? 'manage' : 'upload')}
                         className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${view === 'manage'
                             ? 'bg-[#cba153]/20 text-[#cba153] border border-[#cba153]/30'
-                            : 'bg-[#1c1c1e] text-gray-300 border border-[#2a2a2a]'
+                            : 'bg-gray-100 dark:bg-[#1c1c1e] text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-[#2a2a2a]'
                             }`}
                     >
                         <img
@@ -685,7 +685,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                     </button>
                     <button
                         onClick={onClose}
-                        className="p-2 rounded-full hover:bg-[#1c1c1e] transition-colors text-white"
+                        className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#1c1c1e] transition-colors text-gray-700 dark:text-white"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M18 6 6 18" /><path d="m6 6 12 12" />
@@ -710,12 +710,12 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                             </div>
                         )}
 
-                        <h3 className="font-semibold text-white mb-3">Batch Upload Products</h3>
+                        <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Batch Upload Products</h3>
 
                         {/* Image Picker */}
                         <button
                             onClick={() => fileInputRef.current?.click()}
-                            className="w-full border-2 border-dashed border-[#444] rounded-xl p-6 flex flex-col items-center gap-2 text-[#cba153] hover:bg-[#111111] hover:border-[#cba153] transition-colors mb-4"
+                            className="w-full border-2 border-dashed border-gray-300 dark:border-[#444] rounded-xl p-6 flex flex-col items-center gap-2 text-[#cba153] hover:bg-gray-100 dark:hover:bg-[#111111] hover:border-[#cba153] transition-colors mb-4"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
@@ -766,7 +766,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                             </div>
                         )}
 
-                        <h3 className="font-semibold text-white mb-3">Active Products</h3>
+                        <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Active Products</h3>
                         {isLoadingProducts ? (
                             <div className="flex justify-center py-10">
                                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#cba153]"></div>
@@ -803,7 +803,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
             {/* Footer - Fixed at bottom below the scrollable area */}
             {
                 images.length > 0 && view === 'upload' && (
-                    <div className="p-4 border-t border-[#2a2a2a] bg-[#0a0a0a] pb-safe">
+                    <div className="p-4 border-t border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#0a0a0a] pb-safe">
                         <button
                             onClick={handlePublish}
                             disabled={isUploading}

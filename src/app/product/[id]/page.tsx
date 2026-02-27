@@ -50,20 +50,20 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-[#0a0a0a] p-4 animate-pulse">
+            <div className="min-h-screen bg-gray-100 dark:bg-[#0a0a0a] p-4 animate-pulse">
                 {/* Back button skeleton */}
-                <div className="w-12 h-12 bg-[#1c1c1e] rounded-full mb-8"></div>
+                <div className="w-12 h-12 bg-gray-200 dark:bg-[#1c1c1e] rounded-full mb-8"></div>
                 {/* Main image skeleton */}
-                <div className="h-[55vh] bg-[#111111] rounded-2xl w-full mb-6 relative overflow-hidden">
+                <div className="h-[55vh] bg-gray-200 dark:bg-[#111111] rounded-2xl w-full mb-6 relative overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                 </div>
                 {/* Content skeletons */}
-                <div className="h-8 bg-[#1c1c1e] rounded-lg w-3/4 mb-4"></div>
-                <div className="h-4 bg-[#1c1c1e] rounded-lg w-1/2 mb-8"></div>
+                <div className="h-8 bg-gray-200 dark:bg-[#1c1c1e] rounded-lg w-3/4 mb-4"></div>
+                <div className="h-4 bg-gray-200 dark:bg-[#1c1c1e] rounded-lg w-1/2 mb-8"></div>
                 <div className="space-y-3">
-                    <div className="h-4 bg-[#1c1c1e] rounded-lg w-full"></div>
-                    <div className="h-4 bg-[#1c1c1e] rounded-lg w-full"></div>
-                    <div className="h-4 bg-[#1c1c1e] rounded-lg w-4/5"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-[#1c1c1e] rounded-lg w-full"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-[#1c1c1e] rounded-lg w-full"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-[#1c1c1e] rounded-lg w-4/5"></div>
                 </div>
             </div>
         );
@@ -101,13 +101,13 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
     return (
         <PageTransition>
-            <main className="min-h-screen bg-[#080808] text-white font-sans relative pb-32">
+            <main className="min-h-screen bg-gray-50 dark:bg-[#080808] text-gray-900 dark:text-white font-sans relative pb-32">
                 {/* Dynamic Background Gradient */}
                 <div className="fixed inset-0 bg-[radial-gradient(circle_at_top_right,#1a1a1a,transparent_70%),radial-gradient(circle_at_bottom_left,#000,transparent_70%)] pointer-events-none" />
 
                 {/* Sticky Header with Glassmorphism */}
                 <header
-                    className="sticky top-0 z-50 bg-black/40 backdrop-blur-xl border-b border-white/5 px-4 flex items-center justify-between transition-all duration-300"
+                    className="sticky top-0 z-50 bg-white/80 dark:bg-black/40 backdrop-blur-xl border-b border-gray-200/50 dark:border-white/5 px-4 flex items-center justify-between transition-all duration-300"
                     style={{
                         paddingTop: 'calc(1rem + var(--tg-safe-area-inset-top, 0px))',
                         paddingBottom: '1rem'
@@ -115,7 +115,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 >
                     <button
                         onClick={handleBack}
-                        className="p-2.5 bg-white/5 rounded-2xl text-white/70 hover:text-white border border-white/10 hover:bg-white/10 transition-all active:scale-90"
+                        className="p-2.5 bg-gray-100 dark:bg-white/5 rounded-2xl text-gray-600 dark:text-white/70 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-white/10 hover:bg-gray-200 dark:hover:bg-white/10 transition-all active:scale-90"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M19 12H5M12 19l-7-7 7-7" />
@@ -124,7 +124,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                     <div className="flex flex-col items-center">
                         <span className="text-[10px] font-bold text-[#cba153] uppercase tracking-[0.2em]">Product Details</span>
                     </div>
-                    <div className="p-1 bg-white/5 rounded-2xl border border-white/10">
+                    <div className="p-1 bg-gray-100 dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10">
                         <CartIcon />
                     </div>
                 </header>
@@ -149,7 +149,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                             className="relative"
                         >
                             <div className="absolute -inset-1 bg-gradient-to-r from-[#cba153]/20 to-transparent rounded-[32px] blur-xl opacity-50 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
-                            <div className="relative aspect-[4/5] w-full rounded-[30px] overflow-hidden bg-[#111] border border-white/10 shadow-2xl">
+                            <div className="relative aspect-[4/5] w-full rounded-[30px] overflow-hidden bg-gray-100 dark:bg-[#111] border border-gray-200 dark:border-white/10 shadow-2xl">
                                 {product.image_url ? (
                                     <Image
                                         src={product.image_url}
@@ -196,7 +196,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                                     ))}
                                 </div>
                             </div>
-                            <h1 className="text-3xl font-black text-white leading-tight mb-4 tracking-tight">
+                            <h1 className="text-3xl font-black text-gray-900 dark:text-white leading-tight mb-4 tracking-tight">
                                 {product.name}
                             </h1>
                         </motion.div>
@@ -208,7 +208,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                             className="space-y-3"
                         >
                             <h3 className="text-xs font-bold text-[#cba153] uppercase tracking-[0.2em]">The Description</h3>
-                            <p className="text-gray-400 text-[15px] leading-relaxed font-medium">
+                            <p className="text-gray-500 dark:text-gray-400 text-[15px] leading-relaxed font-medium">
                                 {product.description || "Indulge in the epitome of luxury and craftsmanship. Each piece is meticulously curated to bring an aura of sophistication and timeless elegance to your collection. Experience quality that resonates with your lifestyle."}
                             </p>
                         </motion.div>
@@ -222,19 +222,19 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                     transition={{ delay: 0.7, type: "spring", damping: 20, stiffness: 100 }}
                     className="fixed bottom-0 left-0 right-0 p-6 z-[60] pointer-events-none"
                 >
-                    <div className="max-w-md mx-auto pointer-events-auto bg-[#161618]/90 backdrop-blur-2xl border border-white/10 p-3 rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center gap-3">
+                    <div className="max-w-md mx-auto pointer-events-auto bg-white/95 dark:bg-[#161618]/90 backdrop-blur-2xl border border-gray-200 dark:border-white/10 p-3 rounded-[32px] shadow-[0_8px_30px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center gap-3">
                         {/* Quantity Pill */}
-                        <div className="flex items-center bg-black/40 rounded-2xl p-1 border border-white/5">
+                        <div className="flex items-center bg-gray-100 dark:bg-black/40 rounded-2xl p-1 border border-gray-200 dark:border-white/5">
                             <button
                                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                className="w-10 h-10 flex items-center justify-center rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all active:scale-90"
+                                className="w-10 h-10 flex items-center justify-center rounded-xl text-gray-400 dark:text-white/50 hover:text-gray-800 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/5 transition-all active:scale-90"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /></svg>
                             </button>
-                            <span className="w-8 text-center font-bold text-white text-base">{quantity}</span>
+                            <span className="w-8 text-center font-bold text-gray-900 dark:text-white text-base">{quantity}</span>
                             <button
                                 onClick={() => setQuantity(quantity + 1)}
-                                className="w-10 h-10 flex items-center justify-center rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all active:scale-90"
+                                className="w-10 h-10 flex items-center justify-center rounded-xl text-gray-400 dark:text-white/50 hover:text-gray-800 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/5 transition-all active:scale-90"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
                             </button>
