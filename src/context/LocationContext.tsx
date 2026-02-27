@@ -112,7 +112,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
             {
                 enableHighAccuracy: false,
                 timeout: 10_000,
-                maximumAge: 60_000,   // accept cached position up to 1 min old
+                maximumAge: 30_000,   // accept cached position up to 30 s old
             }
         );
 
@@ -168,11 +168,14 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         }
 
         // Fallback: standard Geolocation API initial fetch
+        // Use a cached position (up to 2 min old) for a near-instant response;
+        // the live watcher below will update it if the user has moved.
         try {
             const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
                 navigator.geolocation.getCurrentPosition(resolve, reject, {
-                    timeout: 8000,
-                    maximumAge: 0,
+                    enableHighAccuracy: false,
+                    timeout: 5000,
+                    maximumAge: 120_000,   // accept up to 2-min-old cached fix → instant
                 })
             );
             const { latitude: lat, longitude: lon } = pos.coords;
