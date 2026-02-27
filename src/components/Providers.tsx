@@ -99,22 +99,34 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     );
 }
 
+// Module-level flag: once we've decided to show (or skip) the modal this
+// session, never reconsider — survives hot-reloads and re-mounts.
+let _shownThisSession = false;
+
 // Separate inner component so it can access LocationContext
 function LocationModalGate() {
     const { enableLocation, markAsked } = useLocation();
     const [show, setShow] = useState(false);
 
     useEffect(() => {
-        // Read localStorage DIRECTLY (synchronous, always available client-side).
-        // This avoids the race where React context state (locationAsked/locationHydrated)
-        // hasn't been committed yet when this effect first fires, which caused the
-        // modal to appear every load.
+        // Never show more than once per browser session
+        if (_shownThisSession) return;
+
         const alreadyAsked = localStorage.getItem('location_asked') === 'true';
         if (!alreadyAsked) {
-            const t = setTimeout(() => setShow(true), 800);
+            _shownThisSession = true;
+
+            const t = setTimeout(() => {
+                // Write BEFORE showing — if the user force-closes the app
+                // before tapping a button, it still won't show next time.
+                localStorage.setItem('location_asked', 'true');
+                setShow(true);
+            }, 800);
             return () => clearTimeout(t);
+        } else {
+            _shownThisSession = true; // already asked, mark so we never re-check
         }
-    }, []); // intentionally empty — run once on mount, that's all we need
+    }, []); // run once on mount
 
     const handleAllow = async () => {
         setShow(false);
