@@ -89,9 +89,42 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     // ─── Start live watching once location is enabled ─────────────────────────
     useEffect(() => {
         if (!locationEnabled) return;
+
+        const telegram = typeof window !== 'undefined' ? (window as any).Telegram?.WebApp : null;
+
+        // ── Path A: Telegram LocationManager (preferred — no repeated native prompts) ──
+        if (telegram?.LocationManager) {
+            const lm = telegram.LocationManager;
+
+            const fetchViaLM = () => {
+                if (!lm.isLocationAvailable) return;
+                lm.getLocation(async (data: any) => {
+                    if (!data?.latitude || !data?.longitude) return;
+                    const { latitude: lat, longitude: lon } = data;
+                    const last = lastCoordsRef.current;
+                    if (last && distanceMetres(last.lat, last.lon, lat, lon) < MIN_DISTANCE_METRES) return;
+                    lastCoordsRef.current = { lat, lon };
+                    const name = await reverseGeocode(lat, lon);
+                    setLocationName(name);
+                    localStorage.setItem('location_name', name);
+                });
+            };
+
+            // Kick off first fetch once LM is ready
+            if (lm.isInited) {
+                fetchViaLM();
+            } else {
+                lm.init(() => fetchViaLM());
+            }
+
+            // Refresh every 90 seconds (no permission prompt)
+            const interval = window.setInterval(fetchViaLM, 90_000);
+            return () => clearInterval(interval);
+        }
+
+        // ── Path B: Standard Geolocation API (browser / non-Telegram fallback) ──
         if (typeof navigator === 'undefined' || !navigator.geolocation) return;
 
-        // Clear any previous watcher
         if (watchIdRef.current !== null) {
             navigator.geolocation.clearWatch(watchIdRef.current);
         }
@@ -100,29 +133,17 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
             async (pos) => {
                 const { latitude: lat, longitude: lon } = pos.coords;
                 const last = lastCoordsRef.current;
-
-                // Only re-geocode if moved more than MIN_DISTANCE_METRES
-                if (last && distanceMetres(last.lat, last.lon, lat, lon) < MIN_DISTANCE_METRES) {
-                    return;
-                }
-
+                if (last && distanceMetres(last.lat, last.lon, lat, lon) < MIN_DISTANCE_METRES) return;
                 lastCoordsRef.current = { lat, lon };
                 const name = await reverseGeocode(lat, lon);
                 setLocationName(name);
                 localStorage.setItem('location_name', name);
             },
-            () => {
-                // Watch error — silently ignore, stale name stays
-            },
-            {
-                enableHighAccuracy: false,
-                timeout: 10_000,
-                maximumAge: 30_000,   // accept cached position up to 30 s old
-            }
+            () => { /* silently ignore watch errors */ },
+            { enableHighAccuracy: false, timeout: 10_000, maximumAge: 30_000 }
         );
 
         watchIdRef.current = id;
-
         return () => {
             navigator.geolocation.clearWatch(id);
             watchIdRef.current = null;
