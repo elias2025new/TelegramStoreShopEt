@@ -255,6 +255,11 @@ function HomeContent() {
               placeholder="Search sneakers, apparel..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={(e) => {
+                setTimeout(() => {
+                  e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 300);
+              }}
               className="w-full bg-white dark:bg-[#111111] border-2 border-gray-100 dark:border-[#1a1a1a] rounded-2xl py-3 pl-11 pr-11 text-sm font-medium focus:ring-2 focus:ring-[#cba153]/20 focus:border-[#cba153] focus:outline-none transition-all duration-300 placeholder-gray-400 dark:placeholder-gray-600 text-gray-900 dark:text-white shadow-sm dark:shadow-none"
             />
             {searchQuery && (

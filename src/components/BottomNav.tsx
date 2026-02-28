@@ -9,6 +9,24 @@ import { motion, AnimatePresence } from 'framer-motion';
 export default function BottomNav() {
     const pathname = usePathname();
     const { adminOpen } = useAdmin();
+    const [isInputFocused, setIsInputFocused] = React.useState(false);
+
+    React.useEffect(() => {
+        const handleFocus = (e: FocusEvent) => {
+            const target = e.target as HTMLElement;
+            if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+                setIsInputFocused(true);
+            }
+        };
+        const handleBlur = () => setIsInputFocused(false);
+
+        window.addEventListener('focusin', handleFocus);
+        window.addEventListener('focusout', handleBlur);
+        return () => {
+            window.removeEventListener('focusin', handleFocus);
+            window.removeEventListener('focusout', handleBlur);
+        };
+    }, []);
 
     const tabs = [
         { name: 'Home', href: '/', icon: "home" },
@@ -19,7 +37,7 @@ export default function BottomNav() {
     const isCartPage = pathname === '/cart' || pathname.startsWith('/cart/');
     const isProductPage = pathname.startsWith('/product/');
 
-    if (adminOpen || isCartPage || isProductPage) return null;
+    if (adminOpen || isCartPage || isProductPage || isInputFocused) return null;
 
     return (
         <div className="fixed inset-x-0 bottom-0 z-50 flex justify-center pointer-events-none pb-14 px-6 will-change-transform">
