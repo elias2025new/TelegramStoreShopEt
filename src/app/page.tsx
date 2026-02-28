@@ -17,11 +17,10 @@ import PageTransition from '@/components/PageTransition';
 import CartIcon from '@/components/CartIcon';
 
 const CATEGORIES = [
-  { name: 'New', icon: 'sparkling-diamond' },
-  { name: 'Men', icon: 'male' },
-  { name: 'Women', icon: 'female' },
-  { name: 'Footwear', icon: 'shoes' },
-  { name: 'Accessories', icon: 'shopping-bag' }
+  { name: 'All' },
+  { name: 'Men', image: 'https://images.unsplash.com/photo-1488161628813-04466f872be2?q=80&w=200&auto=format&fit=crop' },
+  { name: 'Women', image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=200&auto=format&fit=crop' },
+  { name: 'Accessories', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=200&auto=format&fit=crop' }
 ];
 
 function HomeContent() {
@@ -31,11 +30,11 @@ function HomeContent() {
   const { locationName, locationEnabled } = useLocation();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const selectedCategory = searchParams.get('category') || 'New';
+  const selectedCategory = searchParams.get('category') || 'All';
 
   const setSelectedCategory = (category: string) => {
     const params = new URLSearchParams(searchParams.toString());
-    if (category === 'New') {
+    if (category === 'All') {
       params.delete('category');
     } else {
       params.set('category', category);
@@ -242,28 +241,33 @@ function HomeContent() {
           </div>
         </section>
 
-        {/* Categories Scroller */}
-        <section className="mt-8 sticky top-[100px] z-40 bg-white/95 dark:bg-black/95 backdrop-blur-xl pt-4 pb-0 border-b border-gray-200/50 dark:border-white/5 transition-colors duration-300">
-          <div className="flex overflow-x-auto gap-4 pb-4 px-4 scrollbar-hide transform-gpu scroll-smooth overscroll-x-contain">
+        {/* Circular Category Filter */}
+        <section className="mt-8 mb-4">
+          <div className="flex justify-center items-center gap-6 px-4">
             {CATEGORIES.map((category) => {
               const isSelected = selectedCategory === category.name;
               return (
                 <button
                   key={category.name}
                   onClick={() => setSelectedCategory(category.name)}
-                  className={`flex flex-col items-center justify-center min-w-[85px] h-[85px] p-2 rounded-[24px] transform-gpu active:scale-95 transition-all duration-300 ${isSelected
-                    ? 'bg-[#cba153] dark:bg-[#cba153] shadow-[0_8px_20px_rgba(203,161,83,0.3)] border-transparent'
-                    : 'bg-white dark:bg-[#111111] border border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-[#161616] shadow-sm'
-                    }`}
+                  className="flex flex-col items-center gap-2 group transform-gpu active:scale-95 transition-all duration-200"
                 >
-                  <div className={`p-2 rounded-xl mb-1 ${isSelected ? 'bg-black/10' : 'bg-transparent'}`}>
-                    <img
-                      src={`https://img.icons8.com/ios-filled/50/${isSelected ? 'ffffff' : (theme === 'light' ? '6b7280' : '9ca3af')}/${category.icon}.png`}
-                      alt={category.name}
-                      className={`w-7 h-7 object-contain ${isSelected ? 'brightness-0 invert' : ''}`}
-                    />
+                  <div className={`
+                    relative h-16 w-16 rounded-full overflow-hidden flex items-center justify-center transition-all duration-300
+                    ${isSelected ? 'ring-2 ring-yellow-500 ring-offset-2 ring-offset-black scale-105' : 'scale-100'}
+                    ${category.name === 'All' ? 'bg-black border border-white/10' : ''}
+                  `}>
+                    {category.name === 'All' ? (
+                      <span className="text-white font-bold text-sm tracking-widest">ALL</span>
+                    ) : (
+                      <img
+                        src={(category as { name: string; image?: string }).image}
+                        alt={category.name}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
                   </div>
-                  <span className={`text-[11px] uppercase tracking-wider font-black ${isSelected ? 'text-white' : 'text-gray-500 dark:text-gray-400'}`}>
+                  <span className={`text-xs font-medium tracking-tight ${isSelected ? 'text-yellow-500' : 'text-gray-300'}`}>
                     {category.name}
                   </span>
                 </button>
@@ -273,7 +277,7 @@ function HomeContent() {
         </section>
 
         {/* Product Section Header */}
-        {selectedCategory === 'New' && (
+        {selectedCategory === 'All' && (
           <div ref={productSectionRef} className="px-6 mt-6 flex justify-between items-center scroll-mt-[190px]">
             <div className="flex items-center gap-2">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">Bestsellers</h2>
@@ -286,7 +290,7 @@ function HomeContent() {
         )}
 
         {/* Product Grid */}
-        <ProductGrid selectedCategory={selectedCategory === 'New' ? 'All' : selectedCategory} />
+        <ProductGrid selectedCategory={selectedCategory} />
       </PageTransition>
 
       {/* Admin Overlay */}
