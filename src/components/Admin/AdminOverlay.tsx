@@ -22,16 +22,16 @@ interface ChoiceChipGroupProps {
 
 function ChoiceChipGroup({ options, selected, onChange, label, onAddNew }: ChoiceChipGroupProps) {
     return (
-        <div className="flex flex-col gap-1.5">
-            {label && <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{label}</span>}
-            <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col gap-1">
+            {label && <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{label}</span>}
+            <div className="flex flex-wrap gap-1.5">
                 {options.map((opt) => (
                     <button
                         key={opt}
                         type="button"
                         onClick={() => onChange(opt)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200 ${selected === opt
-                            ? 'bg-yellow-500 text-black border-yellow-500 shadow-[0_2px_8px_rgba(234,179,8,0.3)]'
+                        className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all duration-200 ${selected === opt
+                            ? 'bg-yellow-500 text-black border-yellow-500 shadow-sm'
                             : 'bg-gray-800 text-gray-400 border-gray-700 hover:border-gray-500'
                             }`}
                     >
@@ -42,7 +42,7 @@ function ChoiceChipGroup({ options, selected, onChange, label, onAddNew }: Choic
                     <button
                         type="button"
                         onClick={onAddNew}
-                        className="px-3 py-1.5 rounded-full text-xs font-bold bg-gray-800 text-yellow-500 border border-gray-700 hover:border-yellow-500 transition-all duration-200"
+                        className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-gray-800 text-yellow-500 border border-gray-700 hover:border-yellow-500 flex items-center justify-center p-0"
                     >
                         +
                     </button>
@@ -313,9 +313,10 @@ interface UploadItemRowProps {
     index: number;
     updateItem: (index: number, field: 'title' | 'price' | 'category' | 'gender' | 'description', value: string) => void;
     removeItem: (index: number) => void;
+    onPublish: (index: number) => Promise<void>;
 }
 
-function UploadItemRow({ item, index, updateItem, removeItem }: UploadItemRowProps) {
+function UploadItemRow({ item, index, updateItem, removeItem, onPublish }: UploadItemRowProps) {
     const [localTitle, setLocalTitle] = useState(item.title);
     const [localPrice, setLocalPrice] = useState(item.price);
     const [localCategory, setLocalCategory] = useState(item.category);
@@ -324,6 +325,7 @@ function UploadItemRow({ item, index, updateItem, removeItem }: UploadItemRowPro
     const [isCustomCategory, setIsCustomCategory] = useState(false);
     const [descModalOpen, setDescModalOpen] = useState(false);
     const [modalDraft, setModalDraft] = useState('');
+    const [isPushing, setIsPushing] = useState(false);
 
     useEffect(() => {
         setLocalTitle(item.title);
@@ -349,6 +351,19 @@ function UploadItemRow({ item, index, updateItem, removeItem }: UploadItemRowPro
         setLocalDescription(modalDraft);
         updateItem(index, 'description', modalDraft);
         setDescModalOpen(false);
+    };
+
+    const handlePush = async () => {
+        if (!localTitle.trim() || !localPrice || parseFloat(localPrice) <= 0 || !localGender || !localCategory.trim()) {
+            alert('Please fill in title, price, primary category, and sub-category before pushing.');
+            return;
+        }
+        setIsPushing(true);
+        try {
+            await onPublish(index);
+        } finally {
+            setIsPushing(false);
+        }
     };
 
     return (
@@ -383,106 +398,121 @@ function UploadItemRow({ item, index, updateItem, removeItem }: UploadItemRowPro
                             onClick={saveDesc}
                             className="w-full py-2.5 rounded-xl font-bold text-sm text-black bg-[#cba153] hover:bg-[#b8860b] active:scale-95 transition-all"
                         >
-                            Save
+                            Save Description
                         </button>
                     </div>
                 </div>
             )}
 
-            <div className="flex flex-col gap-2 p-3 bg-white dark:bg-[#1c1c1e] rounded-xl border border-gray-200 dark:border-[#2a2a2a]">
-                {/* Top row: image + delete */}
-                <div className="flex items-center justify-between gap-3">
-                    <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-[#0a0a0a]">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
+            <div className={`flex flex-col gap-2 p-2 bg-white dark:bg-[#1c1c1e] rounded-xl border border-gray-200 dark:border-[#2a2a2a] shadow-sm transition-opacity ${isPushing ? 'opacity-50 pointer-events-none' : ''}`}>
+                <div className="flex items-center gap-2">
+                    <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-[#0a0a0a]">
                         <img src={item.preview} alt="preview" className="w-full h-full object-cover" />
                     </div>
-                    <p className="flex-1 text-[10px] text-gray-400 truncate font-mono">{item.fileName}</p>
-                    <button
-                        onClick={() => removeItem(index)}
-                        className="p-1 text-gray-500 hover:text-red-500 flex-shrink-0 transition-colors"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M18 6 6 18" /><path d="m6 6 12 12" />
-                        </svg>
-                    </button>
-                </div>
-                {/* Fields — 2-col grid */}
-                <div className="grid grid-cols-2 gap-2">
-                    <input
-                        type="text"
-                        placeholder="Title/brand"
-                        value={localTitle}
-                        onChange={(e) => setLocalTitle(e.target.value)}
-                        onBlur={() => updateItem(index, 'title', localTitle)}
-                        onFocus={handleFocus}
-                        className="px-3 py-2 text-sm font-semibold border border-gray-200 dark:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none placeholder-gray-400 dark:placeholder-gray-600"
-                    />
-                    {/* Description trigger button — same size as title field */}
-                    <button
-                        type="button"
-                        onClick={openDescModal}
-                        className="px-3 py-2 text-sm border border-gray-200 dark:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-left truncate focus:outline-none hover:border-[#cba153]/50 transition-colors"
-                    >
-                        {localDescription
-                            ? <span className="text-white truncate">{localDescription}</span>
-                            : <span className="text-gray-600">Description (optional)</span>
-                        }
-                    </button>
-                    <input
-                        type="number"
-                        placeholder="Price (ETB)"
-                        value={localPrice}
-                        onChange={(e) => setLocalPrice(e.target.value)}
-                        onBlur={() => updateItem(index, 'price', localPrice)}
-                        onFocus={handleFocus}
-                        className="px-3 py-2 text-sm border border-gray-200 dark:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none placeholder-gray-400 dark:placeholder-gray-600 font-mono"
-                    />
-                    <div className="col-span-2 flex flex-col gap-4 mt-2">
-                        <ChoiceChipGroup
-                            label="Primary Category"
-                            options={GENDERS}
-                            selected={localGender}
-                            onChange={(val) => {
-                                setLocalGender(val);
-                                updateItem(index, 'gender', val);
-                            }}
-                        />
 
-                        {isCustomCategory ? (
-                            <div className="flex flex-col gap-1.5">
-                                <div className="flex justify-between items-center">
-                                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Category</span>
-                                    <button
-                                        onClick={() => setIsCustomCategory(false)}
-                                        className="text-[10px] text-yellow-500 font-bold hover:underline"
-                                    >
-                                        Back to Chips
-                                    </button>
-                                </div>
-                                <input
-                                    type="text"
-                                    value={localCategory}
-                                    onChange={(e) => {
-                                        setLocalCategory(e.target.value);
-                                        updateItem(index, 'category', e.target.value);
-                                    }}
-                                    placeholder="Type category..."
-                                    className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white focus:ring-1 focus:ring-yellow-500 focus:outline-none"
-                                />
-                            </div>
-                        ) : (
-                            <ChoiceChipGroup
-                                label="What is it?"
-                                options={CATEGORIES}
-                                selected={localCategory}
-                                onChange={(val) => {
-                                    setLocalCategory(val);
-                                    updateItem(index, 'category', val);
+                    <div className="flex-1 min-w-0 flex flex-col">
+                        <input
+                            type="text"
+                            placeholder="Title/brand"
+                            value={localTitle}
+                            onChange={(e) => {
+                                setLocalTitle(e.target.value);
+                                updateItem(index, 'title', e.target.value);
+                            }}
+                            onFocus={handleFocus}
+                            className="w-full bg-transparent border-none p-0 text-sm font-bold text-gray-900 dark:text-white focus:ring-0 truncate"
+                        />
+                        <div className="flex items-center gap-1">
+                            <span className="text-[10px] text-[#cba153] font-bold">ETB</span>
+                            <input
+                                type="number"
+                                placeholder="0"
+                                value={localPrice}
+                                onChange={(e) => {
+                                    setLocalPrice(e.target.value);
+                                    updateItem(index, 'price', e.target.value);
                                 }}
-                                onAddNew={() => setIsCustomCategory(true)}
+                                onFocus={handleFocus}
+                                className="bg-transparent border-none p-0 text-xs font-mono font-bold text-gray-500 dark:text-gray-400 focus:ring-0 w-20"
                             />
-                        )}
+                        </div>
                     </div>
+
+                    <div className="flex items-center gap-1">
+                        <button
+                            onClick={openDescModal}
+                            title="Edit Description"
+                            className={`p-1.5 rounded-lg transition-colors ${localDescription ? 'text-[#cba153] bg-[#cba153]/10' : 'text-gray-400 bg-gray-100 dark:bg-[#2a2a2a]'}`}
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                                <line x1="9" x2="15" y1="10" y2="10" />
+                                <line x1="9" x2="15" y1="14" y2="14" />
+                            </svg>
+                        </button>
+                        <button
+                            onClick={handlePush}
+                            disabled={isPushing}
+                            className="px-3 py-1.5 bg-[#cba153] text-black text-[11px] font-bold rounded-lg hover:bg-[#b8860b] active:scale-95 transition-all shadow-sm"
+                        >
+                            {isPushing ? '...' : 'Push'}
+                        </button>
+                        <button
+                            onClick={() => removeItem(index)}
+                            className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M18 6 6 18" /><path d="m6 6 12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div className="flex flex-col gap-3 mt-1 pt-2 border-t border-gray-100 dark:border-[#2a2a2a]">
+                    <ChoiceChipGroup
+                        label="Primary Category"
+                        options={GENDERS}
+                        selected={localGender}
+                        onChange={(val) => {
+                            setLocalGender(val);
+                            updateItem(index, 'gender', val);
+                        }}
+                    />
+
+                    {isCustomCategory ? (
+                        <div className="flex flex-col gap-1.5">
+                            <div className="flex justify-between items-center">
+                                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Sub Category</span>
+                                <button
+                                    onClick={() => setIsCustomCategory(false)}
+                                    className="text-[10px] text-yellow-500 font-bold"
+                                >
+                                    Back
+                                </button>
+                            </div>
+                            <input
+                                type="text"
+                                value={localCategory}
+                                onChange={(e) => {
+                                    setLocalCategory(e.target.value);
+                                    updateItem(index, 'category', e.target.value);
+                                }}
+                                placeholder="Type category..."
+                                className="w-full px-2 py-1 text-xs border border-gray-200 dark:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-white focus:ring-1 focus:ring-yellow-500 focus:outline-none"
+                            />
+                        </div>
+                    ) : (
+                        <ChoiceChipGroup
+                            label="What is it?"
+                            options={CATEGORIES}
+                            selected={localCategory}
+                            onChange={(val) => {
+                                setLocalCategory(val);
+                                updateItem(index, 'category', val);
+                            }}
+                            onAddNew={() => setIsCustomCategory(true)}
+                        />
+                    )}
                 </div>
             </div>
         </>
@@ -742,6 +772,69 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
         }
     };
 
+    const handleIndividualPublish = async (index: number) => {
+        const item = images[index];
+        if (!item) return;
+
+        try {
+            const fileExt = item.fileName.split('.').pop();
+            const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+            const filePath = `products/${fileName}`;
+
+            const { error: storageError } = await supabase.storage
+                .from('products')
+                .upload(filePath, item.file);
+
+            if (storageError) throw storageError;
+
+            const { data: urlData } = supabase.storage.from('products').getPublicUrl(filePath);
+
+            const productData = {
+                name: item.title.trim(),
+                price: parseFloat(item.price),
+                category: item.category.trim(),
+                gender: item.gender,
+                description: item.description || null,
+                image_url: urlData.publicUrl,
+            };
+
+            const { error: insertError } = await supabase.from('products').insert([productData]);
+            if (insertError) throw insertError;
+
+            // Update local state
+            const updatedImages = images.filter((_, i) => i !== index);
+            setImages(updatedImages);
+
+            // Update draft
+            if (updatedImages.length > 0) {
+                const serialized = updatedImages.map(img => ({
+                    base64: img.base64,
+                    title: img.title,
+                    price: img.price,
+                    category: img.category,
+                    gender: img.gender,
+                    description: img.description,
+                    fileName: img.fileName,
+                }));
+                localStorage.setItem(DRAFT_KEY, JSON.stringify(serialized));
+            } else {
+                localStorage.removeItem(DRAFT_KEY);
+            }
+
+            queryClient.resetQueries({ queryKey: ['products'] });
+            setUploadStatus('✅ PRODUCT PUBLISHED: ' + item.title);
+
+            if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+                window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+            }
+
+            setTimeout(() => setUploadStatus(''), 3000);
+        } catch (err: any) {
+            setUploadStatus('ERROR: ' + err.message);
+            throw err;
+        }
+    };
+
     const handlePublish = async () => {
         if (images.length === 0) return;
         const invalid = images.find((img) => !img.price || parseFloat(img.price) <= 0 || !img.title.trim() || !img.gender || !img.category.trim());
@@ -898,6 +991,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                                         index={index}
                                         updateItem={updateItem}
                                         removeItem={removeItem}
+                                        onPublish={handleIndividualPublish}
                                     />
                                 ))}
                             </div>
