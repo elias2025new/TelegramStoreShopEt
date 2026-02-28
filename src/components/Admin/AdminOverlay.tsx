@@ -376,7 +376,7 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish }: Uploa
             return;
         }
         if (!localGender) {
-            setLocalError('Select Gender');
+            setLocalError('Select Category');
             setTimeout(() => setLocalError(null), 3000);
             return;
         }
