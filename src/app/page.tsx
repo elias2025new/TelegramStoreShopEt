@@ -31,6 +31,7 @@ function HomeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const selectedCategory = searchParams.get('category') || 'All';
+  const [searchQuery, setSearchQuery] = useState('');
 
   const setSelectedCategory = (category: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -241,8 +242,36 @@ function HomeContent() {
           </div>
         </section>
 
+        {/* Search Bar */}
+        <section className="px-6 mt-8 mb-2">
+          <div className="relative max-w-md mx-auto group">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors duration-200 group-focus-within:text-[#cba153] text-gray-500">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
+              </svg>
+            </div>
+            <input
+              type="text"
+              placeholder="Search sneakers, apparel..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-white dark:bg-[#111111] border-2 border-gray-100 dark:border-[#1a1a1a] rounded-2xl py-3 pl-11 pr-11 text-sm font-medium focus:ring-2 focus:ring-[#cba153]/20 focus:border-[#cba153] focus:outline-none transition-all duration-300 placeholder-gray-400 dark:placeholder-gray-600 text-gray-900 dark:text-white shadow-sm dark:shadow-none"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 6 6 18" /><path d="m6 6 12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+        </section>
+
         {/* Circular Category Filter */}
-        <section className="mt-8 mb-4">
+        <section className="mt-6 mb-4">
           <div className="flex justify-center items-center gap-6 px-4">
             {CATEGORIES.map((category) => {
               const isSelected = selectedCategory === category.name;
@@ -290,7 +319,7 @@ function HomeContent() {
         )}
 
         {/* Product Grid */}
-        <ProductGrid selectedCategory={selectedCategory} />
+        <ProductGrid selectedCategory={selectedCategory} searchQuery={searchQuery} />
       </PageTransition>
 
       {/* Admin Overlay */}

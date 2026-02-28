@@ -10,6 +10,7 @@ type Product = Database['public']['Tables']['products']['Row'];
 
 interface ProductGridProps {
     selectedCategory?: string;
+    searchQuery?: string;
 }
 
 async function fetchProducts() {
@@ -25,7 +26,7 @@ async function fetchProducts() {
     return data as Product[];
 }
 
-export default function ProductGrid({ selectedCategory = 'All' }: ProductGridProps) {
+export default function ProductGrid({ selectedCategory = 'All', searchQuery = '' }: ProductGridProps) {
     const { data: products, isLoading, error } = useQuery({
         queryKey: ['products'],
         queryFn: fetchProducts,
@@ -65,31 +66,38 @@ export default function ProductGrid({ selectedCategory = 'All' }: ProductGridPro
         );
     }
 
-    const filtered =
-        selectedCategory === 'All'
-            ? products
-            : products.filter((p) => {
-                const category = selectedCategory.toLowerCase();
-                const gender = p.gender?.toLowerCase();
+    const filtered = products.filter((p) => {
+        // 1. Category/Gender Filter
+        const categoryMatch = selectedCategory === 'All' || (() => {
+            const cat = selectedCategory.toLowerCase();
+            const gender = p.gender?.toLowerCase();
 
-                if (category === 'men') {
-                    return gender === 'men' || gender === 'unisex';
-                }
-                if (category === 'women') {
-                    return gender === 'women' || gender === 'unisex';
-                }
-                if (category === 'accessories') {
-                    return gender === 'accessories';
-                }
+            if (cat === 'men') return gender === 'men' || gender === 'unisex';
+            if (cat === 'women') return gender === 'women' || gender === 'unisex';
+            if (cat === 'accessories') return gender === 'accessories';
 
-                // Fallback to legacy category check if gender is not set
-                return p.category?.toLowerCase() === category;
-            });
+            return p.category?.toLowerCase() === cat;
+        })();
+
+        if (!categoryMatch) return false;
+
+        // 2. Search Filter
+        if (!searchQuery.trim()) return true;
+
+        const query = searchQuery.toLowerCase().trim();
+        const nameMatch = p.name.toLowerCase().includes(query);
+        const descMatch = p.description?.toLowerCase().includes(query);
+
+        return nameMatch || descMatch;
+    });
 
     if (filtered.length === 0) {
         return (
             <div className="p-8 text-center text-gray-500">
-                No products in &quot;{selectedCategory}&quot;.
+                {searchQuery
+                    ? `No products matching "${searchQuery}"`
+                    : `No products in "${selectedCategory}"`
+                }
             </div>
         );
     }
