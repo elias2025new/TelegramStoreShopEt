@@ -42,15 +42,29 @@ export function AdminProvider({ children }: { children: ReactNode }) {
 
                 const telegramId = tgUser.id;
 
-                const { data, error } = await supabase
+                // 1. Check if primary owner
+                const { data: storeData, error: storeError } = await supabase
                     .from('stores')
                     .select('id')
                     .eq('owner_id', telegramId)
                     .single();
 
-                if (!error && data) {
+                if (!storeError && storeData) {
                     setIsOwner(true);
-                    setStoreId(data.id);
+                    setStoreId(storeData.id);
+                    return;
+                }
+
+                // 2. Check if secondary admin
+                const { data: adminData, error: adminError } = await supabase
+                    .from('store_admins')
+                    .select('store_id')
+                    .eq('telegram_id', telegramId)
+                    .single();
+
+                if (!adminError && adminData) {
+                    setIsOwner(true);
+                    setStoreId(adminData.store_id);
                 }
             } catch (err) {
                 console.error('Admin check failed:', err);
