@@ -40,10 +40,22 @@ function HomeContent() {
     searchInputRef.current?.blur();
   };
 
+  const isKeyboardOpen = useRef(false);
+
   useEffect(() => {
     const handleViewportChange = () => {
-      if (window.visualViewport && window.visualViewport.height > window.innerHeight * 0.8) {
-        searchInputRef.current?.blur();
+      if (!window.visualViewport) return;
+
+      const currentHeight = window.visualViewport.height;
+      const fullHeight = window.innerHeight;
+
+      if (currentHeight < fullHeight * 0.8) {
+        isKeyboardOpen.current = true;
+      } else if (isKeyboardOpen.current && currentHeight > fullHeight * 0.9) {
+        isKeyboardOpen.current = false;
+        if (document.activeElement === searchInputRef.current) {
+          searchInputRef.current?.blur();
+        }
       }
     };
 
@@ -268,7 +280,7 @@ function HomeContent() {
           <div className="relative max-w-md mx-auto group">
             <div className="flex items-center gap-2">
               <div className="relative flex-1 group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors duration-200 group-focus-within:text-[#cba153] text-gray-500">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors duration-200 group-focus-within:text-cyan-400 text-slate-500">
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
                   </svg>
@@ -289,7 +301,7 @@ function HomeContent() {
                       e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     }, 300);
                   }}
-                  className="w-full bg-white dark:bg-[#111111] border-2 border-gray-100 dark:border-[#1a1a1a] rounded-2xl py-3 pl-11 pr-11 text-sm font-medium focus:ring-2 focus:ring-[#cba153]/20 focus:border-[#cba153] focus:outline-none transition-all duration-300 placeholder-gray-400 dark:placeholder-gray-600 text-gray-900 dark:text-white shadow-sm dark:shadow-none"
+                  className="w-full bg-[#0a192f] border-2 border-[#112240] rounded-2xl py-3 pl-11 pr-11 text-sm font-medium focus:ring-4 focus:ring-cyan-500/20 focus:border-cyan-500 focus:outline-none transition-all duration-300 placeholder-slate-500 text-cyan-50 shadow-[0_0_20px_rgba(0,0,0,0.3)]"
                 />
                 {searchInput && (
                   <button
@@ -297,7 +309,7 @@ function HomeContent() {
                       setSearchInput('');
                       setSearchQuery('');
                     }}
-                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-cyan-400 transition-colors"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M18 6 6 18" /><path d="m6 6 12 12" />
@@ -307,7 +319,7 @@ function HomeContent() {
               </div>
               <button
                 onClick={handleSearch}
-                className="px-5 py-3 bg-[#cba153] hover:bg-[#b88f44] text-black font-bold text-sm rounded-2xl transform-gpu active:scale-95 transition-all duration-200 shadow-md shadow-[#cba153]/20"
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-black text-sm rounded-2xl transform-gpu active:scale-95 transition-all duration-200 shadow-lg shadow-blue-500/20 uppercase tracking-widest"
               >
                 Go
               </button>
