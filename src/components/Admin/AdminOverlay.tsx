@@ -602,6 +602,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
         type: 'announcement',
         media_url: '',
     });
+    const [announceError, setAnnounceError] = useState<string | null>(null);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const editFileInputRef = useRef<HTMLInputElement>(null);
@@ -885,9 +886,9 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
     };
 
     const handleSaveAnnouncement = async () => {
+        setAnnounceError(null);
         if (!announceForm.title.trim() || !announceForm.content.trim()) {
-            setUploadStatus('ERROR: Title and Content are required for announcements');
-            setTimeout(() => setUploadStatus(''), 4000);
+            setAnnounceError('Title and Content are required');
             return;
         }
 
@@ -916,6 +917,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
             }
             setTimeout(() => setUploadStatus(''), 4000);
         } catch (err: any) {
+            setAnnounceError('Broadcast failed: ' + err.message);
             setUploadStatus('ERROR: ' + err.message);
             setTimeout(() => setUploadStatus(''), 4000);
         } finally {
@@ -1235,6 +1237,12 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                                     />
                                 </div>
                             </div>
+
+                            {announceError && (
+                                <div className="p-3 rounded-xl bg-red-900/10 border border-red-900/20 text-red-500 text-xs font-bold animate-shake">
+                                    {announceError}
+                                </div>
+                            )}
 
                             <button
                                 onClick={handleSaveAnnouncement}

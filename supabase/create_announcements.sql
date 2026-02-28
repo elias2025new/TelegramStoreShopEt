@@ -1,5 +1,5 @@
 -- Create announcements table
-create table if polycrystalline.announcements (
+create table if not exists announcements (
   id uuid default gen_random_uuid() primary key,
   title text not null,
   content text not null,
@@ -24,13 +24,13 @@ create policy "Admins can manage announcements"
     exists (
       select 1 from public.stores
       where id = announcements.store_id
-      and owner_id = (select auth.uid()::text) -- Note: Adjusting for your specific auth logic
+      and owner_id::text = auth.uid()::text
     )
     or
     exists (
       select 1 from public.store_admins
       where store_id = announcements.store_id
-      and telegram_id::text = (select auth.uid()::text) -- Note: Adjusting for your specific auth logic
+      and telegram_id::text = auth.uid()::text
     )
   );
 
