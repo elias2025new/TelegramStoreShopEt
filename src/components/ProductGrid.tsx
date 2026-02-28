@@ -68,10 +68,23 @@ export default function ProductGrid({ selectedCategory = 'All' }: ProductGridPro
     const filtered =
         selectedCategory === 'All'
             ? products
-            : products.filter(
-                (p) =>
-                    p.category?.toLowerCase() === selectedCategory.toLowerCase()
-            );
+            : products.filter((p) => {
+                const category = selectedCategory.toLowerCase();
+                const gender = p.gender?.toLowerCase();
+
+                if (category === 'men') {
+                    return gender === 'men' || gender === 'unisex';
+                }
+                if (category === 'women') {
+                    return gender === 'women' || gender === 'unisex';
+                }
+                if (category === 'accessories') {
+                    return gender === 'accessories';
+                }
+
+                // Fallback to legacy category check if gender is not set
+                return p.category?.toLowerCase() === category;
+            });
 
     if (filtered.length === 0) {
         return (

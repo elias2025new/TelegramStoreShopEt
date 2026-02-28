@@ -9,7 +9,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 
 const DRAFT_KEY = 'admin_product_draft';
-const GENDERS = ['Men', 'Women', 'Unisex', 'Kids'];
+const GENDERS = ['Men', 'Women', 'Unisex', 'Accessories'];
 const CATEGORIES = ['Men', 'women', 'accessories'];
 
 interface ChoiceChipGroupProps {
@@ -157,7 +157,7 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
                         </div>
                         <div className="flex flex-col gap-4">
                             <ChoiceChipGroup
-                                label="Who is it for?"
+                                label="Primary Category"
                                 options={GENDERS}
                                 selected={localGender}
                                 onChange={setLocalGender}
@@ -400,7 +400,7 @@ function UploadItemRow({ item, index, updateItem, removeItem }: UploadItemRowPro
                     />
                     <div className="col-span-2 flex flex-col gap-4 mt-2">
                         <ChoiceChipGroup
-                            label="Who is it for?"
+                            label="Primary Category"
                             options={GENDERS}
                             selected={localGender}
                             onChange={(val) => {
