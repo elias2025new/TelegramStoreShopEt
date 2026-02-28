@@ -992,22 +992,20 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
             }}
         >
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#0a0a0a]">
-                <div className="flex flex-col">
-                    <div className="flex items-center gap-2">
-                        <img src="https://img.icons8.com/ios-filled/50/cba153/manager.png" alt="admin" className="w-5 h-5" />
-                        <h2 className="text-lg font-bold text-[#cba153]">Store Admin</h2>
-                        {draftRestored && view === 'upload' && (
-                            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-[#cba153]/20 text-[#cba153] animate-pulse">
-                                Draft restored
-                            </span>
-                        )}
-                    </div>
+            <div className="flex items-center justify-between gap-1.5 px-3 py-2 border-b border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#0a0a0a]">
+                <div className="flex items-center gap-1.5 min-w-0 overflow-hidden">
+                    <img src="https://img.icons8.com/ios-filled/50/cba153/manager.png" alt="admin" className="w-4 h-4 flex-shrink-0" />
+                    <h2 className="text-sm font-black text-[#cba153] truncate">Admin</h2>
+                    {draftRestored && view === 'upload' && (
+                        <span className="flex-shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#cba153]/20 text-[#cba153] animate-pulse">
+                            Draft
+                        </span>
+                    )}
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 flex-shrink-0">
                     <button
                         onClick={() => setView(view === 'upload' ? 'manage' : 'upload')}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${view === 'manage'
+                        className={`px-2 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${view === 'manage'
                             ? 'bg-[#cba153]/20 text-[#cba153] border border-[#cba153]/30'
                             : 'bg-gray-100 dark:bg-[#1c1c1e] text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-[#2a2a2a]'
                             }`}
@@ -1015,20 +1013,20 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                         <img
                             src={view === 'upload' ? "https://img.icons8.com/ios-filled/50/cba153/settings.png" : "https://img.icons8.com/ios-filled/50/cba153/plus-math.png"}
                             alt="icon"
-                            className="w-4 h-4"
+                            className="w-3.5 h-3.5"
                         />
-                        {view === 'upload' ? 'Manage' : 'Upload'}
+                        <span>{view === 'upload' ? 'Manage' : 'Add'}</span>
                     </button>
                     <button
                         onClick={() => setAnnounceModalOpen(true)}
-                        className="px-3 py-1.5 rounded-lg text-sm font-bold bg-[#cba153]/10 text-[#cba153] border border-[#cba153]/30 transition-all flex items-center gap-2"
+                        className="px-2 py-1 rounded-lg text-xs font-bold bg-[#cba153]/10 text-[#cba153] border border-[#cba153]/30 transition-all flex items-center gap-1.5"
                     >
                         <img
                             src="https://img.icons8.com/ios-filled/50/cba153/megaphone.png"
                             alt="icon"
-                            className="w-4 h-4"
+                            className="w-3.5 h-3.5"
                         />
-                        Announce
+                        <span>Broadcast</span>
                     </button>
                     <button
                         onClick={onClose}

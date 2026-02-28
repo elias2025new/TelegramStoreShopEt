@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, X, Megaphone, Video, Newspaper, ExternalLink } from 'lucide-react';
 
@@ -38,6 +38,29 @@ const formatDate = (dateString: string) => {
 };
 
 export default function NotificationDrawer({ isOpen, onClose, notifications }: NotificationDrawerProps) {
+    useEffect(() => {
+        if (!isOpen) return;
+
+        // Use the SDK dynamically to handle Telegram native UI
+        if (typeof window !== 'undefined') {
+            import('@twa-dev/sdk').then((WebApp) => {
+                const twa = WebApp.default;
+                twa.BackButton.show();
+                twa.BackButton.onClick(onClose);
+            });
+        }
+
+        return () => {
+            if (typeof window !== 'undefined') {
+                import('@twa-dev/sdk').then((WebApp) => {
+                    const twa = WebApp.default;
+                    twa.BackButton.hide();
+                    twa.BackButton.offClick(onClose);
+                });
+            }
+        };
+    }, [isOpen, onClose]);
+
     return (
         <AnimatePresence>
             {isOpen && (
@@ -58,6 +81,9 @@ export default function NotificationDrawer({ isOpen, onClose, notifications }: N
                         exit={{ x: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                         className="fixed right-0 top-0 bottom-0 w-full max-w-[400px] bg-white dark:bg-[#0a0a0a] z-[101] shadow-2xl flex flex-col"
+                        style={{
+                            paddingTop: 'calc(var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px))',
+                        }}
                     >
                         {/* Header */}
                         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-gray-800/50">
@@ -70,6 +96,7 @@ export default function NotificationDrawer({ isOpen, onClose, notifications }: N
                             <button
                                 onClick={onClose}
                                 className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+                                title="Close"
                             >
                                 <X size={20} className="text-gray-500" />
                             </button>
