@@ -280,7 +280,7 @@ function HomeContent() {
           <div className="relative max-w-md mx-auto group">
             <div className="flex items-center gap-2">
               <div className="relative flex-1 group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors duration-200 group-focus-within:text-cyan-400 text-slate-500">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors duration-200 group-focus-within:text-blue-600 dark:group-focus-within:text-cyan-400 text-slate-400 dark:text-slate-500">
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
                   </svg>
@@ -301,7 +301,7 @@ function HomeContent() {
                       e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     }, 300);
                   }}
-                  className="w-full bg-[#0a192f] border-2 border-[#112240] rounded-2xl py-3 pl-11 pr-11 text-sm font-medium focus:ring-4 focus:ring-cyan-500/20 focus:border-cyan-500 focus:outline-none transition-all duration-300 placeholder-slate-500 text-cyan-50 shadow-[0_0_20px_rgba(0,0,0,0.3)]"
+                  className="w-full bg-white dark:bg-[#0a192f] border-2 border-gray-200 dark:border-[#112240] rounded-2xl py-3 pl-11 pr-11 text-sm font-medium focus:ring-4 focus:ring-blue-500/10 dark:focus:ring-cyan-500/20 focus:border-blue-500 dark:focus:border-cyan-500 focus:outline-none transition-all duration-300 placeholder-slate-400 dark:placeholder-slate-500 text-slate-900 dark:text-cyan-50 shadow-sm dark:shadow-[0_0_20px_rgba(0,0,0,0.3)]"
                 />
                 {searchInput && (
                   <button
@@ -309,7 +309,7 @@ function HomeContent() {
                       setSearchInput('');
                       setSearchQuery('');
                     }}
-                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-cyan-400 transition-colors"
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-blue-600 dark:hover:text-cyan-400 transition-colors"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M18 6 6 18" /><path d="m6 6 12 12" />
