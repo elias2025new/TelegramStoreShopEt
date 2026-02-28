@@ -9,13 +9,55 @@ import { useQueryClient } from '@tanstack/react-query';
 
 
 const DRAFT_KEY = 'admin_product_draft';
-const CATEGORIES = ['Electronics', 'Fashion', 'Home', 'Beauty', 'Food & Drink', 'Other'];
+const GENDERS = ['Men', 'Women', 'Unisex', 'Kids'];
+const CATEGORIES = ['Men', 'women', 'accessories'];
+
+interface ChoiceChipGroupProps {
+    options: string[];
+    selected: string;
+    onChange: (value: string) => void;
+    label?: string;
+    onAddNew?: () => void;
+}
+
+function ChoiceChipGroup({ options, selected, onChange, label, onAddNew }: ChoiceChipGroupProps) {
+    return (
+        <div className="flex flex-col gap-1.5">
+            {label && <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{label}</span>}
+            <div className="flex flex-wrap gap-2">
+                {options.map((opt) => (
+                    <button
+                        key={opt}
+                        type="button"
+                        onClick={() => onChange(opt)}
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200 ${selected === opt
+                            ? 'bg-yellow-500 text-black border-yellow-500 shadow-[0_2px_8px_rgba(234,179,8,0.3)]'
+                            : 'bg-gray-800 text-gray-400 border-gray-700 hover:border-gray-500'
+                            }`}
+                    >
+                        {opt}
+                    </button>
+                ))}
+                {onAddNew && (
+                    <button
+                        type="button"
+                        onClick={onAddNew}
+                        className="px-3 py-1.5 rounded-full text-xs font-bold bg-gray-800 text-yellow-500 border border-gray-700 hover:border-yellow-500 transition-all duration-200"
+                    >
+                        +
+                    </button>
+                )}
+            </div>
+        </div>
+    );
+}
 
 type Product = {
     id: string;
     name: string;
     price: number;
     category: string | null;
+    gender: string | null;
     image_url: string | null;
     created_at: string;
 };
@@ -30,21 +72,25 @@ interface ProductManageItemProps {
 function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: ProductManageItemProps) {
     const [localName, setLocalName] = useState(product.name);
     const [localPrice, setLocalPrice] = useState(product.price.toString());
-    const [localCategory, setLocalCategory] = useState(product.category || 'Other');
+    const [localCategory, setLocalCategory] = useState(product.category || '');
+    const [localGender, setLocalGender] = useState(product.gender || '');
     const [isSaving, setIsSaving] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [isCustomCategory, setIsCustomCategory] = useState(false);
 
     // Track if there are unsaved changes
     const hasChanges =
         localName !== product.name ||
         localPrice !== product.price.toString() ||
-        localCategory !== (product.category || 'Other');
+        localCategory !== (product.category || '') ||
+        localGender !== (product.gender || '');
 
     // Keep local state in sync if product changes externally (e.g. image update)
     useEffect(() => {
         setLocalName(product.name);
         setLocalPrice(product.price.toString());
-        setLocalCategory(product.category || 'Other');
+        setLocalCategory(product.category || '');
+        setLocalGender(product.gender || '');
     }, [product]);
 
     const handleSave = async () => {
@@ -59,7 +105,8 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
             await onUpdate(product.id, {
                 name: localName.trim(),
                 price: priceNum,
-                category: localCategory,
+                category: localCategory.trim(),
+                gender: localGender,
             });
         } finally {
             setIsSaving(false);
@@ -108,16 +155,43 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
                                 className="w-full pl-8 pr-1 py-1.5 text-sm font-bold border border-gray-200 dark:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none transition-all"
                             />
                         </div>
-                        <select
-                            value={localCategory}
-                            onChange={(e) => setLocalCategory(e.target.value)}
-                            onFocus={handleFocus}
-                            className="flex-1 min-w-[80px] px-1 py-1.5 text-[11px] border border-gray-200 dark:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none transition-all"
-                        >
-                            {CATEGORIES.map((cat) => (
-                                <option key={cat} value={cat}>{cat}</option>
-                            ))}
-                        </select>
+                        <div className="flex flex-col gap-4">
+                            <ChoiceChipGroup
+                                label="Who is it for?"
+                                options={GENDERS}
+                                selected={localGender}
+                                onChange={setLocalGender}
+                            />
+
+                            {isCustomCategory ? (
+                                <div className="flex flex-col gap-1.5">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Category</span>
+                                        <button
+                                            onClick={() => setIsCustomCategory(false)}
+                                            className="text-[10px] text-yellow-500 font-bold hover:underline"
+                                        >
+                                            Back to Chips
+                                        </button>
+                                    </div>
+                                    <input
+                                        type="text"
+                                        value={localCategory}
+                                        onChange={(e) => setLocalCategory(e.target.value)}
+                                        placeholder="Type category..."
+                                        className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white focus:ring-1 focus:ring-yellow-500 focus:outline-none"
+                                    />
+                                </div>
+                            ) : (
+                                <ChoiceChipGroup
+                                    label="What is it?"
+                                    options={CATEGORIES}
+                                    selected={localCategory}
+                                    onChange={setLocalCategory}
+                                    onAddNew={() => setIsCustomCategory(true)}
+                                />
+                            )}
+                        </div>
                     </div>
                 </div>
                 <button
@@ -180,6 +254,7 @@ interface ImageItem {
     title: string;
     price: string;
     category: string;
+    gender: string;
     description: string;
     fileName: string;
 }
@@ -189,6 +264,7 @@ interface SerializedItem {
     title: string;
     price: string;
     category: string;
+    gender: string;
     description: string;
     fileName: string;
 }
@@ -196,7 +272,7 @@ interface SerializedItem {
 interface UploadItemRowProps {
     item: ImageItem;
     index: number;
-    updateItem: (index: number, field: 'title' | 'price' | 'category' | 'description', value: string) => void;
+    updateItem: (index: number, field: 'title' | 'price' | 'category' | 'gender' | 'description', value: string) => void;
     removeItem: (index: number) => void;
 }
 
@@ -204,7 +280,9 @@ function UploadItemRow({ item, index, updateItem, removeItem }: UploadItemRowPro
     const [localTitle, setLocalTitle] = useState(item.title);
     const [localPrice, setLocalPrice] = useState(item.price);
     const [localCategory, setLocalCategory] = useState(item.category);
+    const [localGender, setLocalGender] = useState(item.gender);
     const [localDescription, setLocalDescription] = useState(item.description);
+    const [isCustomCategory, setIsCustomCategory] = useState(false);
     const [descModalOpen, setDescModalOpen] = useState(false);
     const [modalDraft, setModalDraft] = useState('');
 
@@ -212,8 +290,9 @@ function UploadItemRow({ item, index, updateItem, removeItem }: UploadItemRowPro
         setLocalTitle(item.title);
         setLocalPrice(item.price);
         setLocalCategory(item.category);
+        setLocalGender(item.gender);
         setLocalDescription(item.description);
-    }, [item.title, item.price, item.category, item.description]);
+    }, [item.title, item.price, item.category, item.gender, item.description]);
 
     const handleFocus = (e: React.FocusEvent<HTMLElement>) => {
         const target = e.target as HTMLElement;
@@ -319,20 +398,52 @@ function UploadItemRow({ item, index, updateItem, removeItem }: UploadItemRowPro
                         onFocus={handleFocus}
                         className="px-3 py-2 text-sm border border-gray-200 dark:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none placeholder-gray-400 dark:placeholder-gray-600 font-mono"
                     />
-                    <select
-                        value={localCategory}
-                        onChange={(e) => {
-                            setLocalCategory(e.target.value);
-                            updateItem(index, 'category', e.target.value);
-                        }}
-                        onFocus={handleFocus}
-                        className="px-3 py-2 text-sm border border-gray-200 dark:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none"
-                    >
-                        <option value="" disabled>Category</option>
-                        {CATEGORIES.map((cat) => (
-                            <option key={cat} value={cat}>{cat}</option>
-                        ))}
-                    </select>
+                    <div className="col-span-2 flex flex-col gap-4 mt-2">
+                        <ChoiceChipGroup
+                            label="Who is it for?"
+                            options={GENDERS}
+                            selected={localGender}
+                            onChange={(val) => {
+                                setLocalGender(val);
+                                updateItem(index, 'gender', val);
+                            }}
+                        />
+
+                        {isCustomCategory ? (
+                            <div className="flex flex-col gap-1.5">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Category</span>
+                                    <button
+                                        onClick={() => setIsCustomCategory(false)}
+                                        className="text-[10px] text-yellow-500 font-bold hover:underline"
+                                    >
+                                        Back to Chips
+                                    </button>
+                                </div>
+                                <input
+                                    type="text"
+                                    value={localCategory}
+                                    onChange={(e) => {
+                                        setLocalCategory(e.target.value);
+                                        updateItem(index, 'category', e.target.value);
+                                    }}
+                                    placeholder="Type category..."
+                                    className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white focus:ring-1 focus:ring-yellow-500 focus:outline-none"
+                                />
+                            </div>
+                        ) : (
+                            <ChoiceChipGroup
+                                label="What is it?"
+                                options={CATEGORIES}
+                                selected={localCategory}
+                                onChange={(val) => {
+                                    setLocalCategory(val);
+                                    updateItem(index, 'category', val);
+                                }}
+                                onAddNew={() => setIsCustomCategory(true)}
+                            />
+                        )}
+                    </div>
                 </div>
             </div>
         </>
@@ -396,7 +507,8 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                 base64: s.base64,
                 title: s.title || '',
                 price: s.price,
-                category: s.category,
+                category: s.category || '',
+                gender: s.gender || '',
                 description: s.description || '',
                 fileName: s.fileName,
             }));
@@ -419,6 +531,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
             title: item.title,
             price: item.price,
             category: item.category,
+            gender: item.gender,
             description: item.description,
             fileName: item.fileName,
         }));
@@ -444,6 +557,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                     title: '',
                     price: '',
                     category: '',
+                    gender: '',
                     description: '',
                     fileName: file.name,
                 };
@@ -454,7 +568,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
         e.target.value = '';
     }, []);
 
-    const updateItem = (index: number, field: 'title' | 'price' | 'category' | 'description', value: string) => {
+    const updateItem = (index: number, field: 'title' | 'price' | 'category' | 'gender' | 'description', value: string) => {
         setImages((prev) => prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)));
     };
 
@@ -591,9 +705,9 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
 
     const handlePublish = async () => {
         if (images.length === 0) return;
-        const invalid = images.find((img) => !img.price || parseFloat(img.price) <= 0 || !img.title.trim());
+        const invalid = images.find((img) => !img.price || parseFloat(img.price) <= 0 || !img.title.trim() || !img.gender || !img.category.trim());
         if (invalid) {
-            setUploadStatus('Please enter a valid title and price for all items.');
+            setUploadStatus('Please enter a valid title, price, gender and category for all items.');
             return;
         }
 
@@ -618,7 +732,8 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                     return {
                         name: item.title.trim(),
                         price: parseFloat(item.price),
-                        category: item.category,
+                        category: item.category.trim(),
+                        gender: item.gender,
                         description: item.description || null,
                         image_url: urlData.publicUrl,
                     };

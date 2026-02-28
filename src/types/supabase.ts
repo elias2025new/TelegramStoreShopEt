@@ -19,6 +19,7 @@ export interface Database {
                     price: number
                     image_url: string | null
                     category: string | null
+                    gender: string | null
                 }
                 Insert: {
                     id?: string
@@ -28,6 +29,7 @@ export interface Database {
                     price: number
                     image_url?: string | null
                     category?: string | null
+                    gender?: string | null
                 }
                 Update: {
                     id?: string
@@ -37,6 +39,7 @@ export interface Database {
                     price?: number
                     image_url?: string | null
                     category?: string | null
+                    gender?: string | null
                 }
                 Relationships: []
             }
