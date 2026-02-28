@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { supabase } from '@/utils/supabase/client';
 import { useAdmin } from '@/context/AdminContext';
 import { useQueryClient } from '@tanstack/react-query';
+import { motion, AnimatePresence } from 'framer-motion';
 
 
 const DRAFT_KEY = 'admin_product_draft';
@@ -61,6 +62,13 @@ type Product = {
     description: string | null;
     image_url: string | null;
     created_at: string;
+};
+
+type Announcement = {
+    title: string;
+    content: string;
+    type: 'announcement' | 'news' | 'vlog';
+    media_url?: string;
 };
 
 interface ProductManageItemProps {
@@ -586,6 +594,15 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
     const [isUploading, setIsUploading] = useState(false);
     const [uploadStatus, setUploadStatus] = useState('');
     const [draftRestored, setDraftRestored] = useState(false);
+
+    const [announceModalOpen, setAnnounceModalOpen] = useState(false);
+    const [announceForm, setAnnounceForm] = useState<Announcement>({
+        title: '',
+        content: '',
+        type: 'announcement',
+        media_url: '',
+    });
+
     const fileInputRef = useRef<HTMLInputElement>(null);
     const editFileInputRef = useRef<HTMLInputElement>(null);
     const [editingProductId, setEditingProductId] = useState<string | null>(null);
@@ -867,6 +884,45 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
         }
     };
 
+    const handleSaveAnnouncement = async () => {
+        if (!announceForm.title.trim() || !announceForm.content.trim()) {
+            setUploadStatus('ERROR: Title and Content are required for announcements');
+            setTimeout(() => setUploadStatus(''), 4000);
+            return;
+        }
+
+        setIsUploading(true);
+        setUploadStatus('Broadcasting announcement...');
+
+        try {
+            // Check if storeId exists
+            if (!storeId) throw new Error('Store ID not found. Are you an admin?');
+
+            const { error } = await supabase.from('announcements').insert([{
+                title: announceForm.title.trim(),
+                content: announceForm.content.trim(),
+                type: announceForm.type,
+                media_url: announceForm.media_url?.trim() || null,
+                store_id: storeId
+            }]);
+
+            if (error) throw error;
+
+            setAnnounceModalOpen(false);
+            setAnnounceForm({ title: '', content: '', type: 'announcement', media_url: '' });
+            setUploadStatus('SUCCESS: ANNOUNCEMENT BROADCAST SUCCESSFUL!');
+            if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+                window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+            }
+            setTimeout(() => setUploadStatus(''), 4000);
+        } catch (err: any) {
+            setUploadStatus('ERROR: ' + err.message);
+            setTimeout(() => setUploadStatus(''), 4000);
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
     const handlePublish = async () => {
         if (images.length === 0) return;
         const invalid = images.find((img) => !img.price || parseFloat(img.price) <= 0 || !img.title.trim() || !img.gender);
@@ -962,6 +1018,17 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                             className="w-4 h-4"
                         />
                         {view === 'upload' ? 'Manage' : 'Upload'}
+                    </button>
+                    <button
+                        onClick={() => setAnnounceModalOpen(true)}
+                        className="px-3 py-1.5 rounded-lg text-sm font-bold bg-[#cba153]/10 text-[#cba153] border border-[#cba153]/30 transition-all flex items-center gap-2"
+                    >
+                        <img
+                            src="https://img.icons8.com/ios-filled/50/cba153/megaphone.png"
+                            alt="icon"
+                            className="w-4 h-4"
+                        />
+                        Announce
                     </button>
                     <button
                         onClick={onClose}
@@ -1095,6 +1162,93 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                     </div>
                 )
             }
+            {/* Announcement Modal */}
+            <AnimatePresence>
+                {announceModalOpen && (
+                    <div
+                        className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+                        onClick={() => setAnnounceModalOpen(false)}
+                    >
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="w-full max-w-lg bg-white dark:bg-[#1c1c1e] rounded-2xl p-6 border border-gray-200 dark:border-[#3a3a3a] flex flex-col gap-4 shadow-2xl"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3">
+                                <h3 className="text-lg font-bold text-[#cba153] flex items-center gap-2">
+                                    <img src="https://img.icons8.com/ios-filled/50/cba153/megaphone.png" alt="icon" className="w-5 h-5" />
+                                    New Broadcast
+                                </h3>
+                                <button onClick={() => setAnnounceModalOpen(false)} className="text-gray-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M18 6 6 18" /><path d="m6 6 12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Type</label>
+                                    <div className="flex gap-2">
+                                        {(['announcement', 'news', 'vlog'] as const).map((t) => (
+                                            <button
+                                                key={t}
+                                                onClick={() => setAnnounceForm({ ...announceForm, type: t })}
+                                                className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all ${announceForm.type === t ? 'bg-[#cba153] text-black border-[#cba153]' : 'bg-gray-100 dark:bg-[#2a2a2a] text-gray-500 border-transparent'}`}
+                                            >
+                                                {t.toUpperCase()}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Title</label>
+                                    <input
+                                        type="text"
+                                        value={announceForm.title}
+                                        onChange={(e) => setAnnounceForm({ ...announceForm, title: e.target.value })}
+                                        className="w-full bg-gray-50 dark:bg-[#2a2a2a] border border-gray-100 dark:border-gray-800 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#cba153] text-gray-800 dark:text-white"
+                                        placeholder="Headline for your update..."
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Message</label>
+                                    <textarea
+                                        rows={4}
+                                        value={announceForm.content}
+                                        onChange={(e) => setAnnounceForm({ ...announceForm, content: e.target.value })}
+                                        className="w-full bg-gray-50 dark:bg-[#2a2a2a] border border-gray-100 dark:border-gray-800 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#cba153] text-gray-800 dark:text-white resize-none"
+                                        placeholder="What's the update?"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Link / Media URL (Optional)</label>
+                                    <input
+                                        type="text"
+                                        value={announceForm.media_url}
+                                        onChange={(e) => setAnnounceForm({ ...announceForm, media_url: e.target.value })}
+                                        className="w-full bg-gray-50 dark:bg-[#2a2a2a] border border-gray-100 dark:border-gray-800 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#cba153] text-gray-800 dark:text-white"
+                                        placeholder="https://..."
+                                    />
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={handleSaveAnnouncement}
+                                disabled={isUploading}
+                                className={`w-full py-4 mt-2 rounded-xl font-black text-black transition-all ${isUploading ? 'bg-gray-400' : 'bg-[#cba153] hover:bg-[#b8860b] shadow-lg shadow-[#cba153]/20'}`}
+                            >
+                                {isUploading ? 'BROADCASTING...' : 'SEND ANNOUNCEMENT'}
+                            </button>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div >
     );
 }

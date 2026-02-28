@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { supabase } from '@/utils/supabase/client';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCart } from '@/context/CartContext';
@@ -16,6 +17,16 @@ import Toast from '@/components/Toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import PageTransition from '@/components/PageTransition';
 import CartIcon from '@/components/CartIcon';
+import NotificationDrawer from '@/components/NotificationDrawer';
+
+interface Announcement {
+  id: string;
+  title: string;
+  content: string;
+  type: 'announcement' | 'news' | 'vlog';
+  media_url: string | null;
+  created_at: string;
+}
 
 const CATEGORIES = [
   { name: 'All' },
@@ -27,6 +38,9 @@ const CATEGORIES = [
 function HomeContent() {
   const { totalPrice } = useCart();
   const { isOwner, adminOpen, setAdminOpen } = useAdmin();
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false); // Added state
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]); // Added state
+  const [hasNewNotifications, setHasNewNotifications] = useState(false); // Added state
   const { theme } = useTheme();
   const { locationName, locationEnabled } = useLocation();
   const router = useRouter();
@@ -127,6 +141,32 @@ function HomeContent() {
   }, [slides.length]);
 
   useEffect(() => {
+    const fetchAnnouncements = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('announcements')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(15);
+
+        if (error) throw error;
+        if (data) {
+          setAnnouncements(data);
+          // Simple badge logic: check if there are recent notifications
+          const lastSeen = localStorage.getItem('last_seen_announcement');
+          if (data.length > 0 && data[0].id !== lastSeen) {
+            setHasNewNotifications(true);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching announcements:', err);
+      }
+    };
+
+    fetchAnnouncements();
+  }, []);
+
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       import('@twa-dev/sdk').then((WebApp) => {
         if (WebApp.default.initDataUnsafe?.user) {
@@ -188,9 +228,20 @@ function HomeContent() {
           </div>
           <div className="flex items-center gap-4">
             <CartIcon />
-            <button className="relative text-gray-800 dark:text-white hover:text-[#cba153] dark:hover:text-[#cba153] transition-colors">
+            <button
+              onClick={() => {
+                setIsNotificationOpen(true);
+                setHasNewNotifications(false);
+                if (announcements.length > 0) {
+                  localStorage.setItem('last_seen_announcement', announcements[0].id);
+                }
+              }}
+              className="relative text-gray-800 dark:text-white hover:text-[#cba153] dark:hover:text-[#cba153] transition-colors"
+            >
               <Bell size={24} />
-              <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-red-500 border-2 border-white dark:border-black"></span>
+              {hasNewNotifications && (
+                <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-red-500 border-2 border-white dark:border-black animate-pulse"></span>
+              )}
             </button>
           </div>
         </header>
@@ -401,6 +452,13 @@ function HomeContent() {
           // Final safety sync when closing
           queryClient.invalidateQueries({ queryKey: ['products'] });
         }}
+      />
+
+      {/* Notification Drawer */}
+      <NotificationDrawer
+        isOpen={isNotificationOpen}
+        onClose={() => setIsNotificationOpen(false)}
+        notifications={announcements}
       />
     </main>
   );
