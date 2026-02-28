@@ -193,13 +193,13 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
                             className="w-full bg-transparent border-none p-0 text-sm font-bold text-gray-900 dark:text-white focus:ring-0 truncate"
                         />
                         <div className="flex items-center gap-1">
-                            <span className="text-[10px] text-[#cba153] font-bold">ETB</span>
+                            <span className="text-xs text-[#cba153] font-bold">ETB</span>
                             <input
                                 type="number"
                                 value={localPrice}
                                 onChange={(e) => setLocalPrice(e.target.value)}
                                 onFocus={handleFocus}
-                                className="bg-transparent border-none p-0 text-xs font-mono font-bold text-gray-500 dark:text-gray-400 focus:ring-0 w-20"
+                                className="bg-transparent border-none p-0 text-sm font-mono font-bold text-gray-500 dark:text-gray-400 focus:ring-0 w-24"
                             />
                         </div>
                     </div>
@@ -273,11 +273,21 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
                 )}
 
                 {showDeleteConfirm && (
-                    <div className="flex items-center justify-between p-2 bg-red-900/10 rounded-lg">
-                        <span className="text-[11px] font-bold text-red-500">Delete?</span>
-                        <div className="flex gap-2">
-                            <button onClick={() => setShowDeleteConfirm(false)} className="text-[11px] font-bold text-gray-500">No</button>
-                            <button onClick={() => onDelete(product.id, product.image_url)} className="text-[11px] font-bold text-red-500">Yes, Delete</button>
+                    <div className="flex items-center justify-between p-3 bg-red-900/10 rounded-xl border border-red-900/20">
+                        <span className="text-sm font-bold text-red-500">Delete?</span>
+                        <div className="flex gap-4">
+                            <button
+                                onClick={() => setShowDeleteConfirm(false)}
+                                className="px-4 py-1.5 rounded-lg text-xs font-bold bg-gray-100 dark:bg-[#1c1c1e] text-gray-500 border border-gray-300 dark:border-gray-700"
+                            >
+                                No
+                            </button>
+                            <button
+                                onClick={() => onDelete(product.id, product.image_url)}
+                                className="px-4 py-1.5 rounded-lg text-xs font-bold bg-red-600 text-white border border-red-700 shadow-lg shadow-red-900/20"
+                            >
+                                Yes, Delete
+                            </button>
                         </div>
                     </div>
                 )}
@@ -326,6 +336,7 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish }: Uploa
     const [descModalOpen, setDescModalOpen] = useState(false);
     const [modalDraft, setModalDraft] = useState('');
     const [isPushing, setIsPushing] = useState(false);
+    const [localError, setLocalError] = useState<string | null>(null);
 
     useEffect(() => {
         setLocalTitle(item.title);
@@ -354,13 +365,28 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish }: Uploa
     };
 
     const handlePush = async () => {
-        if (!localTitle.trim() || !localPrice || parseFloat(localPrice) <= 0 || !localGender || !localCategory.trim()) {
-            alert('Please fill in title, price, primary category, and sub-category before pushing.');
+        if (!localTitle.trim()) {
+            setLocalError('Title required');
+            setTimeout(() => setLocalError(null), 3000);
             return;
         }
+        if (!localPrice || parseFloat(localPrice) <= 0) {
+            setLocalError('Price required');
+            setTimeout(() => setLocalError(null), 3000);
+            return;
+        }
+        if (!localGender) {
+            setLocalError('Select Gender');
+            setTimeout(() => setLocalError(null), 3000);
+            return;
+        }
+
         setIsPushing(true);
         try {
             await onPublish(index);
+        } catch (err: any) {
+            setLocalError(err.message || 'Push failed');
+            setTimeout(() => setLocalError(null), 4000);
         } finally {
             setIsPushing(false);
         }
@@ -423,7 +449,7 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish }: Uploa
                             className="w-full bg-transparent border-none p-0 text-sm font-bold text-gray-900 dark:text-white focus:ring-0 truncate"
                         />
                         <div className="flex items-center gap-1">
-                            <span className="text-[10px] text-[#cba153] font-bold">ETB</span>
+                            <span className="text-xs text-[#cba153] font-bold">ETB</span>
                             <input
                                 type="number"
                                 placeholder="0"
@@ -433,7 +459,7 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish }: Uploa
                                     updateItem(index, 'price', e.target.value);
                                 }}
                                 onFocus={handleFocus}
-                                className="bg-transparent border-none p-0 text-xs font-mono font-bold text-gray-500 dark:text-gray-400 focus:ring-0 w-20"
+                                className="bg-transparent border-none p-0 text-sm font-mono font-bold text-gray-500 dark:text-gray-400 focus:ring-0 w-24"
                             />
                         </div>
                     </div>
@@ -453,9 +479,15 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish }: Uploa
                         <button
                             onClick={handlePush}
                             disabled={isPushing}
-                            className="px-3 py-1.5 bg-[#cba153] text-black text-[11px] font-bold rounded-lg hover:bg-[#b8860b] active:scale-95 transition-all shadow-sm"
+                            className="relative px-3 py-1.5 bg-[#cba153] text-black text-[11px] font-bold rounded-lg hover:bg-[#b8860b] active:scale-95 transition-all shadow-sm"
                         >
                             {isPushing ? '...' : 'Push'}
+                            {localError && (
+                                <div className="absolute bottom-full mb-2 right-0 bg-red-600 text-white text-[9px] px-2 py-1 rounded shadow-lg whitespace-nowrap animate-bounce z-10">
+                                    {localError}
+                                    <div className="absolute top-full right-4 w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[4px] border-t-red-600"></div>
+                                </div>
+                            )}
                         </button>
                         <button
                             onClick={() => removeItem(index)}
@@ -792,7 +824,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
             const productData = {
                 name: item.title.trim(),
                 price: parseFloat(item.price),
-                category: item.category.trim(),
+                category: item.category?.trim() || null,
                 gender: item.gender,
                 description: item.description || null,
                 image_url: urlData.publicUrl,
@@ -837,14 +869,15 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
 
     const handlePublish = async () => {
         if (images.length === 0) return;
-        const invalid = images.find((img) => !img.price || parseFloat(img.price) <= 0 || !img.title.trim() || !img.gender || !img.category.trim());
+        const invalid = images.find((img) => !img.price || parseFloat(img.price) <= 0 || !img.title.trim() || !img.gender);
         if (invalid) {
-            setUploadStatus('Please enter a valid title, price, gender and category for all items.');
+            setUploadStatus('ERROR: Title, price, and primary category are required.');
+            setTimeout(() => setUploadStatus(''), 4000);
             return;
         }
 
         setIsUploading(true);
-        setUploadStatus('Uploading...');
+        setUploadStatus('Pushing all products...');
 
         try {
             const results = await Promise.all(
@@ -864,7 +897,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                     return {
                         name: item.title.trim(),
                         price: parseFloat(item.price),
-                        category: item.category.trim(),
+                        category: item.category?.trim() || null,
                         gender: item.gender,
                         description: item.description || null,
                         image_url: urlData.publicUrl,
