@@ -58,6 +58,7 @@ type Product = {
     price: number;
     category: string | null;
     gender: string | null;
+    description: string | null;
     image_url: string | null;
     created_at: string;
 };
@@ -74,16 +75,20 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
     const [localPrice, setLocalPrice] = useState(product.price.toString());
     const [localCategory, setLocalCategory] = useState(product.category || '');
     const [localGender, setLocalGender] = useState(product.gender || '');
+    const [localDescription, setLocalDescription] = useState(product.description || '');
     const [isSaving, setIsSaving] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [isCustomCategory, setIsCustomCategory] = useState(false);
+    const [descModalOpen, setDescModalOpen] = useState(false);
+    const [modalDraft, setModalDraft] = useState('');
 
     // Track if there are unsaved changes
     const hasChanges =
         localName !== product.name ||
         localPrice !== product.price.toString() ||
         localCategory !== (product.category || '') ||
-        localGender !== (product.gender || '');
+        localGender !== (product.gender || '') ||
+        localDescription !== (product.description || '');
 
     // Keep local state in sync if product changes externally (e.g. image update)
     useEffect(() => {
@@ -91,6 +96,7 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
         setLocalPrice(product.price.toString());
         setLocalCategory(product.category || '');
         setLocalGender(product.gender || '');
+        setLocalDescription(product.description || '');
     }, [product]);
 
     const handleSave = async () => {
@@ -107,6 +113,7 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
                 price: priceNum,
                 category: localCategory.trim(),
                 gender: localGender,
+                description: localDescription.trim() || null,
             });
         } finally {
             setIsSaving(false);
@@ -120,130 +127,162 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
         }, 300);
     };
 
+    const openDescModal = () => {
+        setModalDraft(localDescription);
+        setDescModalOpen(true);
+    };
+
+    const saveDesc = () => {
+        setLocalDescription(modalDraft);
+        setDescModalOpen(false);
+    };
+
     return (
-        <div className="flex flex-col gap-3 p-3 bg-white dark:bg-[#1c1c1e] rounded-xl border border-gray-200 dark:border-[#2a2a2a]">
-            <div className={`flex gap-3 transition-opacity ${showDeleteConfirm ? 'opacity-20 pointer-events-none' : ''}`}>
+        <>
+            {/* Description Modal */}
+            {descModalOpen && (
                 <div
-                    className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-[#111111] cursor-pointer group"
-                    onClick={() => onChangeImage(product.id)}
+                    className="fixed inset-0 z-[200] flex items-end justify-center bg-black/70 backdrop-blur-sm"
+                    onClick={() => setDescModalOpen(false)}
                 >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={product.image_url || ''} alt={product.name} className="w-full h-full object-cover group-hover:opacity-75 transition-opacity" />
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#cba153" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-                        </svg>
+                    <div
+                        className="w-full max-w-lg bg-white dark:bg-[#1c1c1e] rounded-t-2xl p-5 pb-8 border-t border-gray-200 dark:border-[#3a3a3a] flex flex-col gap-3"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm font-semibold text-gray-900 dark:text-white">Edit Description</span>
+                            <button onClick={() => setDescModalOpen(false)} className="text-gray-500 hover:text-white transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M18 6 6 18" /><path d="m6 6 12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <textarea
+                            autoFocus
+                            value={modalDraft}
+                            onChange={(e) => setModalDraft(e.target.value)}
+                            placeholder="Enter a product description..."
+                            rows={5}
+                            className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-[#3a3a3a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none placeholder-gray-400 dark:placeholder-gray-600 resize-none"
+                        />
+                        <button
+                            onClick={saveDesc}
+                            className="w-full py-2.5 rounded-xl font-bold text-sm text-black bg-[#cba153] hover:bg-[#b8860b] active:scale-95 transition-all"
+                        >
+                            Confirm Description
+                        </button>
                     </div>
                 </div>
-                <div className="flex-1 flex flex-col gap-2">
-                    <input
-                        type="text"
-                        value={localName}
-                        onChange={(e) => setLocalName(e.target.value)}
-                        onFocus={handleFocus}
-                        placeholder="Title/brand"
-                        className="w-full px-2 py-1.5 text-sm font-semibold border border-gray-200 dark:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none transition-all placeholder-gray-400 dark:placeholder-gray-500"
-                    />
-                    <div className="flex gap-1.5">
-                        <div className="flex-[1.4] relative">
-                            <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-[10px] text-[#cba153] font-bold pointer-events-none">ETB</span>
+            )}
+
+            <div className="flex flex-col gap-2 p-2 bg-white dark:bg-[#1c1c1e] rounded-xl border border-gray-200 dark:border-[#2a2a2a] shadow-sm">
+                <div className={`flex items-center gap-2 transition-opacity ${showDeleteConfirm ? 'opacity-20 pointer-events-none' : ''}`}>
+                    <div
+                        className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-[#111111] cursor-pointer group"
+                        onClick={() => onChangeImage(product.id)}
+                    >
+                        <img src={product.image_url || ''} alt={product.name} className="w-full h-full object-cover group-hover:opacity-75 transition-opacity" />
+                    </div>
+
+                    <div className="flex-1 min-w-0 flex flex-col">
+                        <input
+                            type="text"
+                            value={localName}
+                            onChange={(e) => setLocalName(e.target.value)}
+                            onFocus={handleFocus}
+                            className="w-full bg-transparent border-none p-0 text-sm font-bold text-gray-900 dark:text-white focus:ring-0 truncate"
+                        />
+                        <div className="flex items-center gap-1">
+                            <span className="text-[10px] text-[#cba153] font-bold">ETB</span>
                             <input
                                 type="number"
                                 value={localPrice}
                                 onChange={(e) => setLocalPrice(e.target.value)}
                                 onFocus={handleFocus}
-                                className="w-full pl-8 pr-1 py-1.5 text-sm font-bold border border-gray-200 dark:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none transition-all"
+                                className="bg-transparent border-none p-0 text-xs font-mono font-bold text-gray-500 dark:text-gray-400 focus:ring-0 w-20"
                             />
                         </div>
-                        <div className="flex flex-col gap-4">
-                            <ChoiceChipGroup
-                                label="Primary Category"
-                                options={GENDERS}
-                                selected={localGender}
-                                onChange={setLocalGender}
-                            />
+                    </div>
 
-                            {isCustomCategory ? (
-                                <div className="flex flex-col gap-1.5">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Category</span>
-                                        <button
-                                            onClick={() => setIsCustomCategory(false)}
-                                            className="text-[10px] text-yellow-500 font-bold hover:underline"
-                                        >
-                                            Back to Chips
-                                        </button>
-                                    </div>
-                                    <input
-                                        type="text"
-                                        value={localCategory}
-                                        onChange={(e) => setLocalCategory(e.target.value)}
-                                        placeholder="Type category..."
-                                        className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white focus:ring-1 focus:ring-yellow-500 focus:outline-none"
-                                    />
+                    <div className="flex items-center gap-1">
+                        <button
+                            onClick={openDescModal}
+                            className={`p-1.5 rounded-lg transition-colors ${localDescription ? 'text-[#cba153] bg-[#cba153]/10' : 'text-gray-400 bg-gray-100 dark:bg-[#2a2a2a]'}`}
+                            title="Edit Description"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                                <line x1="9" x2="15" y1="10" y2="10" />
+                                <line x1="9" x2="15" y1="14" y2="14" />
+                            </svg>
+                        </button>
+                        <button
+                            onClick={() => setShowDeleteConfirm(true)}
+                            className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                {!showDeleteConfirm && (
+                    <div className="flex flex-col gap-3 mt-1 pt-2 border-t border-gray-100 dark:border-[#2a2a2a]">
+                        <ChoiceChipGroup
+                            label="Primary Category"
+                            options={GENDERS}
+                            selected={localGender}
+                            onChange={setLocalGender}
+                        />
+
+                        {isCustomCategory ? (
+                            <div className="flex flex-col gap-1.5">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Category Detail</span>
+                                    <button onClick={() => setIsCustomCategory(false)} className="text-[10px] text-yellow-500 font-bold">Back</button>
                                 </div>
-                            ) : (
-                                <ChoiceChipGroup
-                                    label="What is it?"
-                                    options={CATEGORIES}
-                                    selected={localCategory}
-                                    onChange={setLocalCategory}
-                                    onAddNew={() => setIsCustomCategory(true)}
+                                <input
+                                    type="text"
+                                    value={localCategory}
+                                    onChange={(e) => setLocalCategory(e.target.value)}
+                                    placeholder="Type category..."
+                                    className="w-full px-2 py-1 text-xs border border-gray-200 dark:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-white focus:ring-1 focus:ring-yellow-500 focus:outline-none"
                                 />
-                            )}
-                        </div>
-                    </div>
-                </div>
-                <button
-                    onClick={() => setShowDeleteConfirm(true)}
-                    className="self-start p-2 text-gray-500 hover:text-red-500 transition-colors"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" />
-                    </svg>
-                </button>
-            </div>
+                            </div>
+                        ) : (
+                            <ChoiceChipGroup
+                                label="Sub Category"
+                                options={CATEGORIES}
+                                selected={localCategory}
+                                onChange={setLocalCategory}
+                                onAddNew={() => setIsCustomCategory(true)}
+                            />
+                        )}
 
-            {hasChanges && !showDeleteConfirm && (
-                <div className="flex items-center justify-between pt-1">
-                    <div className="flex items-center gap-1.5">
-                        <img src="https://img.icons8.com/ios-filled/50/cba153/warning-shield.png" alt="warning" className="w-3 h-3" />
-                        <span className="text-[11px] text-[#cba153] font-medium">Unsaved changes</span>
+                        {hasChanges && (
+                            <button
+                                onClick={handleSave}
+                                disabled={isSaving}
+                                className={`w-full py-1.5 rounded-lg text-[11px] font-bold text-black transition-all ${isSaving ? 'bg-gray-600' : 'bg-[#cba153] hover:bg-[#b8860b]'}`}
+                            >
+                                {isSaving ? 'Saving...' : 'Save Changes'}
+                            </button>
+                        )}
                     </div>
-                    <button
-                        onClick={handleSave}
-                        disabled={isSaving}
-                        className={`px-4 py-1.5 rounded-lg text-xs font-bold text-black transition-all ${isSaving ? 'bg-gray-600' : 'bg-[#cba153] hover:bg-[#b8860b] active:scale-95 shadow-[0_2px_10px_rgba(203,161,83,0.2)]'
-                            }`}
-                    >
-                        {isSaving ? 'Saving...' : 'Save Changes'}
-                    </button>
-                </div>
-            )}
+                )}
 
-            {showDeleteConfirm && (
-                <div className="flex flex-col gap-2 pt-1 border-t border-red-900/30">
-                    <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-red-500">Delete this product?</span>
+                {showDeleteConfirm && (
+                    <div className="flex items-center justify-between p-2 bg-red-900/10 rounded-lg">
+                        <span className="text-[11px] font-bold text-red-500">Delete?</span>
                         <div className="flex gap-2">
-                            <button
-                                onClick={() => setShowDeleteConfirm(false)}
-                                className="px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-200 dark:bg-[#2a2a2a] hover:bg-gray-300 dark:hover:bg-[#333333] text-gray-800 dark:text-white transition-all"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={() => onDelete(product.id, product.image_url)}
-                                className="px-3 py-1.5 rounded-lg text-xs font-bold bg-red-600 hover:bg-red-700 text-white shadow-sm active:scale-95 transition-all"
-                            >
-                                Yes, Delete
-                            </button>
+                            <button onClick={() => setShowDeleteConfirm(false)} className="text-[11px] font-bold text-gray-500">No</button>
+                            <button onClick={() => onDelete(product.id, product.image_url)} className="text-[11px] font-bold text-red-500">Yes, Delete</button>
                         </div>
                     </div>
-                </div>
-            )
-            }
-        </div >
+                )}
+            </div>
+        </>
     );
 }
 
