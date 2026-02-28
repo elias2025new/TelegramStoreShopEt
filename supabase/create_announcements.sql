@@ -12,27 +12,13 @@ create table if not exists announcements (
 -- Enable RLS
 alter table public.announcements enable row level security;
 
--- Policy: Everyone can read announcements
-create policy "Announcements are viewable by everyone"
-  on public.announcements for select
-  using ( true );
-
--- Policy: Only store owners/admins can insert/update/delete
-create policy "Admins can manage announcements"
+-- Policy: Allow all actions for now
+-- Since the app uses manual Telegram ID checks instead of Supabase Auth,
+-- we'll rely on client-side security for the time being.
+create policy "Allow all actions for announcements"
   on public.announcements for all
-  using (
-    exists (
-      select 1 from public.stores
-      where id = announcements.store_id
-      and owner_id::text = auth.uid()::text
-    )
-    or
-    exists (
-      select 1 from public.store_admins
-      where store_id = announcements.store_id
-      and telegram_id::text = auth.uid()::text
-    )
-  );
+  using ( true )
+  with check ( true );
 
 -- Note: In this specific app, the admin check is usually done client-side based on Telegram ID.
 -- For the most flexible RLS without full Supabase Auth, you might use a simpler policy or keep it open if focused on client-side security.

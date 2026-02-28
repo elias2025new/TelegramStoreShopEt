@@ -156,6 +156,10 @@ function HomeContent() {
           const lastSeen = localStorage.getItem('last_seen_announcement');
           if (data.length > 0 && data[0].id !== lastSeen) {
             setHasNewNotifications(true);
+            // Trigger a light haptic feedback to get attention if first time seeing it this mount
+            if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+              window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+            }
           }
         }
       } catch (err) {
@@ -228,7 +232,16 @@ function HomeContent() {
           </div>
           <div className="flex items-center gap-4">
             <CartIcon />
-            <button
+            <motion.button
+              animate={hasNewNotifications ? {
+                rotate: [0, -10, 10, -10, 10, 0],
+                scale: [1, 1.1, 1]
+              } : {}}
+              transition={{
+                duration: 0.5,
+                repeat: hasNewNotifications ? Infinity : 0,
+                repeatDelay: 3
+              }}
               onClick={() => {
                 setIsNotificationOpen(true);
                 setHasNewNotifications(false);
@@ -240,9 +253,12 @@ function HomeContent() {
             >
               <Bell size={24} />
               {hasNewNotifications && (
-                <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-red-500 border-2 border-white dark:border-black animate-pulse"></span>
+                <>
+                  <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-red-500 animate-ping opacity-75"></span>
+                  <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-red-500 border-2 border-white dark:border-black animate-pulse"></span>
+                </>
               )}
-            </button>
+            </motion.button>
           </div>
         </header>
 

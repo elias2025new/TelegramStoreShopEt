@@ -128,6 +128,11 @@ export default function NotificationDrawer({ isOpen, onClose, notifications }: N
                                                     <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
                                                         {notif.type}
                                                     </span>
+                                                    {new Date(notif.created_at).getTime() > Date.now() - 24 * 60 * 60 * 1000 && (
+                                                        <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-red-500 text-white animate-pulse">
+                                                            NEW
+                                                        </span>
+                                                    )}
                                                 </div>
                                                 <span className="text-[10px] text-gray-400 font-medium">
                                                     {formatDate(notif.created_at)}
