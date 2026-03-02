@@ -985,21 +985,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
             const updatedImages = images.filter((_, i) => i !== index);
             setImages(updatedImages);
 
-            // Update draft
-            if (updatedImages.length > 0) {
-                const serialized = updatedImages.map(img => ({
-                    base64: img.base64,
-                    title: img.title,
-                    price: img.price,
-                    category: img.category,
-                    gender: img.gender,
-                    description: img.description,
-                    fileName: img.fileName,
-                }));
-                localStorage.setItem(DRAFT_KEY, JSON.stringify(serialized));
-            } else {
-                localStorage.removeItem(DRAFT_KEY);
-            }
+            // Draft is automatically updated via useEffect on 'images'
 
             queryClient.resetQueries({ queryKey: ['products'] });
             setUploadStatus('✅ PRODUCT PUBLISHED: ' + item.title);
@@ -1088,6 +1074,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                         category: item.category?.trim() || null,
                         gender: item.gender,
                         description: item.description || null,
+                        sizes: item.sizes || [],
                         image_url: urlData.publicUrl,
                     };
                 })
@@ -1187,7 +1174,32 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                             </div>
                         )}
 
-                        <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Batch Upload Products</h3>
+                        <div className="flex items-center justify-between mb-3">
+                            <h3 className="font-semibold text-gray-900 dark:text-white uppercase text-[11px] tracking-wider">Batch Upload Products</h3>
+                            {images.length > 0 && (
+                                <button
+                                    onClick={() => {
+                                        const clear = () => {
+                                            setImages([]);
+                                            localStorage.removeItem(DRAFT_KEY);
+                                            if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+                                                window.Telegram.WebApp.HapticFeedback.notificationOccurred('warning');
+                                            }
+                                        };
+                                        if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+                                            window.Telegram.WebApp.showConfirm('Clear all draft products?', (ok: boolean) => {
+                                                if (ok) clear();
+                                            });
+                                        } else if (confirm('Clear all draft products?')) {
+                                            clear();
+                                        }
+                                    }}
+                                    className="text-[10px] font-black text-red-500 uppercase tracking-widest bg-red-500/10 px-2 py-1 rounded-md hover:bg-red-500/20 transition-colors"
+                                >
+                                    Clear All
+                                </button>
+                            )}
+                        </div>
 
                         {/* Image Picker */}
                         <button

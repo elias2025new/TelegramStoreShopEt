@@ -212,39 +212,31 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                                 </div>
                             </div>
 
-                            {/* Title Section */}
-                            <div className="flex flex-col gap-1 mb-6">
-                                <h1 className="text-3xl font-black text-gray-900 dark:text-white leading-tight tracking-tight">
-                                    {product.name}
-                                </h1>
-                                <p className="text-[#cba153] text-sm font-medium tracking-wide">Premium Collection Edition</p>
-                            </div>
-
-                            {/* Horizontal Size Selector - Optimized for touch */}
+                            {/* Horizontal Size Selector - Moved higher for better access */}
                             {SIZES.length > 0 && (
-                                <div className="space-y-4">
+                                <div className="space-y-3 mb-6">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
-                                            <span className="w-6 h-px bg-[#cba153]"></span>
-                                            <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]">Select Size</h3>
+                                            <span className="w-4 h-px bg-[#cba153]"></span>
+                                            <h3 className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">Select Size</h3>
                                         </div>
                                         {selectedSize && (
-                                            <span className="text-[10px] font-bold text-[#cba153] uppercase tracking-wider">Selected: {selectedSize}</span>
+                                            <span className="text-[9px] font-bold text-[#cba153] uppercase tracking-wider">Choice: {selectedSize}</span>
                                         )}
                                     </div>
 
                                     <motion.div
                                         animate={shakeSizeBtn ? { x: [0, -10, 10, -10, 10, 0] } : {}}
                                         transition={{ duration: 0.5 }}
-                                        className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-2 px-2"
+                                        className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-2 px-2"
                                     >
                                         {SIZES.map((size) => (
                                             <button
                                                 key={size}
                                                 onClick={() => setSelectedSize(selectedSize === size ? null : size)}
-                                                className={`shrink-0 min-w-[56px] h-12 flex items-center justify-center rounded-2xl border text-sm font-black uppercase tracking-wide transition-all duration-200 active:scale-90 ${selectedSize === size
-                                                    ? 'bg-[#cba153] border-[#cba153] text-white shadow-lg shadow-[#cba153]/25 scale-105'
-                                                    : 'bg-gray-50 dark:bg-white/[0.04] border-gray-100 dark:border-white/[0.08] text-gray-500 dark:text-white/50'
+                                                className={`shrink-0 min-w-[48px] h-10 flex items-center justify-center rounded-xl border text-[12px] font-black uppercase tracking-wide transition-all duration-200 active:scale-90 ${selectedSize === size
+                                                        ? 'bg-[#cba153] border-[#cba153] text-white shadow-lg shadow-[#cba153]/25 scale-105'
+                                                        : 'bg-gray-50 dark:bg-white/[0.04] border-gray-100 dark:border-white/[0.08] text-gray-500 dark:text-white/50'
                                                     }`}
                                             >
                                                 {size}
@@ -253,6 +245,14 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                                     </motion.div>
                                 </div>
                             )}
+
+                            {/* Title Section - More compact font sizes */}
+                            <div className="flex flex-col gap-0.5 mb-8">
+                                <h1 className="text-2xl font-black text-gray-900 dark:text-white leading-tight tracking-tight">
+                                    {product.name}
+                                </h1>
+                                <p className="text-[#cba153] text-[12px] font-bold tracking-widest uppercase opacity-80">Premium Collection Edition</p>
+                            </div>
                         </motion.div>
 
                         <motion.div
