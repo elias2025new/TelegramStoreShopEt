@@ -465,8 +465,8 @@ function HomeContent() {
                     key={sub}
                     onClick={() => setSelectedSubcategory(selectedSubcategory === sub ? null : sub)}
                     className={`shrink-0 px-4 py-2 rounded-full text-[12px] font-bold tracking-wide border transition-all duration-200 active:scale-95 ${selectedSubcategory === sub
-                        ? 'bg-[#cba153] border-[#cba153] text-white shadow-md shadow-[#cba153]/25'
-                        : 'bg-white dark:bg-white/[0.04] border-gray-200 dark:border-white/[0.08] text-gray-600 dark:text-white/60 hover:border-[#cba153]/50 hover:text-[#cba153]'
+                      ? 'bg-[#cba153]/80 border-[#cba153]/40 text-white shadow-md shadow-[#cba153]/20'
+                      : 'bg-white dark:bg-white/[0.04] border-gray-200 dark:border-white/[0.08] text-gray-600 dark:text-white/60 hover:border-[#cba153]/50 hover:text-[#cba153]'
                       }`}
                   >
                     {sub}

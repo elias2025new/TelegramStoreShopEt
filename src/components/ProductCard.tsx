@@ -2,7 +2,6 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Database } from '@/types/supabase';
-import { useCart } from '@/context/CartContext';
 import { useFavorites } from '@/context/FavoritesContext';
 import { useRouter } from 'next/navigation';
 import { useTelegram } from '@/hooks/useTelegram';
@@ -14,7 +13,6 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-    const { addToCart } = useCart();
     const { toggleFavorite, isFavorite } = useFavorites();
     const router = useRouter();
     const { hapticFeedback } = useTelegram();
@@ -28,8 +26,9 @@ export default function ProductCard({ product }: ProductCardProps) {
     const handleQuickAdd = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        addToCart(product, 1);
+        // Navigate to product detail so user can select size before adding to cart
         hapticFeedback('light');
+        router.push(`/product/${product.id}`);
     };
 
     return (

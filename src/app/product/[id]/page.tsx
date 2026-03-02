@@ -50,6 +50,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     const [isAdded, setIsAdded] = useState(false);
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
     const [sizeDropdownOpen, setSizeDropdownOpen] = useState(false);
+    const [shakeSizeBtn, setShakeSizeBtn] = useState(false);
 
     const SIZES = ['XS', 'S', 'M', 'L', 'XL'];
 
@@ -87,20 +88,23 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
 
     const handleAddToCart = () => {
+        if (!selectedSize) {
+            // Shake the size button and open the dropdown as a hint
+            setShakeSizeBtn(true);
+            setSizeDropdownOpen(true);
+            setTimeout(() => setShakeSizeBtn(false), 600);
+            if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+                window.Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+            }
+            return;
+        }
+
         addToCart(product, quantity);
         setIsAdded(true);
         setTimeout(() => setIsAdded(false), 2000);
 
         if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
             window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-            // Optionally still show popup, but immediate visual feedback is better
-            /*
-            window.Telegram.WebApp.showPopup({
-                title: 'Added to Cart',
-                message: `${quantity} x ${product.name} added.`,
-                buttons: [{ type: 'ok' }]
-            });
-            */
         }
     };
 
@@ -220,22 +224,29 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
                                 {/* Right: size dropdown trigger */}
                                 <div className="relative shrink-0">
-                                    <button
-                                        id="size-dropdown-btn"
-                                        onClick={() => setSizeDropdownOpen((o) => !o)}
-                                        className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-[11px] font-black uppercase tracking-wide transition-all duration-200 active:scale-95 ${selectedSize
+                                    <motion.div
+                                        animate={shakeSizeBtn ? {
+                                            x: [0, -10, 10, -10, 10, 0],
+                                        } : {}}
+                                        transition={{ duration: 0.5 }}
+                                    >
+                                        <button
+                                            id="size-dropdown-btn"
+                                            onClick={() => setSizeDropdownOpen((o) => !o)}
+                                            className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-[11px] font-black uppercase tracking-wide transition-all duration-200 active:scale-95 ${selectedSize
                                                 ? 'bg-[#cba153] border-[#cba153] text-white shadow-md shadow-[#cba153]/25'
                                                 : 'bg-gray-50 dark:bg-white/[0.04] border-gray-200 dark:border-white/[0.08] text-gray-500 dark:text-white/50'
-                                            }`}
-                                    >
-                                        {selectedSize ?? 'Size'}
-                                        <svg
-                                            width="10" height="10" viewBox="0 0 10 10" fill="none"
-                                            className={`transition-transform duration-200 ${sizeDropdownOpen ? 'rotate-180' : ''}`}
+                                                }`}
                                         >
-                                            <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                        </svg>
-                                    </button>
+                                            {selectedSize ?? 'Size'}
+                                            <svg
+                                                width="10" height="10" viewBox="0 0 10 10" fill="none"
+                                                className={`transition-transform duration-200 ${sizeDropdownOpen ? 'rotate-180' : ''}`}
+                                            >
+                                                <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                            </svg>
+                                        </button>
+                                    </motion.div>
 
                                     {/* Dropdown panel */}
                                     <AnimatePresence>
@@ -262,8 +273,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                                                                 setSizeDropdownOpen(false);
                                                             }}
                                                             className={`w-full px-3 py-2 rounded-xl text-[12px] font-black tracking-wide transition-all duration-150 active:scale-95 text-left ${selectedSize === size
-                                                                    ? 'bg-[#cba153] text-white'
-                                                                    : 'text-gray-700 dark:text-white/70 hover:bg-gray-50 dark:hover:bg-white/[0.06]'
+                                                                ? 'bg-[#cba153] text-white'
+                                                                : 'text-gray-700 dark:text-white/70 hover:bg-gray-50 dark:hover:bg-white/[0.06]'
                                                                 }`}
                                                         >
                                                             {size}
@@ -378,7 +389,9 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                                         </>
                                     ) : (
                                         <>
-                                            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Reserve Item</span>
+                                            <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${!selectedSize ? 'text-white/60' : ''}`}>
+                                                {!selectedSize ? 'Pick a Size First' : 'Reserve Item'}
+                                            </span>
                                         </>
                                     )}
                                 </motion.div>
