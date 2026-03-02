@@ -14,9 +14,9 @@ const GENDERS = ['Men', 'Women', 'Unisex', 'Accessories'];
 
 const CATEGORY_SUBCATEGORIES: Record<string, string[]> = {
     'Men': ['Shoes', 'Jackets & Coats', 'T-shirts', 'Trousers'],
-    'Women': [],
-    'Unisex': [],
-    'Accessories': []
+    'Women': ['Dresses', 'Tops', 'Shoes', 'Bags'],
+    'Unisex': ['Shoes', 'T-shirts', 'Trousers'],
+    'Accessories': ['Watches', 'Sunglasses', 'Belts', 'Jewelry']
 };
 
 const PRODUCT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45'];

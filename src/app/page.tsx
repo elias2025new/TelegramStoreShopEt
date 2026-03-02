@@ -37,8 +37,8 @@ const CATEGORIES = [
 
 const CATEGORY_SUBCATEGORIES: Record<string, string[]> = {
   'Men': ['Shoes', 'Jackets & Coats', 'T-shirts', 'Trousers'],
-  'Women': [], // To be added later
-  'Accessories': [] // To be added later
+  'Women': ['Dresses', 'Tops', 'Shoes', 'Bags'],
+  'Accessories': ['Watches', 'Sunglasses', 'Belts', 'Jewelry']
 };
 
 function HomeContent() {
@@ -469,7 +469,7 @@ function HomeContent() {
                     key={sub}
                     onClick={() => setSelectedSubcategory(selectedSubcategory === sub ? null : sub)}
                     className={`shrink-0 px-4 py-2 rounded-full text-[12px] font-bold tracking-wide border transition-all duration-200 active:scale-95 ${selectedSubcategory === sub
-                      ? 'bg-[#cba153]/80 border-[#cba153]/40 text-white shadow-md shadow-[#cba153]/20'
+                      ? 'bg-[#cba153]/40 border-[#cba153]/30 text-white shadow-md shadow-[#cba153]/10'
                       : 'bg-white dark:bg-white/[0.04] border-gray-200 dark:border-white/[0.08] text-gray-600 dark:text-white/60 hover:border-[#cba153]/50 hover:text-[#cba153]'
                       }`}
                   >
