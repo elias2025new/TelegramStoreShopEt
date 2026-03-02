@@ -48,6 +48,9 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
     const [quantity, setQuantity] = useState(1);
     const [isAdded, setIsAdded] = useState(false);
+    const [selectedSize, setSelectedSize] = useState<string | null>(null);
+
+    const SIZES = ['XS', 'S', 'M', 'L', 'XL'];
 
     if (isLoading) {
         return (
@@ -192,6 +195,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2, duration: 0.8 }}
                         >
+                            {/* Category + Rating row */}
                             <div className="flex items-center gap-3 mb-4">
                                 <span className="px-3 py-1 bg-[#cba153] dark:bg-[#cba153]/10 text-white dark:text-[#cba153] text-[9px] font-black rounded-lg uppercase tracking-widest">
                                     {product.category || 'Luxury'}
@@ -203,10 +207,35 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                                 </div>
                             </div>
 
-                            <h1 className="text-2xl font-black text-gray-900 dark:text-white leading-tight mb-1 tracking-tight">
-                                {product.name}
-                            </h1>
-                            <p className="text-[#cba153] text-sm font-medium tracking-wide">Premium Collection Edition</p>
+                            {/* Title + Size Selector side-by-side */}
+                            <div className="flex items-start justify-between gap-4">
+                                {/* Left: title & subtitle */}
+                                <div className="flex-1 min-w-0">
+                                    <h1 className="text-2xl font-black text-gray-900 dark:text-white leading-tight mb-1 tracking-tight">
+                                        {product.name}
+                                    </h1>
+                                    <p className="text-[#cba153] text-sm font-medium tracking-wide">Premium Collection Edition</p>
+                                </div>
+
+                                {/* Right: custom size selector */}
+                                <div className="flex flex-col items-end gap-1.5 shrink-0">
+                                    <span className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">Size</span>
+                                    <div className="flex flex-col gap-1">
+                                        {SIZES.map((size) => (
+                                            <button
+                                                key={size}
+                                                onClick={() => setSelectedSize(selectedSize === size ? null : size)}
+                                                className={`w-10 h-10 rounded-xl text-[11px] font-black tracking-wide border transition-all duration-200 active:scale-90 ${selectedSize === size
+                                                        ? 'bg-[#cba153] border-[#cba153] text-white shadow-lg shadow-[#cba153]/30'
+                                                        : 'bg-gray-50 dark:bg-white/[0.04] border-gray-200 dark:border-white/[0.08] text-gray-500 dark:text-white/50 hover:border-[#cba153]/60 hover:text-[#cba153]'
+                                                    }`}
+                                            >
+                                                {size}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
                         </motion.div>
 
                         <motion.div
