@@ -108,11 +108,11 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 <div className="fixed inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(0,0,0,0.05),transparent_60%)] pointer-events-none dark:hidden" />
                 <div className="fixed inset-0 bg-[radial-gradient(circle_at_bottom_left,#000,transparent_70%)] pointer-events-none hidden dark:block" />
 
-                {/* Refined Header */}
+                {/* Refined Fixed Header */}
                 <header
-                    className="sticky top-0 z-50 bg-white/70 dark:bg-black/40 backdrop-blur-2xl px-4 flex items-center justify-between transition-all duration-300"
+                    className="fixed top-0 left-0 right-0 z-50 bg-white/70 dark:bg-black/40 backdrop-blur-2xl px-4 flex items-center justify-between transition-all duration-300"
                     style={{
-                        paddingTop: 'calc(0.75rem + var(--tg-safe-area-inset-top, 0px))',
+                        paddingTop: 'calc(1.5rem + var(--tg-safe-area-inset-top, 0px))',
                         paddingBottom: '0.75rem'
                     }}
                 >
@@ -125,14 +125,18 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                         </svg>
                     </button>
                     <div className="flex flex-col items-center">
-                        <span className="text-[9px] font-black text-[#cba153] uppercase tracking-[0.3em]">Maison Boutique</span>
+                        <span className="text-[10px] font-black text-[#cba153] uppercase tracking-[0.2em]">Product Details</span>
                     </div>
                     <div className="flex items-center gap-1">
                         <CartIcon />
                     </div>
                 </header>
 
-                <div className="px-6 pt-4 space-y-10 relative z-10">
+                <div className="px-6 space-y-10 relative z-10"
+                    style={{
+                        paddingTop: 'calc(5.5rem + var(--tg-safe-area-inset-top, 0px))'
+                    }}
+                >
                     {/* Immersive Product Image */}
                     <motion.div
                         initial={{ opacity: 0, scale: 0.98 }}
@@ -302,11 +306,11 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                                             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                 <path d="M16.6666 5L7.49992 14.1667L3.33325 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                                             </svg>
-                                            <span className="text-[10px] font-black uppercase tracking-[0.2em]">In My Maison</span>
+                                            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Bagged!</span>
                                         </>
                                     ) : (
                                         <>
-                                            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Acquire Now</span>
+                                            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Reserve Item</span>
                                         </>
                                     )}
                                 </motion.div>
