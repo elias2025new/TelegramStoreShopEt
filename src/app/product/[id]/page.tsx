@@ -112,7 +112,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 <header
                     className="fixed top-0 left-0 right-0 z-50 bg-white/70 dark:bg-black/40 backdrop-blur-2xl px-4 flex items-center justify-between transition-all duration-300"
                     style={{
-                        paddingTop: 'calc(1.5rem + var(--tg-safe-area-inset-top, 0px))',
+                        paddingTop: 'calc(2.25rem + var(--tg-safe-area-inset-top, 0px))',
                         paddingBottom: '0.75rem'
                     }}
                 >
@@ -134,7 +134,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
                 <div className="px-6 space-y-10 relative z-10"
                     style={{
-                        paddingTop: 'calc(5.5rem + var(--tg-safe-area-inset-top, 0px))'
+                        paddingTop: 'calc(6.5rem + var(--tg-safe-area-inset-top, 0px))'
                     }}
                 >
                     {/* Immersive Product Image */}
@@ -203,7 +203,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                                 </div>
                             </div>
 
-                            <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white leading-[1.1] tracking-tight mb-2">
+                            <h1 className="text-2xl font-black text-gray-900 dark:text-white leading-tight mb-1 tracking-tight">
                                 {product.name}
                             </h1>
                             <p className="text-[#cba153] text-sm font-medium tracking-wide">Premium Collection Edition</p>
