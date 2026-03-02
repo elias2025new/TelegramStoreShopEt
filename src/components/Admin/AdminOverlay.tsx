@@ -19,7 +19,9 @@ const CATEGORY_SUBCATEGORIES: Record<string, string[]> = {
     'Accessories': ['Watches', 'Sunglasses', 'Belts', 'Jewelry']
 };
 
-const PRODUCT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45'];
+const CLOTHING_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+const SHOE_SIZES = ['36', '37', '38', '39', '40', '41', '42', '43', '44', '45'];
+const PRODUCT_SIZES = [...CLOTHING_SIZES, ...SHOE_SIZES];
 
 interface ChoiceChipGroupProps {
     options: string[];
@@ -145,7 +147,7 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
         localCategory !== (product.category || '') ||
         localGender !== (product.gender || '') ||
         localDescription !== (product.description || '') ||
-        JSON.stringify(localSizes) !== JSON.stringify(product.sizes || []);
+        JSON.stringify(localSizes.sort()) !== JSON.stringify((product.sizes || []).sort());
 
     // Keep local state in sync if product changes externally (e.g. image update)
     useEffect(() => {
@@ -195,6 +197,8 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
         setLocalDescription(modalDraft);
         setDescModalOpen(false);
     };
+
+    const isShoes = localCategory.toLowerCase().includes('shoes');
 
     return (
         <>
@@ -292,39 +296,50 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
                             label="Primary Category"
                             options={GENDERS}
                             selected={localGender}
-                            onChange={setLocalGender}
+                            onChange={(val) => {
+                                setLocalGender(val);
+                                setLocalCategory('');
+                                setLocalSizes([]);
+                            }}
                         />
 
-                        {isCustomCategory ? (
-                            <div className="flex flex-col gap-1.5">
-                                <div className="flex justify-between items-center">
-                                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Category Detail</span>
-                                    <button onClick={() => setIsCustomCategory(false)} className="text-[10px] text-yellow-500 font-bold">Back</button>
+                        {localGender && (
+                            isCustomCategory ? (
+                                <div className="flex flex-col gap-1.5">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Sub Category</span>
+                                        <button onClick={() => setIsCustomCategory(false)} className="text-[10px] text-yellow-500 font-bold">Back</button>
+                                    </div>
+                                    <input
+                                        type="text"
+                                        value={localCategory}
+                                        onChange={(e) => setLocalCategory(e.target.value)}
+                                        placeholder="Type category..."
+                                        className="w-full px-2 py-1 text-xs border border-gray-200 dark:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-white focus:ring-1 focus:ring-yellow-500 focus:outline-none"
+                                    />
                                 </div>
-                                <input
-                                    type="text"
-                                    value={localCategory}
-                                    onChange={(e) => setLocalCategory(e.target.value)}
-                                    placeholder="Type category..."
-                                    className="w-full px-2 py-1 text-xs border border-gray-200 dark:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-white focus:ring-1 focus:ring-yellow-500 focus:outline-none"
+                            ) : (
+                                <ChoiceChipGroup
+                                    label="Sub Category"
+                                    options={CATEGORY_SUBCATEGORIES[localGender] || []}
+                                    selected={localCategory}
+                                    onChange={(val) => {
+                                        setLocalCategory(val);
+                                        setLocalSizes([]);
+                                    }}
+                                    onAddNew={() => setIsCustomCategory(true)}
                                 />
-                            </div>
-                        ) : (
-                            <ChoiceChipGroup
-                                label="Sub Category"
-                                options={localGender ? (CATEGORY_SUBCATEGORIES[localGender] || []) : []}
-                                selected={localCategory}
-                                onChange={setLocalCategory}
-                                onAddNew={() => setIsCustomCategory(true)}
-                            />
+                            )
                         )}
 
-                        <MultiChoiceChipGroup
-                            label="Available Sizes"
-                            options={PRODUCT_SIZES}
-                            selected={localSizes}
-                            onChange={setLocalSizes}
-                        />
+                        {localCategory && localGender !== 'Accessories' && (
+                            <MultiChoiceChipGroup
+                                label="Available Sizes"
+                                options={isShoes ? SHOE_SIZES : CLOTHING_SIZES}
+                                selected={localSizes}
+                                onChange={setLocalSizes}
+                            />
+                        )}
 
                         {hasChanges && (
                             <button
@@ -462,6 +477,8 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish }: Uploa
         }
     };
 
+    const isShoes = localCategory.toLowerCase().includes('shoes');
+
     return (
         <>
             {/* Description Modal */}
@@ -578,53 +595,65 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish }: Uploa
                         onChange={(val) => {
                             setLocalGender(val);
                             updateItem(index, 'gender', val);
+                            // Reset subcategory and sizes
+                            setLocalCategory('');
+                            updateItem(index, 'category', '');
+                            setLocalSizes([]);
+                            updateItem(index, 'sizes', []);
                         }}
                     />
 
-                    {isCustomCategory ? (
-                        <div className="flex flex-col gap-1.5">
-                            <div className="flex justify-between items-center">
-                                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Sub Category</span>
-                                <button
-                                    onClick={() => setIsCustomCategory(false)}
-                                    className="text-[10px] text-yellow-500 font-bold"
-                                >
-                                    Back
-                                </button>
+                    {localGender && (
+                        isCustomCategory ? (
+                            <div className="flex flex-col gap-1.5">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Sub Category</span>
+                                    <button
+                                        onClick={() => setIsCustomCategory(false)}
+                                        className="text-[10px] text-yellow-500 font-bold"
+                                    >
+                                        Back
+                                    </button>
+                                </div>
+                                <input
+                                    type="text"
+                                    value={localCategory}
+                                    onChange={(e) => {
+                                        setLocalCategory(e.target.value);
+                                        updateItem(index, 'category', e.target.value);
+                                    }}
+                                    placeholder="Type category..."
+                                    className="w-full px-2 py-1 text-xs border border-gray-200 dark:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-white focus:ring-1 focus:ring-yellow-500 focus:outline-none"
+                                />
                             </div>
-                            <input
-                                type="text"
-                                value={localCategory}
-                                onChange={(e) => {
-                                    setLocalCategory(e.target.value);
-                                    updateItem(index, 'category', e.target.value);
+                        ) : (
+                            <ChoiceChipGroup
+                                label="What is it?"
+                                options={CATEGORY_SUBCATEGORIES[localGender] || []}
+                                selected={localCategory}
+                                onChange={(val) => {
+                                    setLocalCategory(val);
+                                    updateItem(index, 'category', val);
+                                    // Reset sizes
+                                    setLocalSizes([]);
+                                    updateItem(index, 'sizes', []);
                                 }}
-                                placeholder="Type category..."
-                                className="w-full px-2 py-1 text-xs border border-gray-200 dark:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-white focus:ring-1 focus:ring-yellow-500 focus:outline-none"
+                                onAddNew={() => setIsCustomCategory(true)}
                             />
-                        </div>
-                    ) : (
-                        <ChoiceChipGroup
-                            label="What is it?"
-                            options={localGender ? (CATEGORY_SUBCATEGORIES[localGender] || []) : []}
-                            selected={localCategory}
-                            onChange={(val) => {
-                                setLocalCategory(val);
-                                updateItem(index, 'category', val);
-                            }}
-                            onAddNew={() => setIsCustomCategory(true)}
-                        />
+                        )
                     )}
 
-                    <MultiChoiceChipGroup
-                        label="Available Sizes"
-                        options={PRODUCT_SIZES}
-                        selected={localSizes}
-                        onChange={(val) => {
-                            setLocalSizes(val);
-                            updateItem(index, 'sizes', val);
-                        }}
-                    />
+                    {localCategory && localGender !== 'Accessories' && (
+                        <MultiChoiceChipGroup
+                            label="Available Sizes"
+                            options={isShoes ? SHOE_SIZES : CLOTHING_SIZES}
+                            selected={localSizes}
+                            onChange={(val) => {
+                                setLocalSizes(val);
+                                updateItem(index, 'sizes', val);
+                            }}
+                        />
+                    )}
                 </div>
             </div>
         </>
