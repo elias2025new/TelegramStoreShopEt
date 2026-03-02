@@ -49,7 +49,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     const [quantity, setQuantity] = useState(1);
     const [isAdded, setIsAdded] = useState(false);
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
-    const [sizeDropdownOpen, setSizeDropdownOpen] = useState(false);
     const [shakeSizeBtn, setShakeSizeBtn] = useState(false);
 
 
@@ -90,10 +89,9 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
 
     const handleAddToCart = () => {
-        if (!selectedSize) {
-            // Shake the size button and open the dropdown as a hint
+        if (!selectedSize && product.gender !== 'Accessories') {
+            // Shake the size section
             setShakeSizeBtn(true);
-            setSizeDropdownOpen(true);
             setTimeout(() => setShakeSizeBtn(false), 600);
             if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
                 window.Telegram.WebApp.HapticFeedback.notificationOccurred('error');
@@ -214,80 +212,47 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                                 </div>
                             </div>
 
-                            {/* Title + Size Selector side-by-side */}
-                            <div className="flex items-start justify-between gap-4">
-                                {/* Left: title & subtitle */}
-                                <div className="flex-1 min-w-0">
-                                    <h1 className="text-2xl font-black text-gray-900 dark:text-white leading-tight mb-1 tracking-tight">
-                                        {product.name}
-                                    </h1>
-                                    <p className="text-[#cba153] text-sm font-medium tracking-wide">Premium Collection Edition</p>
-                                </div>
-
-                                {/* Right: size dropdown trigger */}
-                                <div className="relative shrink-0">
-                                    <motion.div
-                                        animate={shakeSizeBtn ? {
-                                            x: [0, -10, 10, -10, 10, 0],
-                                        } : {}}
-                                        transition={{ duration: 0.5 }}
-                                    >
-                                        <button
-                                            id="size-dropdown-btn"
-                                            onClick={() => setSizeDropdownOpen((o) => !o)}
-                                            className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-[11px] font-black uppercase tracking-wide transition-all duration-200 active:scale-95 ${selectedSize
-                                                ? 'bg-[#cba153] border-[#cba153] text-white shadow-md shadow-[#cba153]/25'
-                                                : 'bg-gray-50 dark:bg-white/[0.04] border-gray-200 dark:border-white/[0.08] text-gray-500 dark:text-white/50'
-                                                }`}
-                                        >
-                                            {selectedSize ?? 'Size'}
-                                            <svg
-                                                width="10" height="10" viewBox="0 0 10 10" fill="none"
-                                                className={`transition-transform duration-200 ${sizeDropdownOpen ? 'rotate-180' : ''}`}
-                                            >
-                                                <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                            </svg>
-                                        </button>
-                                    </motion.div>
-
-                                    {/* Dropdown panel */}
-                                    <AnimatePresence>
-                                        {sizeDropdownOpen && (
-                                            <>
-                                                {/* Backdrop to close on outside click */}
-                                                <div
-                                                    className="fixed inset-0 z-[70]"
-                                                    onClick={() => setSizeDropdownOpen(false)}
-                                                />
-                                                <motion.div
-                                                    initial={{ opacity: 0, scale: 0.92, y: -6 }}
-                                                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                                                    exit={{ opacity: 0, scale: 0.92, y: -6 }}
-                                                    transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-                                                    className="absolute right-0 top-full mt-2 z-[80] bg-white dark:bg-[#1a1a1a] border border-gray-100 dark:border-white/[0.08] rounded-2xl shadow-xl shadow-black/10 dark:shadow-black/40 p-2 flex flex-col gap-1 min-w-[72px]"
-                                                >
-                                                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] px-2 pt-1 pb-0.5">Size</p>
-                                                    {SIZES.map((size) => (
-                                                        <button
-                                                            key={size}
-                                                            onClick={() => {
-                                                                setSelectedSize(selectedSize === size ? null : size);
-                                                                setSizeDropdownOpen(false);
-                                                            }}
-                                                            className={`w-full px-3 py-2 rounded-xl text-[12px] font-black tracking-wide transition-all duration-150 active:scale-95 text-left ${selectedSize === size
-                                                                ? 'bg-[#cba153] text-white'
-                                                                : 'text-gray-700 dark:text-white/70 hover:bg-gray-50 dark:hover:bg-white/[0.06]'
-                                                                }`}
-                                                        >
-                                                            {size}
-                                                        </button>
-                                                    ))}
-                                                </motion.div>
-                                            </>
-                                        )}
-                                    </AnimatePresence>
-                                </div>
+                            {/* Title Section */}
+                            <div className="flex flex-col gap-1 mb-6">
+                                <h1 className="text-3xl font-black text-gray-900 dark:text-white leading-tight tracking-tight">
+                                    {product.name}
+                                </h1>
+                                <p className="text-[#cba153] text-sm font-medium tracking-wide">Premium Collection Edition</p>
                             </div>
+
+                            {/* Horizontal Size Selector - Optimized for touch */}
+                            {product.gender !== 'Accessories' && (
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <span className="w-6 h-px bg-[#cba153]"></span>
+                                            <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]">Select Size</h3>
+                                        </div>
+                                        {selectedSize && (
+                                            <span className="text-[10px] font-bold text-[#cba153] uppercase tracking-wider">Selected: {selectedSize}</span>
+                                        )}
+                                    </div>
+
+                                    <motion.div
+                                        animate={shakeSizeBtn ? { x: [0, -10, 10, -10, 10, 0] } : {}}
+                                        transition={{ duration: 0.5 }}
+                                        className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-2 px-2"
+                                    >
+                                        {SIZES.map((size) => (
+                                            <button
+                                                key={size}
+                                                onClick={() => setSelectedSize(selectedSize === size ? null : size)}
+                                                className={`shrink-0 min-w-[56px] h-12 flex items-center justify-center rounded-2xl border text-sm font-black uppercase tracking-wide transition-all duration-200 active:scale-90 ${selectedSize === size
+                                                        ? 'bg-[#cba153] border-[#cba153] text-white shadow-lg shadow-[#cba153]/25 scale-105'
+                                                        : 'bg-gray-50 dark:bg-white/[0.04] border-gray-100 dark:border-white/[0.08] text-gray-500 dark:text-white/50'
+                                                    }`}
+                                            >
+                                                {size}
+                                            </button>
+                                        ))}
+                                    </motion.div>
+                                </div>
+                            )}
                         </motion.div>
 
                         <motion.div
@@ -391,8 +356,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                                         </>
                                     ) : (
                                         <>
-                                            <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${!selectedSize ? 'text-white/60' : ''}`}>
-                                                {!selectedSize ? 'Pick a Size First' : 'Reserve Item'}
+                                            <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${(!selectedSize && product.gender !== 'Accessories') ? 'text-white/60' : ''}`}>
+                                                {(!selectedSize && product.gender !== 'Accessories') ? 'Pick a Size First' : 'Reserve Item'}
                                             </span>
                                         </>
                                     )}
