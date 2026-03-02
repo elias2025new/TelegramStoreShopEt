@@ -8,14 +8,16 @@ import { Database } from '@/types/supabase';
 type Product = Database['public']['Tables']['products']['Row'];
 
 export interface CartItem {
+    id: string; // Unique ID for the cart line item (e.g., prodId + size)
     product: Product;
     quantity: number;
+    selectedSize?: string;
 }
 
 interface CartContextType {
     items: CartItem[];
-    addToCart: (product: Product, quantity: number) => void;
-    removeFromCart: (productId: string) => void;
+    addToCart: (product: Product, quantity: number, selectedSize?: string) => void;
+    removeFromCart: (cartItemId: string) => void;
     clearCart: () => void;
     totalItems: number;
     totalPrice: number;
@@ -56,23 +58,25 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setToast(prev => ({ ...prev, isVisible: false }));
     }, []);
 
-    const addToCart = (product: Product, quantity: number) => {
+    const addToCart = (product: Product, quantity: number, selectedSize?: string) => {
+        const cartItemId = selectedSize ? `${product.id}-${selectedSize}` : product.id;
+
         setItems((prev) => {
-            const existing = prev.find((item) => item.product.id === product.id);
+            const existing = prev.find((item) => item.id === cartItemId);
             if (existing) {
                 return prev.map((item) =>
-                    item.product.id === product.id
+                    item.id === cartItemId
                         ? { ...item, quantity: item.quantity + quantity }
                         : item
                 );
             }
-            return [...prev, { product, quantity }];
+            return [...prev, { id: cartItemId, product, quantity, selectedSize }];
         });
-        showToast(`Added to cart`);
+        showToast(`Added to cart${selectedSize ? ` (${selectedSize})` : ''}`);
     };
 
-    const removeFromCart = (productId: string) => {
-        setItems((prev) => prev.filter((item) => item.product.id !== productId));
+    const removeFromCart = (cartItemId: string) => {
+        setItems((prev) => prev.filter((item) => item.id !== cartItemId));
     };
 
     const clearCart = () => {

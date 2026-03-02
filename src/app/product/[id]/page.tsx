@@ -85,11 +85,11 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         );
     }
 
-    const SIZES = product.sizes && product.sizes.length > 0 ? product.sizes : ['XS', 'S', 'M', 'L', 'XL'];
+    const SIZES = product.sizes && product.sizes.length > 0 ? product.sizes : [];
 
 
     const handleAddToCart = () => {
-        if (!selectedSize && product.gender !== 'Accessories') {
+        if (!selectedSize && SIZES.length > 0) {
             // Shake the size section
             setShakeSizeBtn(true);
             setTimeout(() => setShakeSizeBtn(false), 600);
@@ -99,7 +99,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             return;
         }
 
-        addToCart(product, quantity);
+        addToCart(product, quantity, selectedSize ?? undefined);
         setIsAdded(true);
         setTimeout(() => setIsAdded(false), 2000);
 
@@ -221,7 +221,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                             </div>
 
                             {/* Horizontal Size Selector - Optimized for touch */}
-                            {product.gender !== 'Accessories' && (
+                            {SIZES.length > 0 && (
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
@@ -243,8 +243,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                                                 key={size}
                                                 onClick={() => setSelectedSize(selectedSize === size ? null : size)}
                                                 className={`shrink-0 min-w-[56px] h-12 flex items-center justify-center rounded-2xl border text-sm font-black uppercase tracking-wide transition-all duration-200 active:scale-90 ${selectedSize === size
-                                                        ? 'bg-[#cba153] border-[#cba153] text-white shadow-lg shadow-[#cba153]/25 scale-105'
-                                                        : 'bg-gray-50 dark:bg-white/[0.04] border-gray-100 dark:border-white/[0.08] text-gray-500 dark:text-white/50'
+                                                    ? 'bg-[#cba153] border-[#cba153] text-white shadow-lg shadow-[#cba153]/25 scale-105'
+                                                    : 'bg-gray-50 dark:bg-white/[0.04] border-gray-100 dark:border-white/[0.08] text-gray-500 dark:text-white/50'
                                                     }`}
                                             >
                                                 {size}
@@ -356,8 +356,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                                         </>
                                     ) : (
                                         <>
-                                            <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${(!selectedSize && product.gender !== 'Accessories') ? 'text-white/60' : ''}`}>
-                                                {(!selectedSize && product.gender !== 'Accessories') ? 'Pick a Size First' : 'Reserve Item'}
+                                            <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${(!selectedSize && SIZES.length > 0) ? 'text-white/60' : ''}`}>
+                                                {(!selectedSize && SIZES.length > 0) ? 'Pick a Size First' : 'Reserve Item'}
                                             </span>
                                         </>
                                     )}

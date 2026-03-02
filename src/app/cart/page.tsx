@@ -15,9 +15,9 @@ export default function CartPage() {
 
     const [pendingDeleteId, setPendingDeleteId] = useState<number | string | null>(null);
 
-    const pendingItem = items.find((i) => i.product.id === pendingDeleteId);
+    const pendingItem = items.find((i) => i.id === pendingDeleteId);
 
-    const handleDeleteClick = (id: number | string) => {
+    const handleDeleteClick = (id: string) => {
         if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
             window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
         }
@@ -76,7 +76,7 @@ export default function CartPage() {
 
                 <div className="p-4 flex flex-col gap-4">
                     {items.map((item) => (
-                        <div key={item.product.id} className="flex gap-4 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800">
+                        <div key={item.id} className="flex gap-4 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800">
                             <div className="relative w-20 h-20 bg-white dark:bg-gray-800 rounded-lg overflow-hidden flex-shrink-0">
                                 {item.product.image_url ? (
                                     <Image src={item.product.image_url} alt={item.product.name} fill className="object-cover" />
@@ -87,14 +87,22 @@ export default function CartPage() {
                             <div className="flex-1 flex flex-col justify-between">
                                 <div>
                                     <h3 className="font-medium text-gray-900 dark:text-white line-clamp-1">{item.product.name}</h3>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">{item.quantity} x {new Intl.NumberFormat('en-ET', { style: 'currency', currency: 'ETB', maximumFractionDigits: 0 }).format(item.product.price)}</p>
+                                    <div className="flex items-center gap-2 mt-0.5">
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">{item.quantity} x {new Intl.NumberFormat('en-ET', { style: 'currency', currency: 'ETB', maximumFractionDigits: 0 }).format(item.product.price)}</p>
+                                        {item.selectedSize && (
+                                            <>
+                                                <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700"></span>
+                                                <span className="text-[10px] font-bold text-[#cba153] uppercase tracking-wider bg-[#cba153]/10 px-1.5 py-0.5 rounded-md">Size: {item.selectedSize}</span>
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
                                 <div className="flex items-center justify-between mt-2">
                                     <span className="font-bold text-gray-900 dark:text-white">
                                         {new Intl.NumberFormat('en-ET', { style: 'currency', currency: 'ETB', maximumFractionDigits: 0 }).format(item.product.price * item.quantity)}
                                     </span>
                                     <button
-                                        onClick={() => handleDeleteClick(item.product.id)}
+                                        onClick={() => handleDeleteClick(item.id)}
                                         className="text-red-500 hover:text-red-600 p-1 active:scale-90 transition-transform"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
