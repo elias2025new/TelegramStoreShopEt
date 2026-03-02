@@ -35,6 +35,8 @@ const CATEGORIES = [
   { name: 'Accessories', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=200&auto=format&fit=crop' }
 ];
 
+const MEN_SUBCATEGORIES = ['Shoes', 'Jackets & Coats', 'T-shirts', 'Trousers'];
+
 function HomeContent() {
   const { totalPrice } = useCart();
   const { isOwner, adminOpen, setAdminOpen } = useAdmin();
@@ -48,6 +50,7 @@ function HomeContent() {
   const selectedCategory = searchParams.get('category') || 'All';
   const [searchQuery, setSearchQuery] = useState('');
   const [searchInput, setSearchInput] = useState('');
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const handleSearch = () => {
@@ -89,6 +92,8 @@ function HomeContent() {
       params.set('category', category);
     }
     router.replace(`/?${params.toString()}`, { scroll: false });
+    // Reset subcategory when switching main category
+    setSelectedSubcategory(null);
   };
   const queryClient = useQueryClient();
   const [userPhotoUrl, setUserPhotoUrl] = useState<string | null>(null);
@@ -442,6 +447,35 @@ function HomeContent() {
             })}
           </div>
         </section>
+
+        {/* Men Subcategories */}
+        <AnimatePresence>
+          {selectedCategory === 'Men' && (
+            <motion.section
+              key="men-subcategories"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              className="overflow-hidden"
+            >
+              <div className="flex items-center gap-2 px-4 pb-4 overflow-x-auto scrollbar-hide">
+                {MEN_SUBCATEGORIES.map((sub) => (
+                  <button
+                    key={sub}
+                    onClick={() => setSelectedSubcategory(selectedSubcategory === sub ? null : sub)}
+                    className={`shrink-0 px-4 py-2 rounded-full text-[12px] font-bold tracking-wide border transition-all duration-200 active:scale-95 ${selectedSubcategory === sub
+                        ? 'bg-[#cba153] border-[#cba153] text-white shadow-md shadow-[#cba153]/25'
+                        : 'bg-white dark:bg-white/[0.04] border-gray-200 dark:border-white/[0.08] text-gray-600 dark:text-white/60 hover:border-[#cba153]/50 hover:text-[#cba153]'
+                      }`}
+                  >
+                    {sub}
+                  </button>
+                ))}
+              </div>
+            </motion.section>
+          )}
+        </AnimatePresence>
 
         {/* Product Section Header */}
         {selectedCategory === 'All' && (
