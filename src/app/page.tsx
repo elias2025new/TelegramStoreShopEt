@@ -274,13 +274,13 @@ function HomeContent() {
         {/* Hero Section */}
         <section className="px-4 mt-2">
           <div
-            className="relative w-full h-[280px] rounded-2xl overflow-hidden bg-gray-100 dark:bg-[#0a0a0a] shadow-lg dark:shadow-none"
+            className="relative w-full h-[280px] rounded-2xl overflow-hidden bg-black shadow-lg dark:shadow-none"
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEndHandler}
             style={{ touchAction: 'pan-y' }}
           >
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="popLayout">
               <motion.div
                 key={currentSlide}
                 initial={{ opacity: 0, scale: 1.05 }}

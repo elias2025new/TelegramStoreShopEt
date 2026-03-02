@@ -7,6 +7,7 @@ import { supabase } from '@/utils/supabase/client';
 import { useAdmin } from '@/context/AdminContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
+import AdminConfirmModal from './AdminConfirmModal';
 
 
 const DRAFT_KEY = 'admin_product_draft';
@@ -767,6 +768,21 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
     const [selectedProductIds, setSelectedProductIds] = useState<Set<string>>(new Set());
     const [isDeletingBulk, setIsDeletingBulk] = useState(false);
     const [deleteMenuOpen, setDeleteMenuOpen] = useState(false);
+    const [confirmModal, setConfirmModal] = useState<{
+        isOpen: boolean;
+        title: string;
+        description: string;
+        confirmText: string;
+        onConfirm: () => void;
+        variant: 'danger' | 'warning';
+    }>({
+        isOpen: false,
+        title: '',
+        description: '',
+        confirmText: '',
+        onConfirm: () => { },
+        variant: 'danger'
+    });
     const hasRestoredRef = useRef(false); // prevent double-restore on re-renders
 
     // ── Restore draft on first open ─────────────────────────────────────────
@@ -1134,64 +1150,62 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
         }
     };
     const handleBulkDeleteAll = async () => {
-        const clear = async () => {
-            setIsDeletingBulk(true);
-            setUploadStatus('Deleting all products...');
-            try {
-                const { error } = await supabase.from('products').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-                if (error) throw error;
+        setConfirmModal({
+            isOpen: true,
+            title: 'Delete All Products?',
+            description: 'This action cannot be undone. All products and their images will be permanently removed from the store.',
+            confirmText: 'Yes, Delete Everything',
+            variant: 'danger',
+            onConfirm: async () => {
+                setIsDeletingBulk(true);
+                setUploadStatus('Deleting all products...');
+                try {
+                    const { error } = await supabase.from('products').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+                    if (error) throw error;
 
-                setUploadStatus('SUCCESS: ALL PRODUCTS DELETED');
-                queryClient.resetQueries({ queryKey: ['products'] });
-                fetchProducts();
-            } catch (err: any) {
-                setUploadStatus('ERROR: ' + err.message);
-            } finally {
-                setIsDeletingBulk(false);
-                setTimeout(() => setUploadStatus(''), 4000);
+                    setUploadStatus('SUCCESS: ALL PRODUCTS DELETED');
+                    queryClient.resetQueries({ queryKey: ['products'] });
+                    fetchProducts();
+                } catch (err: any) {
+                    setUploadStatus('ERROR: ' + err.message);
+                } finally {
+                    setIsDeletingBulk(false);
+                    setTimeout(() => setUploadStatus(''), 4000);
+                }
             }
-        };
-
-        if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-            window.Telegram.WebApp.showConfirm('Are you absolutely sure? This will delete EVERYTHING.', (ok: boolean) => {
-                if (ok) clear();
-            });
-        } else if (confirm('Are you absolutely sure? This will delete EVERYTHING.')) {
-            clear();
-        }
+        });
     };
 
     const handleDeleteSelected = async () => {
         if (selectedProductIds.size === 0) return;
 
-        const performDelete = async () => {
-            setIsDeletingBulk(true);
-            setUploadStatus(`Deleting ${selectedProductIds.size} products...`);
-            try {
-                const ids = Array.from(selectedProductIds);
-                const { error } = await supabase.from('products').delete().in('id', ids);
-                if (error) throw error;
+        setConfirmModal({
+            isOpen: true,
+            title: `Delete ${selectedProductIds.size} Products?`,
+            description: `You are about to delete ${selectedProductIds.size} selected items. This action is permanent and will remove them from the store.`,
+            confirmText: 'Delete Selected',
+            variant: 'danger',
+            onConfirm: async () => {
+                setIsDeletingBulk(true);
+                setUploadStatus(`Deleting ${selectedProductIds.size} products...`);
+                try {
+                    const ids = Array.from(selectedProductIds);
+                    const { error } = await supabase.from('products').delete().in('id', ids);
+                    if (error) throw error;
 
-                setUploadStatus(`SUCCESS: ${ids.length} PRODUCTS DELETED`);
-                setIsSelectMode(false);
-                setSelectedProductIds(new Set());
-                queryClient.resetQueries({ queryKey: ['products'] });
-                fetchProducts();
-            } catch (err: any) {
-                setUploadStatus('ERROR: ' + err.message);
-            } finally {
-                setIsDeletingBulk(false);
-                setTimeout(() => setUploadStatus(''), 4000);
+                    setUploadStatus(`SUCCESS: ${ids.length} PRODUCTS DELETED`);
+                    setIsSelectMode(false);
+                    setSelectedProductIds(new Set());
+                    queryClient.resetQueries({ queryKey: ['products'] });
+                    fetchProducts();
+                } catch (err: any) {
+                    setUploadStatus('ERROR: ' + err.message);
+                } finally {
+                    setIsDeletingBulk(false);
+                    setTimeout(() => setUploadStatus(''), 4000);
+                }
             }
-        };
-
-        if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-            window.Telegram.WebApp.showConfirm(`Delete ${selectedProductIds.size} selected products?`, (ok: boolean) => {
-                if (ok) performDelete();
-            });
-        } else if (confirm(`Delete ${selectedProductIds.size} selected products?`)) {
-            performDelete();
-        }
+        });
     };
 
     if (!isOpen) return null;
@@ -1570,6 +1584,17 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                     </div>
                 )}
             </AnimatePresence>
+
+            {/* Admin Confirmation Modal */}
+            <AdminConfirmModal
+                isOpen={confirmModal.isOpen}
+                title={confirmModal.title}
+                description={confirmModal.description}
+                confirmText={confirmModal.confirmText}
+                variant={confirmModal.variant}
+                onConfirm={confirmModal.onConfirm}
+                onCancel={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+            />
         </div >
     );
 }
