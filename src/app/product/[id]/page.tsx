@@ -49,6 +49,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     const [quantity, setQuantity] = useState(1);
     const [isAdded, setIsAdded] = useState(false);
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
+    const [sizeDropdownOpen, setSizeDropdownOpen] = useState(false);
 
     const SIZES = ['XS', 'S', 'M', 'L', 'XL'];
 
@@ -217,23 +218,61 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                                     <p className="text-[#cba153] text-sm font-medium tracking-wide">Premium Collection Edition</p>
                                 </div>
 
-                                {/* Right: custom size selector */}
-                                <div className="flex flex-col items-end gap-1.5 shrink-0">
-                                    <span className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">Size</span>
-                                    <div className="flex flex-col gap-1">
-                                        {SIZES.map((size) => (
-                                            <button
-                                                key={size}
-                                                onClick={() => setSelectedSize(selectedSize === size ? null : size)}
-                                                className={`w-10 h-10 rounded-xl text-[11px] font-black tracking-wide border transition-all duration-200 active:scale-90 ${selectedSize === size
-                                                        ? 'bg-[#cba153] border-[#cba153] text-white shadow-lg shadow-[#cba153]/30'
-                                                        : 'bg-gray-50 dark:bg-white/[0.04] border-gray-200 dark:border-white/[0.08] text-gray-500 dark:text-white/50 hover:border-[#cba153]/60 hover:text-[#cba153]'
-                                                    }`}
-                                            >
-                                                {size}
-                                            </button>
-                                        ))}
-                                    </div>
+                                {/* Right: size dropdown trigger */}
+                                <div className="relative shrink-0">
+                                    <button
+                                        id="size-dropdown-btn"
+                                        onClick={() => setSizeDropdownOpen((o) => !o)}
+                                        className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-[11px] font-black uppercase tracking-wide transition-all duration-200 active:scale-95 ${selectedSize
+                                                ? 'bg-[#cba153] border-[#cba153] text-white shadow-md shadow-[#cba153]/25'
+                                                : 'bg-gray-50 dark:bg-white/[0.04] border-gray-200 dark:border-white/[0.08] text-gray-500 dark:text-white/50'
+                                            }`}
+                                    >
+                                        {selectedSize ?? 'Size'}
+                                        <svg
+                                            width="10" height="10" viewBox="0 0 10 10" fill="none"
+                                            className={`transition-transform duration-200 ${sizeDropdownOpen ? 'rotate-180' : ''}`}
+                                        >
+                                            <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                        </svg>
+                                    </button>
+
+                                    {/* Dropdown panel */}
+                                    <AnimatePresence>
+                                        {sizeDropdownOpen && (
+                                            <>
+                                                {/* Backdrop to close on outside click */}
+                                                <div
+                                                    className="fixed inset-0 z-[70]"
+                                                    onClick={() => setSizeDropdownOpen(false)}
+                                                />
+                                                <motion.div
+                                                    initial={{ opacity: 0, scale: 0.92, y: -6 }}
+                                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                                    exit={{ opacity: 0, scale: 0.92, y: -6 }}
+                                                    transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                                                    className="absolute right-0 top-full mt-2 z-[80] bg-white dark:bg-[#1a1a1a] border border-gray-100 dark:border-white/[0.08] rounded-2xl shadow-xl shadow-black/10 dark:shadow-black/40 p-2 flex flex-col gap-1 min-w-[72px]"
+                                                >
+                                                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] px-2 pt-1 pb-0.5">Size</p>
+                                                    {SIZES.map((size) => (
+                                                        <button
+                                                            key={size}
+                                                            onClick={() => {
+                                                                setSelectedSize(selectedSize === size ? null : size);
+                                                                setSizeDropdownOpen(false);
+                                                            }}
+                                                            className={`w-full px-3 py-2 rounded-xl text-[12px] font-black tracking-wide transition-all duration-150 active:scale-95 text-left ${selectedSize === size
+                                                                    ? 'bg-[#cba153] text-white'
+                                                                    : 'text-gray-700 dark:text-white/70 hover:bg-gray-50 dark:hover:bg-white/[0.06]'
+                                                                }`}
+                                                        >
+                                                            {size}
+                                                        </button>
+                                                    ))}
+                                                </motion.div>
+                                            </>
+                                        )}
+                                    </AnimatePresence>
                                 </div>
                             </div>
                         </motion.div>
