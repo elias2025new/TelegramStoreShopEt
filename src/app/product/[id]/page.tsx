@@ -134,7 +134,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
                 <div className="px-6 space-y-10 relative z-10"
                     style={{
-                        paddingTop: 'calc(6.5rem + var(--tg-safe-area-inset-top, 0px))'
+                        paddingTop: 'calc(4.75rem + var(--tg-safe-area-inset-top, 0px))'
                     }}
                 >
                     {/* Immersive Product Image */}
