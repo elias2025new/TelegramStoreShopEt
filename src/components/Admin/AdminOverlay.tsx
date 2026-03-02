@@ -11,7 +11,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const DRAFT_KEY = 'admin_product_draft';
 const GENDERS = ['Men', 'Women', 'Unisex', 'Accessories'];
-const CATEGORIES = ['Men', 'women', 'accessories'];
+
+const CATEGORY_SUBCATEGORIES: Record<string, string[]> = {
+    'Men': ['Shoes', 'Jackets & Coats', 'T-shirts', 'Trousers'],
+    'Women': [],
+    'Unisex': [],
+    'Accessories': []
+};
+
+const PRODUCT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45'];
 
 interface ChoiceChipGroupProps {
     options: string[];
@@ -53,6 +61,44 @@ function ChoiceChipGroup({ options, selected, onChange, label, onAddNew }: Choic
     );
 }
 
+interface MultiChoiceChipGroupProps {
+    options: string[];
+    selected: string[];
+    onChange: (value: string[]) => void;
+    label?: string;
+}
+
+function MultiChoiceChipGroup({ options, selected, onChange, label }: MultiChoiceChipGroupProps) {
+    const toggleOption = (opt: string) => {
+        if (selected.includes(opt)) {
+            onChange(selected.filter((s) => s !== opt));
+        } else {
+            onChange([...selected, opt]);
+        }
+    };
+
+    return (
+        <div className="flex flex-col gap-1">
+            {label && <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{label}</span>}
+            <div className="flex flex-wrap gap-1.5">
+                {options.map((opt) => (
+                    <button
+                        key={opt}
+                        type="button"
+                        onClick={() => toggleOption(opt)}
+                        className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all duration-200 ${selected.includes(opt)
+                            ? 'bg-yellow-500 text-black border-yellow-500 shadow-sm'
+                            : 'bg-gray-800 text-gray-400 border-gray-700 hover:border-gray-500'
+                            }`}
+                    >
+                        {opt}
+                    </button>
+                ))}
+            </div>
+        </div>
+    );
+}
+
 type Product = {
     id: string;
     name: string;
@@ -60,6 +106,7 @@ type Product = {
     category: string | null;
     gender: string | null;
     description: string | null;
+    sizes: string[] | null;
     image_url: string | null;
     created_at: string;
 };
@@ -84,6 +131,7 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
     const [localCategory, setLocalCategory] = useState(product.category || '');
     const [localGender, setLocalGender] = useState(product.gender || '');
     const [localDescription, setLocalDescription] = useState(product.description || '');
+    const [localSizes, setLocalSizes] = useState<string[]>(product.sizes || []);
     const [isSaving, setIsSaving] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [isCustomCategory, setIsCustomCategory] = useState(false);
@@ -96,7 +144,8 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
         localPrice !== product.price.toString() ||
         localCategory !== (product.category || '') ||
         localGender !== (product.gender || '') ||
-        localDescription !== (product.description || '');
+        localDescription !== (product.description || '') ||
+        JSON.stringify(localSizes) !== JSON.stringify(product.sizes || []);
 
     // Keep local state in sync if product changes externally (e.g. image update)
     useEffect(() => {
@@ -105,6 +154,7 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
         setLocalCategory(product.category || '');
         setLocalGender(product.gender || '');
         setLocalDescription(product.description || '');
+        setLocalSizes(product.sizes || []);
     }, [product]);
 
     const handleSave = async () => {
@@ -122,6 +172,7 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
                 category: localCategory.trim(),
                 gender: localGender,
                 description: localDescription.trim() || null,
+                sizes: localSizes,
             });
         } finally {
             setIsSaving(false);
@@ -261,12 +312,19 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
                         ) : (
                             <ChoiceChipGroup
                                 label="Sub Category"
-                                options={CATEGORIES}
+                                options={localGender ? (CATEGORY_SUBCATEGORIES[localGender] || []) : []}
                                 selected={localCategory}
                                 onChange={setLocalCategory}
                                 onAddNew={() => setIsCustomCategory(true)}
                             />
                         )}
+
+                        <MultiChoiceChipGroup
+                            label="Available Sizes"
+                            options={PRODUCT_SIZES}
+                            selected={localSizes}
+                            onChange={setLocalSizes}
+                        />
 
                         {hasChanges && (
                             <button
@@ -313,6 +371,7 @@ interface ImageItem {
     category: string;
     gender: string;
     description: string;
+    sizes: string[];
     fileName: string;
 }
 
@@ -323,13 +382,14 @@ interface SerializedItem {
     category: string;
     gender: string;
     description: string;
+    sizes: string[];
     fileName: string;
 }
 
 interface UploadItemRowProps {
     item: ImageItem;
     index: number;
-    updateItem: (index: number, field: 'title' | 'price' | 'category' | 'gender' | 'description', value: string) => void;
+    updateItem: (index: number, field: 'title' | 'price' | 'category' | 'gender' | 'description' | 'sizes', value: any) => void;
     removeItem: (index: number) => void;
     onPublish: (index: number) => Promise<void>;
 }
@@ -340,6 +400,7 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish }: Uploa
     const [localCategory, setLocalCategory] = useState(item.category);
     const [localGender, setLocalGender] = useState(item.gender);
     const [localDescription, setLocalDescription] = useState(item.description);
+    const [localSizes, setLocalSizes] = useState<string[]>(item.sizes || []);
     const [isCustomCategory, setIsCustomCategory] = useState(false);
     const [descModalOpen, setDescModalOpen] = useState(false);
     const [modalDraft, setModalDraft] = useState('');
@@ -352,7 +413,8 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish }: Uploa
         setLocalCategory(item.category);
         setLocalGender(item.gender);
         setLocalDescription(item.description);
-    }, [item.title, item.price, item.category, item.gender, item.description]);
+        setLocalSizes(item.sizes || []);
+    }, [item.title, item.price, item.category, item.gender, item.description, item.sizes]);
 
     const handleFocus = (e: React.FocusEvent<HTMLElement>) => {
         const target = e.target as HTMLElement;
@@ -544,7 +606,7 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish }: Uploa
                     ) : (
                         <ChoiceChipGroup
                             label="What is it?"
-                            options={CATEGORIES}
+                            options={localGender ? (CATEGORY_SUBCATEGORIES[localGender] || []) : []}
                             selected={localCategory}
                             onChange={(val) => {
                                 setLocalCategory(val);
@@ -553,6 +615,16 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish }: Uploa
                             onAddNew={() => setIsCustomCategory(true)}
                         />
                     )}
+
+                    <MultiChoiceChipGroup
+                        label="Available Sizes"
+                        options={PRODUCT_SIZES}
+                        selected={localSizes}
+                        onChange={(val) => {
+                            setLocalSizes(val);
+                            updateItem(index, 'sizes', val);
+                        }}
+                    />
                 </div>
             </div>
         </>
@@ -629,6 +701,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                 category: s.category || '',
                 gender: s.gender || '',
                 description: s.description || '',
+                sizes: s.sizes || [],
                 fileName: s.fileName,
             }));
 
@@ -652,6 +725,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
             category: item.category,
             gender: item.gender,
             description: item.description,
+            sizes: item.sizes,
             fileName: item.fileName,
         }));
         try {
@@ -678,6 +752,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                     category: '',
                     gender: '',
                     description: '',
+                    sizes: [],
                     fileName: file.name,
                 };
             })
@@ -687,7 +762,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
         e.target.value = '';
     }, []);
 
-    const updateItem = (index: number, field: 'title' | 'price' | 'category' | 'gender' | 'description', value: string) => {
+    const updateItem = (index: number, field: 'title' | 'price' | 'category' | 'gender' | 'description' | 'sizes', value: any) => {
         setImages((prev) => prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)));
     };
 
@@ -845,6 +920,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                 category: item.category?.trim() || null,
                 gender: item.gender,
                 description: item.description || null,
+                sizes: item.sizes || [],
                 image_url: urlData.publicUrl,
             };
 

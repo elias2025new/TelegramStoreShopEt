@@ -35,7 +35,11 @@ const CATEGORIES = [
   { name: 'Accessories', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=200&auto=format&fit=crop' }
 ];
 
-const MEN_SUBCATEGORIES = ['Shoes', 'Jackets & Coats', 'T-shirts', 'Trousers'];
+const CATEGORY_SUBCATEGORIES: Record<string, string[]> = {
+  'Men': ['Shoes', 'Jackets & Coats', 'T-shirts', 'Trousers'],
+  'Women': [], // To be added later
+  'Accessories': [] // To be added later
+};
 
 function HomeContent() {
   const { totalPrice } = useCart();
@@ -448,11 +452,11 @@ function HomeContent() {
           </div>
         </section>
 
-        {/* Men Subcategories */}
+        {/* Dynamic Subcategories */}
         <AnimatePresence>
-          {selectedCategory === 'Men' && (
+          {CATEGORY_SUBCATEGORIES[selectedCategory] && CATEGORY_SUBCATEGORIES[selectedCategory].length > 0 && (
             <motion.section
-              key="men-subcategories"
+              key={`subcategories-${selectedCategory}`}
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
@@ -460,7 +464,7 @@ function HomeContent() {
               className="overflow-hidden"
             >
               <div className="flex items-center gap-2 px-4 pb-4 overflow-x-auto scrollbar-hide">
-                {MEN_SUBCATEGORIES.map((sub) => (
+                {CATEGORY_SUBCATEGORIES[selectedCategory].map((sub) => (
                   <button
                     key={sub}
                     onClick={() => setSelectedSubcategory(selectedSubcategory === sub ? null : sub)}

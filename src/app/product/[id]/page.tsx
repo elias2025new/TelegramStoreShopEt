@@ -52,7 +52,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     const [sizeDropdownOpen, setSizeDropdownOpen] = useState(false);
     const [shakeSizeBtn, setShakeSizeBtn] = useState(false);
 
-    const SIZES = ['XS', 'S', 'M', 'L', 'XL'];
+
 
     if (isLoading) {
         return (
@@ -85,6 +85,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             </div>
         );
     }
+
+    const SIZES = product.sizes && product.sizes.length > 0 ? product.sizes : ['XS', 'S', 'M', 'L', 'XL'];
 
 
     const handleAddToCart = () => {

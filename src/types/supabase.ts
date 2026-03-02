@@ -20,6 +20,7 @@ export interface Database {
                     image_url: string | null
                     category: string | null
                     gender: string | null
+                    sizes: string[] | null
                 }
                 Insert: {
                     id?: string
@@ -30,6 +31,7 @@ export interface Database {
                     image_url?: string | null
                     category?: string | null
                     gender?: string | null
+                    sizes?: string[] | null
                 }
                 Update: {
                     id?: string
@@ -40,6 +42,7 @@ export interface Database {
                     image_url?: string | null
                     category?: string | null
                     gender?: string | null
+                    sizes?: string[] | null
                 }
                 Relationships: []
             }
