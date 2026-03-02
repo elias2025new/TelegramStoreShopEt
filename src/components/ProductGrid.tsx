@@ -10,6 +10,7 @@ type Product = Database['public']['Tables']['products']['Row'];
 
 interface ProductGridProps {
     selectedCategory?: string;
+    selectedSubcategory?: string | null;
     searchQuery?: string;
 }
 
@@ -26,7 +27,7 @@ async function fetchProducts() {
     return data as Product[];
 }
 
-export default function ProductGrid({ selectedCategory = 'All', searchQuery = '' }: ProductGridProps) {
+export default function ProductGrid({ selectedCategory = 'All', selectedSubcategory = null, searchQuery = '' }: ProductGridProps) {
     const { data: products, isLoading, error } = useQuery({
         queryKey: ['products'],
         queryFn: fetchProducts,
@@ -72,11 +73,21 @@ export default function ProductGrid({ selectedCategory = 'All', searchQuery = ''
             const cat = selectedCategory.toLowerCase();
             const gender = p.gender?.toLowerCase();
 
-            if (cat === 'men') return gender === 'men' || gender === 'unisex';
-            if (cat === 'women') return gender === 'women' || gender === 'unisex';
-            if (cat === 'accessories') return gender === 'accessories';
+            // Main Category Filter
+            let matchesMain = false;
+            if (cat === 'men') matchesMain = gender === 'men' || gender === 'unisex';
+            else if (cat === 'women') matchesMain = gender === 'women' || gender === 'unisex';
+            else if (cat === 'accessories') matchesMain = gender === 'accessories';
+            else matchesMain = p.category?.toLowerCase() === cat;
 
-            return p.category?.toLowerCase() === cat;
+            if (!matchesMain) return false;
+
+            // Subcategory Filter (if any)
+            if (selectedSubcategory) {
+                return p.category?.toLowerCase() === selectedSubcategory.toLowerCase();
+            }
+
+            return true;
         })();
 
         if (!categoryMatch) return false;

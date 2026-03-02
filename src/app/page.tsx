@@ -491,7 +491,11 @@ function HomeContent() {
         )}
 
         {/* Product Grid */}
-        <ProductGrid selectedCategory={selectedCategory} searchQuery={searchQuery} />
+        <ProductGrid
+          selectedCategory={selectedCategory}
+          selectedSubcategory={selectedSubcategory}
+          searchQuery={searchQuery}
+        />
       </PageTransition>
 
       {/* Admin Overlay */}
