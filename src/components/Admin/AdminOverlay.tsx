@@ -656,6 +656,30 @@ function base64ToFile(dataUrl: string, fileName: string): File {
     return new File([bytes], fileName, { type: mime });
 }
 
+/** Compress a base64 image for localStorage (Draft) */
+function compressImage(base64: string, maxWidth = 300, quality = 0.6): Promise<string> {
+    return new Promise((resolve) => {
+        const img = new window.Image();
+        img.src = base64;
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+
+            if (width > maxWidth) {
+                height = Math.round((height * maxWidth) / width);
+                width = maxWidth;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx?.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+    });
+}
+
 export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
     const { storeId } = useAdmin();
     const queryClient = useQueryClient();
@@ -742,11 +766,12 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
 
         const newItems: ImageItem[] = await Promise.all(
             files.map(async (file) => {
-                const base64 = await fileToBase64(file);
+                const fullResBase64 = await fileToBase64(file);
+                const compressedBase64 = await compressImage(fullResBase64);
                 return {
                     file,
-                    preview: base64,
-                    base64,
+                    preview: fullResBase64,
+                    base64: compressedBase64, // specifically for the draft storage
                     title: '',
                     price: '',
                     category: '',
