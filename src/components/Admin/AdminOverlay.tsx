@@ -125,9 +125,20 @@ interface ProductManageItemProps {
     onUpdate: (id: string, updates: Partial<Product>) => Promise<void>;
     onDelete: (id: string, imageUrl: string | null) => Promise<void>;
     onChangeImage: (id: string) => void;
+    isSelectMode?: boolean;
+    isSelected?: boolean;
+    onToggleSelect?: (id: string) => void;
 }
 
-function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: ProductManageItemProps) {
+function ProductManageItem({
+    product,
+    onUpdate,
+    onDelete,
+    onChangeImage,
+    isSelectMode = false,
+    isSelected = false,
+    onToggleSelect
+}: ProductManageItemProps) {
     const [localName, setLocalName] = useState(product.name);
     const [localPrice, setLocalPrice] = useState(product.price.toString());
     const [localCategory, setLocalCategory] = useState(product.category || '');
@@ -238,11 +249,31 @@ function ProductManageItem({ product, onUpdate, onDelete, onChangeImage }: Produ
                 </div>
             )}
 
-            <div className="flex flex-col gap-2 p-2 bg-white dark:bg-[#1c1c1e] rounded-xl border border-gray-200 dark:border-[#2a2a2a] shadow-sm">
-                <div className={`flex items-center gap-2 transition-opacity ${showDeleteConfirm ? 'opacity-20 pointer-events-none' : ''}`}>
+            <div
+                className={`flex flex-col gap-2 p-2 bg-white dark:bg-[#1c1c1e] rounded-xl border transition-all ${isSelected ? 'border-[#cba153] shadow-md scale-[1.01]' : 'border-gray-200 dark:border-[#2a2a2a] shadow-sm'
+                    } ${isSelectMode ? 'cursor-pointer active:scale-95' : ''}`}
+                onClick={() => isSelectMode && onToggleSelect?.(product.id)}
+            >
+                <div className={`flex items-center gap-2 transition-opacity ${showDeleteConfirm && !isSelectMode ? 'opacity-20 pointer-events-none' : ''}`}>
+                    {isSelectMode && (
+                        <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center">
+                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-[#cba153] border-[#cba153]' : 'border-gray-300 dark:border-[#444]'
+                                }`}>
+                                {isSelected && (
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                                        <polyline points="20 6 9 17 4 12" />
+                                    </svg>
+                                )}
+                            </div>
+                        </div>
+                    )}
                     <div
                         className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-[#111111] cursor-pointer group"
-                        onClick={() => onChangeImage(product.id)}
+                        onClick={(e) => {
+                            if (isSelectMode) return;
+                            e.stopPropagation();
+                            onChangeImage(product.id);
+                        }}
                     >
                         <img src={product.image_url || ''} alt={product.name} className="w-full h-full object-cover group-hover:opacity-75 transition-opacity" />
                     </div>
@@ -732,6 +763,10 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const editFileInputRef = useRef<HTMLInputElement>(null);
     const [editingProductId, setEditingProductId] = useState<string | null>(null);
+    const [isSelectMode, setIsSelectMode] = useState(false);
+    const [selectedProductIds, setSelectedProductIds] = useState<Set<string>>(new Set());
+    const [isDeletingBulk, setIsDeletingBulk] = useState(false);
+    const [deleteMenuOpen, setDeleteMenuOpen] = useState(false);
     const hasRestoredRef = useRef(false); // prevent double-restore on re-renders
 
     // ── Restore draft on first open ─────────────────────────────────────────
@@ -1094,10 +1129,68 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
             if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
                 window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
             }
-        } catch (err: any) {
-            setUploadStatus(`❌ Error: ${err.message}`);
         } finally {
             setIsUploading(false);
+        }
+    };
+    const handleBulkDeleteAll = async () => {
+        const clear = async () => {
+            setIsDeletingBulk(true);
+            setUploadStatus('Deleting all products...');
+            try {
+                const { error } = await supabase.from('products').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+                if (error) throw error;
+
+                setUploadStatus('SUCCESS: ALL PRODUCTS DELETED');
+                queryClient.resetQueries({ queryKey: ['products'] });
+                fetchProducts();
+            } catch (err: any) {
+                setUploadStatus('ERROR: ' + err.message);
+            } finally {
+                setIsDeletingBulk(false);
+                setTimeout(() => setUploadStatus(''), 4000);
+            }
+        };
+
+        if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+            window.Telegram.WebApp.showConfirm('Are you absolutely sure? This will delete EVERYTHING.', (ok: boolean) => {
+                if (ok) clear();
+            });
+        } else if (confirm('Are you absolutely sure? This will delete EVERYTHING.')) {
+            clear();
+        }
+    };
+
+    const handleDeleteSelected = async () => {
+        if (selectedProductIds.size === 0) return;
+
+        const performDelete = async () => {
+            setIsDeletingBulk(true);
+            setUploadStatus(`Deleting ${selectedProductIds.size} products...`);
+            try {
+                const ids = Array.from(selectedProductIds);
+                const { error } = await supabase.from('products').delete().in('id', ids);
+                if (error) throw error;
+
+                setUploadStatus(`SUCCESS: ${ids.length} PRODUCTS DELETED`);
+                setIsSelectMode(false);
+                setSelectedProductIds(new Set());
+                queryClient.resetQueries({ queryKey: ['products'] });
+                fetchProducts();
+            } catch (err: any) {
+                setUploadStatus('ERROR: ' + err.message);
+            } finally {
+                setIsDeletingBulk(false);
+                setTimeout(() => setUploadStatus(''), 4000);
+            }
+        };
+
+        if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+            window.Telegram.WebApp.showConfirm(`Delete ${selectedProductIds.size} selected products?`, (ok: boolean) => {
+                if (ok) performDelete();
+            });
+        } else if (confirm(`Delete ${selectedProductIds.size} selected products?`)) {
+            performDelete();
         }
     };
 
@@ -1256,7 +1349,69 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                             </div>
                         )}
 
-                        <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Active Products</h3>
+                        <div className="flex items-center justify-between mb-3 relative">
+                            <h3 className="font-semibold text-gray-900 dark:text-white uppercase text-[11px] tracking-wider">
+                                {isSelectMode ? `Selected (${selectedProductIds.size})` : 'Active Products'}
+                            </h3>
+                            <div className="flex items-center gap-2">
+                                {isSelectMode ? (
+                                    <button
+                                        onClick={() => {
+                                            setIsSelectMode(false);
+                                            setSelectedProductIds(new Set());
+                                        }}
+                                        className="text-[10px] font-black text-gray-500 uppercase tracking-widest bg-gray-100 dark:bg-[#2a2a2a] px-2 py-1 rounded-md"
+                                    >
+                                        Cancel
+                                    </button>
+                                ) : (
+                                    existingProducts.length > 0 && (
+                                        <div className="relative">
+                                            <button
+                                                onClick={() => setDeleteMenuOpen(!deleteMenuOpen)}
+                                                className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                    <path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                                </svg>
+                                            </button>
+                                            <AnimatePresence>
+                                                {deleteMenuOpen && (
+                                                    <>
+                                                        <div className="fixed inset-0 z-[110]" onClick={() => setDeleteMenuOpen(false)}></div>
+                                                        <motion.div
+                                                            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                                                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                                                            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                                                            className="absolute right-0 top-full mt-2 w-32 bg-white dark:bg-[#2a2a2a] rounded-xl shadow-xl border border-gray-100 dark:border-gray-800 py-1 z-[120] overflow-hidden"
+                                                        >
+                                                            <button
+                                                                onClick={() => {
+                                                                    setDeleteMenuOpen(false);
+                                                                    handleBulkDeleteAll();
+                                                                }}
+                                                                className="w-full px-4 py-2 text-left text-[11px] font-bold text-red-500 hover:bg-red-500/10 transition-colors"
+                                                            >
+                                                                DELETE ALL
+                                                            </button>
+                                                            <button
+                                                                onClick={() => {
+                                                                    setDeleteMenuOpen(false);
+                                                                    setIsSelectMode(true);
+                                                                }}
+                                                                className="w-full px-4 py-2 text-left text-[11px] font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors border-t border-gray-50 dark:border-gray-800"
+                                                            >
+                                                                SELECT
+                                                            </button>
+                                                        </motion.div>
+                                                    </>
+                                                )}
+                                            </AnimatePresence>
+                                        </div>
+                                    )
+                                )}
+                            </div>
+                        </div>
                         {isLoadingProducts ? (
                             <div className="flex justify-center py-10">
                                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#cba153]"></div>
@@ -1275,6 +1430,14 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                                             setEditingProductId(id);
                                             editFileInputRef.current?.click();
                                         }}
+                                        isSelectMode={isSelectMode}
+                                        isSelected={selectedProductIds.has(product.id)}
+                                        onToggleSelect={(id) => {
+                                            const next = new Set(selectedProductIds);
+                                            if (next.has(id)) next.delete(id);
+                                            else next.add(id);
+                                            setSelectedProductIds(next);
+                                        }}
                                     />
                                 ))}
                             </div>
@@ -1292,15 +1455,25 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
 
             {/* Footer - Fixed at bottom below the scrollable area */}
             {
-                images.length > 0 && view === 'upload' && (
+                (images.length > 0 && view === 'upload' || (isSelectMode && selectedProductIds.size > 0)) && (
                     <div className="p-4 border-t border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#0a0a0a] pb-safe">
-                        <button
-                            onClick={handlePublish}
-                            disabled={isUploading}
-                            className={`w-full py-3.5 px-4 rounded-xl font-extrabold text-black transition-all ${isUploading ? 'bg-gray-600 cursor-not-allowed' : 'bg-[#cba153] hover:bg-[#b8860b] active:scale-[0.98] shadow-[0_4px_20px_rgba(203,161,83,0.3)]'}`}
-                        >
-                            {isUploading ? 'Publishing...' : `PUBLISH ${images.length} PRODUCT${images.length > 1 ? 'S' : ''}`}
-                        </button>
+                        {view === 'upload' ? (
+                            <button
+                                onClick={handlePublish}
+                                disabled={isUploading}
+                                className={`w-full py-3.5 px-4 rounded-xl font-extrabold text-black transition-all ${isUploading ? 'bg-gray-600 cursor-not-allowed' : 'bg-[#cba153] hover:bg-[#b8860b] active:scale-[0.98] shadow-[0_4px_20px_rgba(203,161,83,0.3)]'}`}
+                            >
+                                {isUploading ? 'Publishing...' : `PUBLISH ${images.length} PRODUCT${images.length > 1 ? 'S' : ''}`}
+                            </button>
+                        ) : (
+                            <button
+                                onClick={handleDeleteSelected}
+                                disabled={isDeletingBulk}
+                                className={`w-full py-3.5 px-4 rounded-xl font-extrabold text-white transition-all ${isDeletingBulk ? 'bg-gray-600 cursor-not-allowed' : 'bg-red-500 hover:bg-red-600 active:scale-[0.98] shadow-[0_4px_20px_rgba(239,68,68,0.3)]'}`}
+                            >
+                                {isDeletingBulk ? 'Deleting...' : `DELETE SELECTED (${selectedProductIds.size})`}
+                            </button>
+                        )}
                     </div>
                 )
             }
