@@ -144,14 +144,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                         paddingBottom: '0.75rem'
                     }}
                 >
-                    <button
-                        onClick={handleBack}
-                        className="p-2 bg-gray-50 dark:bg-white/5 rounded-xl text-gray-400 dark:text-white/40 hover:text-gray-900 dark:hover:text-white transition-all active:scale-90"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="m15 18-6-6 6-6" />
-                        </svg>
-                    </button>
+                    {/* Spacer to keep title centered since back button is now native Telegram one */}
+                    <div className="w-10" />
                     <div className="flex flex-col items-center">
                         <span className="text-[10px] font-black text-[#cba153] uppercase tracking-[0.2em]">Product Details</span>
                     </div>
