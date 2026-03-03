@@ -140,8 +140,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 <header
                     className="fixed top-0 left-0 right-0 z-50 bg-white/70 dark:bg-black/40 backdrop-blur-2xl px-4 flex items-center justify-between transition-all duration-300"
                     style={{
-                        paddingTop: 'calc(2.75rem + var(--tg-safe-area-inset-top, 0px))',
-                        paddingBottom: '0.75rem'
+                        paddingTop: 'calc(1.5rem + var(--tg-safe-area-inset-top, 0px))',
+                        paddingBottom: '0.5rem'
                     }}
                 >
                     {/* Spacer to keep title centered since back button is now native Telegram one */}
@@ -154,9 +154,9 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                     </div>
                 </header>
 
-                <div className="px-6 space-y-10 relative z-10"
+                <div className="px-6 space-y-6 relative z-10"
                     style={{
-                        paddingTop: 'calc(2rem + var(--tg-safe-area-inset-top, 0px))'
+                        paddingTop: 'calc(1.25rem + var(--tg-safe-area-inset-top, 0px))'
                     }}
                 >
                     {/* Immersive Product Image */}
@@ -180,7 +180,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                             {/* Glow effect */}
                             <div className="absolute inset-x-8 -bottom-4 h-12 bg-[#cba153]/20 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
 
-                            <div className="relative aspect-[10/13] w-full rounded-[40px] overflow-hidden bg-gray-50 dark:bg-[#0a0a0a] border border-gray-100 dark:border-white/[0.03] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]">
+                            <div className="relative aspect-[4/3] w-full rounded-[32px] overflow-hidden bg-gray-50 dark:bg-[#0a0a0a] border border-gray-100 dark:border-white/[0.03] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]">
                                 {product.image_url ? (
                                     <Image
                                         src={product.image_url}
@@ -195,14 +195,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                                     </div>
                                 )}
 
-                                {/* Floating Label Style Price */}
-                                <div className="absolute top-6 right-6">
-                                    <div className="bg-white/90 dark:bg-black/80 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/20 shadow-lg">
-                                        <p className="text-lg font-black text-black dark:text-white tracking-tighter">
-                                            {new Intl.NumberFormat('en-ET', { style: 'currency', currency: 'ETB', maximumFractionDigits: 0 }).format(product.price)}
-                                        </p>
-                                    </div>
-                                </div>
                             </div>
                         </motion.div>
                     </motion.div>
@@ -214,21 +206,24 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2, duration: 0.8 }}
                         >
-                            {/* Category + Rating row */}
-                            <div className="flex items-center gap-3 mb-4">
-                                <span className="px-3 py-1 bg-[#cba153] dark:bg-[#cba153]/10 text-white dark:text-[#cba153] text-[9px] font-black rounded-lg uppercase tracking-widest">
-                                    {product.category || 'Luxury'}
-                                </span>
-                                <div className="h-px flex-1 bg-gray-100 dark:bg-white/[0.05]"></div>
-                                <div className="flex items-center gap-1 text-[#cba153]">
-                                    <Star size={12} fill="currentColor" />
-                                    <span className="text-[11px] font-bold">4.9</span>
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                    <span className="px-2 py-0.5 bg-[#cba153] dark:bg-[#cba153]/10 text-white dark:text-[#cba153] text-[8px] font-black rounded-md uppercase tracking-widest">
+                                        {product.category || 'Luxury'}
+                                    </span>
+                                    <div className="flex items-center gap-1 text-[#cba153]">
+                                        <Star size={10} fill="currentColor" />
+                                        <span className="text-[10px] font-bold">4.9</span>
+                                    </div>
                                 </div>
+                                <p className="text-lg font-black text-black dark:text-white tracking-tighter">
+                                    {new Intl.NumberFormat('en-ET', { style: 'currency', currency: 'ETB', maximumFractionDigits: 0 }).format(product.price)}
+                                </p>
                             </div>
 
                             {/* Horizontal Size Selector - Moved higher for better access */}
                             {SIZES.length > 0 && (
-                                <div className="space-y-3 mb-6">
+                                <div className="space-y-2 mb-4">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
                                             <span className="w-4 h-px bg-[#cba153]"></span>
@@ -248,7 +243,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                                             <button
                                                 key={size}
                                                 onClick={() => setSelectedSize(selectedSize === size ? null : size)}
-                                                className={`shrink-0 min-w-[48px] h-10 flex items-center justify-center rounded-xl border text-[12px] font-black uppercase tracking-wide transition-all duration-200 active:scale-90 ${selectedSize === size
+                                                className={`shrink-0 min-w-[40px] h-8 flex items-center justify-center rounded-lg border text-[11px] font-black uppercase tracking-wide transition-all duration-200 active:scale-90 ${selectedSize === size
                                                     ? 'bg-[#cba153] border-[#cba153] text-white shadow-lg shadow-[#cba153]/25 scale-105'
                                                     : 'bg-gray-50 dark:bg-white/[0.04] border-gray-100 dark:border-white/[0.08] text-gray-500 dark:text-white/50'
                                                     }`}
@@ -261,11 +256,11 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                             )}
 
                             {/* Title Section - More compact font sizes */}
-                            <div className="flex flex-col gap-0.5 mb-8">
-                                <h1 className="text-2xl font-black text-gray-900 dark:text-white leading-tight tracking-tight">
+                            <div className="flex flex-col gap-0.5 mb-4">
+                                <h1 className="text-xl font-black text-gray-900 dark:text-white leading-tight tracking-tight">
                                     {product.name}
                                 </h1>
-                                <p className="text-[#cba153] text-[12px] font-bold tracking-widest uppercase opacity-80">Premium Collection Edition</p>
+                                <p className="text-[#cba153] text-[10px] font-bold tracking-widest uppercase opacity-80">Premium Edition</p>
                             </div>
                         </motion.div>
 
@@ -273,14 +268,14 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.4, duration: 0.8 }}
-                            className="space-y-4"
+                            className="space-y-2"
                         >
                             <div className="flex items-center gap-2">
-                                <span className="w-8 h-px bg-[#cba153]"></span>
-                                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]">Essence</h3>
+                                <span className="w-6 h-px bg-[#cba153]"></span>
+                                <h3 className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">Essence</h3>
                             </div>
-                            <p className="text-gray-500 dark:text-gray-400 text-[16px] leading-[1.6] font-normal">
-                                {product.description || "A masterpiece of contemporary design, this piece embodies the peak of luxury. Meticulously crafted from the finest materials to provide unparalleled comfort and style for the discerning individual."}
+                            <p className="text-gray-500 dark:text-gray-400 text-sm leading-[1.5] font-normal">
+                                {product.description || "A masterpiece of contemporary design, this piece embodies the peak of luxury. Meticulously crafted from the finest materials to provide unparalleled comfort and style."}
                             </p>
                         </motion.div>
 
@@ -291,23 +286,23 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                             transition={{ delay: 0.6, duration: 0.8 }}
                             className="grid grid-cols-3 gap-3"
                         >
-                            <div className="bg-gray-50 dark:bg-white/[0.02] p-4 rounded-3xl border border-gray-100 dark:border-white/[0.05] flex flex-col items-center text-center gap-2">
-                                <div className="w-8 h-8 rounded-full bg-white dark:bg-white/[0.05] flex items-center justify-center text-[#cba153]">
-                                    <ShieldCheck size={16} />
+                            <div className="bg-gray-50 dark:bg-white/[0.02] p-2 rounded-2xl border border-gray-100 dark:border-white/[0.05] flex flex-col items-center text-center gap-1">
+                                <div className="text-[#cba153]">
+                                    <ShieldCheck size={14} />
                                 </div>
-                                <span className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">Verified</span>
+                                <span className="text-[8px] font-bold text-gray-400 uppercase tracking-tighter">Verified</span>
                             </div>
-                            <div className="bg-gray-50 dark:bg-white/[0.02] p-4 rounded-3xl border border-gray-100 dark:border-white/[0.05] flex flex-col items-center text-center gap-2">
-                                <div className="w-8 h-8 rounded-full bg-white dark:bg-white/[0.05] flex items-center justify-center text-[#cba153]">
-                                    <Ruler size={16} />
+                            <div className="bg-gray-50 dark:bg-white/[0.02] p-2 rounded-2xl border border-gray-100 dark:border-white/[0.05] flex flex-col items-center text-center gap-1">
+                                <div className="text-[#cba153]">
+                                    <Ruler size={14} />
                                 </div>
-                                <span className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">True Fit</span>
+                                <span className="text-[8px] font-bold text-gray-400 uppercase tracking-tighter">True Fit</span>
                             </div>
-                            <div className="bg-gray-50 dark:bg-white/[0.02] p-4 rounded-3xl border border-gray-100 dark:border-white/[0.05] flex flex-col items-center text-center gap-2">
-                                <div className="w-8 h-8 rounded-full bg-white dark:bg-white/[0.05] flex items-center justify-center text-[#cba153]">
-                                    <Truck size={16} />
+                            <div className="bg-gray-50 dark:bg-white/[0.02] p-2 rounded-2xl border border-gray-100 dark:border-white/[0.05] flex flex-col items-center text-center gap-1">
+                                <div className="text-[#cba153]">
+                                    <Truck size={14} />
                                 </div>
-                                <span className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">Priority</span>
+                                <span className="text-[8px] font-bold text-gray-400 uppercase tracking-tighter">Priority</span>
                             </div>
                         </motion.div>
                     </div>
