@@ -111,6 +111,7 @@ type Product = {
     description: string | null;
     sizes: string[] | null;
     image_url: string | null;
+    stock: number | null;
     created_at: string;
 };
 
@@ -146,6 +147,7 @@ function ProductManageItem({
     const [localGender, setLocalGender] = useState(product.gender || '');
     const [localDescription, setLocalDescription] = useState(product.description || '');
     const [localSizes, setLocalSizes] = useState<string[]>(product.sizes || []);
+    const [localStock, setLocalStock] = useState(product.stock?.toString() || '');
     const [isSaving, setIsSaving] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [isCustomCategory, setIsCustomCategory] = useState(false);
@@ -159,6 +161,7 @@ function ProductManageItem({
         localCategory !== (product.category || '') ||
         localGender !== (product.gender || '') ||
         localDescription !== (product.description || '') ||
+        localStock !== (product.stock?.toString() || '') ||
         JSON.stringify(localSizes.sort()) !== JSON.stringify((product.sizes || []).sort());
 
     // Keep local state in sync if product changes externally (e.g. image update)
@@ -169,6 +172,7 @@ function ProductManageItem({
         setLocalGender(product.gender || '');
         setLocalDescription(product.description || '');
         setLocalSizes(product.sizes || []);
+        setLocalStock(product.stock?.toString() || '');
     }, [product]);
 
     const handleSave = async () => {
@@ -187,6 +191,7 @@ function ProductManageItem({
                 gender: localGender,
                 description: localDescription.trim() || null,
                 sizes: localSizes,
+                stock: localStock ? parseInt(localStock) : null,
             });
         } finally {
             setIsSaving(false);
@@ -300,6 +305,19 @@ function ProductManageItem({
                     </div>
 
                     <div className="flex items-center gap-1">
+                        <div className="relative group">
+                            <input
+                                type="number"
+                                placeholder="0"
+                                value={localStock}
+                                onChange={(e) => {
+                                    if (e.target.value.length <= 4) setLocalStock(e.target.value);
+                                }}
+                                onFocus={handleFocus}
+                                className="w-12 h-7 bg-gray-100 dark:bg-[#2a2a2a] border-none text-[11px] font-bold text-gray-700 dark:text-gray-300 rounded-md focus:ring-1 focus:ring-[#cba153] text-center p-0"
+                            />
+                            <span className="absolute -top-6 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[9px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">Stock</span>
+                        </div>
                         <button
                             onClick={openDescModal}
                             className={`p-1.5 rounded-lg transition-colors ${localDescription ? 'text-[#cba153] bg-[#cba153]/10' : 'text-gray-400 bg-gray-100 dark:bg-[#2a2a2a]'}`}
@@ -419,6 +437,7 @@ interface ImageItem {
     gender: string;
     description: string;
     sizes: string[];
+    stock: string;
     fileName: string;
 }
 
@@ -430,13 +449,14 @@ interface SerializedItem {
     gender: string;
     description: string;
     sizes: string[];
+    stock: string;
     fileName: string;
 }
 
 interface UploadItemRowProps {
     item: ImageItem;
     index: number;
-    updateItem: (index: number, field: 'title' | 'price' | 'category' | 'gender' | 'description' | 'sizes', value: any) => void;
+    updateItem: (index: number, field: 'title' | 'price' | 'category' | 'gender' | 'description' | 'sizes' | 'stock', value: any) => void;
     removeItem: (index: number) => void;
     onPublish: (index: number) => Promise<void>;
 }
@@ -448,6 +468,7 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish }: Uploa
     const [localGender, setLocalGender] = useState(item.gender);
     const [localDescription, setLocalDescription] = useState(item.description);
     const [localSizes, setLocalSizes] = useState<string[]>(item.sizes || []);
+    const [localStock, setLocalStock] = useState(item.stock || '');
     const [isCustomCategory, setIsCustomCategory] = useState(false);
     const [descModalOpen, setDescModalOpen] = useState(false);
     const [modalDraft, setModalDraft] = useState('');
@@ -461,7 +482,8 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish }: Uploa
         setLocalGender(item.gender);
         setLocalDescription(item.description);
         setLocalSizes(item.sizes || []);
-    }, [item.title, item.price, item.category, item.gender, item.description, item.sizes]);
+        setLocalStock(item.stock || '');
+    }, [item.title, item.price, item.category, item.gender, item.description, item.sizes, item.stock]);
 
     const handleFocus = (e: React.FocusEvent<HTMLElement>) => {
         const target = e.target as HTMLElement;
@@ -584,6 +606,22 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish }: Uploa
                     </div>
 
                     <div className="flex items-center gap-1">
+                        <div className="relative group">
+                            <input
+                                type="number"
+                                placeholder="0"
+                                value={localStock}
+                                onChange={(e) => {
+                                    if (e.target.value.length <= 4) {
+                                        setLocalStock(e.target.value);
+                                        updateItem(index, 'stock', e.target.value);
+                                    }
+                                }}
+                                onFocus={handleFocus}
+                                className="w-12 h-7 bg-gray-100 dark:bg-[#2a2a2a] border-none text-[11px] font-bold text-gray-700 dark:text-gray-300 rounded-md focus:ring-1 focus:ring-[#cba153] text-center p-0"
+                            />
+                            <span className="absolute -top-6 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[9px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">Stock</span>
+                        </div>
                         <button
                             onClick={openDescModal}
                             title="Edit Description"
@@ -807,6 +845,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                 gender: s.gender || '',
                 description: s.description || '',
                 sizes: s.sizes || [],
+                stock: s.stock || '',
                 fileName: s.fileName,
             }));
 
@@ -831,6 +870,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
             gender: item.gender,
             description: item.description,
             sizes: item.sizes,
+            stock: item.stock,
             fileName: item.fileName,
         }));
         try {
@@ -859,6 +899,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                     gender: '',
                     description: '',
                     sizes: [],
+                    stock: '',
                     fileName: file.name,
                 };
             })
@@ -868,7 +909,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
         e.target.value = '';
     }, []);
 
-    const updateItem = (index: number, field: 'title' | 'price' | 'category' | 'gender' | 'description' | 'sizes', value: any) => {
+    const updateItem = (index: number, field: 'title' | 'price' | 'category' | 'gender' | 'description' | 'sizes' | 'stock', value: any) => {
         setImages((prev) => prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)));
     };
 
@@ -1027,6 +1068,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                 gender: item.gender,
                 description: item.description || null,
                 sizes: item.sizes || [],
+                stock: item.stock ? parseInt(item.stock) : null,
                 image_url: urlData.publicUrl,
             };
 
@@ -1127,6 +1169,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                         gender: item.gender,
                         description: item.description || null,
                         sizes: item.sizes || [],
+                        stock: item.stock ? parseInt(item.stock) : null,
                         image_url: urlData.publicUrl,
                     };
                 })

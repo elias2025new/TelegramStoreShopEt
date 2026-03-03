@@ -21,6 +21,7 @@ export interface Database {
                     category: string | null
                     gender: string | null
                     sizes: string[] | null
+                    stock: number | null
                 }
                 Insert: {
                     id?: string
@@ -32,6 +33,7 @@ export interface Database {
                     category?: string | null
                     gender?: string | null
                     sizes?: string[] | null
+                    stock?: number | null
                 }
                 Update: {
                     id?: string
@@ -43,6 +45,7 @@ export interface Database {
                     category?: string | null
                     gender?: string | null
                     sizes?: string[] | null
+                    stock?: number | null
                 }
                 Relationships: []
             }
