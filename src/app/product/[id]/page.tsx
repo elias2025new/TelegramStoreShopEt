@@ -140,8 +140,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 <header
                     className="fixed top-0 left-0 right-0 z-50 bg-white/70 dark:bg-black/40 backdrop-blur-2xl px-4 flex items-center justify-between transition-all duration-300"
                     style={{
-                        paddingTop: 'calc(2.25rem + var(--tg-safe-area-inset-top, 0px))',
-                        paddingBottom: '0.75rem'
+                        paddingTop: 'calc(1.85rem + var(--tg-safe-area-inset-top, 0px))',
+                        paddingBottom: '0.6rem'
                     }}
                 >
                     {/* Spacer to keep title centered since back button is now native Telegram one */}
@@ -154,9 +154,9 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                     </div>
                 </header>
 
-                <div className="px-6 space-y-6 relative z-10"
+                <div className="px-6 space-y-4 relative z-10"
                     style={{
-                        paddingTop: 'calc(0.75rem + var(--tg-safe-area-inset-top, 0px))'
+                        paddingTop: 'calc(0.5rem + var(--tg-safe-area-inset-top, 0px))'
                     }}
                 >
                     {/* Immersive Product Image */}
@@ -180,7 +180,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                             {/* Glow effect */}
                             <div className="absolute inset-x-8 -bottom-4 h-12 bg-[#cba153]/20 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
 
-                            <div className="relative aspect-[4/5] w-full rounded-[32px] overflow-hidden bg-gray-50 dark:bg-[#0a0a0a] border border-gray-100 dark:border-white/[0.03] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]">
+                            <div className="relative aspect-[10/9] w-full rounded-[32px] overflow-hidden bg-gray-50 dark:bg-[#0a0a0a] border border-gray-100 dark:border-white/[0.03] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]">
                                 {product.image_url ? (
                                     <Image
                                         src={product.image_url}
@@ -256,7 +256,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                             )}
 
                             {/* Title Section - More compact font sizes */}
-                            <div className="flex flex-col gap-0.5 mb-4">
+                            <div className="flex flex-col gap-0.5 mb-2">
                                 <h1 className="text-xl font-black text-gray-900 dark:text-white leading-tight tracking-tight">
                                     {product.name}
                                 </h1>
