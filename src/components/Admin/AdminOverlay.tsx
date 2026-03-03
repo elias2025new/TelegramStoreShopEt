@@ -768,6 +768,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
     const [selectedProductIds, setSelectedProductIds] = useState<Set<string>>(new Set());
     const [isDeletingBulk, setIsDeletingBulk] = useState(false);
     const [deleteMenuOpen, setDeleteMenuOpen] = useState(false);
+    const [isConfirmingDraftClear, setIsConfirmingDraftClear] = useState(false);
     const [confirmModal, setConfirmModal] = useState<{
         isOpen: boolean;
         title: string;
@@ -1284,27 +1285,45 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                         <div className="flex items-center justify-between mb-3">
                             <h3 className="font-semibold text-gray-900 dark:text-white uppercase text-[11px] tracking-wider">Batch Upload Products</h3>
                             {images.length > 0 && (
-                                <button
-                                    onClick={() => {
-                                        const clear = () => {
-                                            setImages([]);
-                                            localStorage.removeItem(DRAFT_KEY);
+                                !isConfirmingDraftClear ? (
+                                    <button
+                                        onClick={() => {
                                             if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-                                                window.Telegram.WebApp.HapticFeedback.notificationOccurred('warning');
+                                                window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
                                             }
-                                        };
-                                        if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-                                            window.Telegram.WebApp.showConfirm('Clear all draft products?', (ok: boolean) => {
-                                                if (ok) clear();
-                                            });
-                                        } else if (confirm('Clear all draft products?')) {
-                                            clear();
-                                        }
-                                    }}
-                                    className="text-[10px] font-black text-red-500 uppercase tracking-widest bg-red-500/10 px-2 py-1 rounded-md hover:bg-red-500/20 transition-colors"
-                                >
-                                    Clear All
-                                </button>
+                                            setIsConfirmingDraftClear(true);
+                                        }}
+                                        className="text-[10px] font-black text-red-500 uppercase tracking-widest bg-red-500/10 px-2 py-1 rounded-md hover:bg-red-500/20 transition-colors flex items-center gap-1"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                        </svg>
+                                        Clear All
+                                    </button>
+                                ) : (
+                                    <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-2 duration-200">
+                                        <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Clear?</span>
+                                        <button
+                                            onClick={() => {
+                                                setImages([]);
+                                                localStorage.removeItem(DRAFT_KEY);
+                                                setIsConfirmingDraftClear(false);
+                                                if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+                                                    window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+                                                }
+                                            }}
+                                            className="text-[9px] font-black bg-red-500 text-white px-2 py-1 rounded shadow-lg shadow-red-500/10 active:scale-90 transition-transform"
+                                        >
+                                            YES
+                                        </button>
+                                        <button
+                                            onClick={() => setIsConfirmingDraftClear(false)}
+                                            className="text-[9px] font-black bg-gray-100 dark:bg-[#1c1c1e] text-gray-500 dark:text-gray-400 px-2 py-1 rounded active:scale-90 transition-transform"
+                                        >
+                                            NO
+                                        </button>
+                                    </div>
+                                )
                             )}
                         </div>
 
