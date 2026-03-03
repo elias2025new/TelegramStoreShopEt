@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import PageTransition from '@/components/PageTransition';
-import DeleteConfirmModal from '@/components/DeleteConfirmModal';
+import AdminConfirmModal from '@/components/Admin/AdminConfirmModal';
 import { useState } from 'react';
 
 export default function CartPage() {
@@ -14,6 +14,7 @@ export default function CartPage() {
     const router = useRouter();
 
     const [isConfirmingClear, setIsConfirmingClear] = useState(false);
+    const [pendingDeleteItem, setPendingDeleteItem] = useState<string | null>(null);
 
     const handleClearClick = () => {
         if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
@@ -35,18 +36,18 @@ export default function CartPage() {
     };
 
     const handleDeleteItem = (id: string) => {
-        const webapp = typeof window !== 'undefined' ? window.Telegram?.WebApp : null;
-        if (webapp) {
-            webapp.HapticFeedback.impactOccurred('medium');
-            webapp.showConfirm('Remove this item from cart?', (confirmed: boolean) => {
-                if (confirmed) {
-                    removeFromCart(id);
-                    webapp.HapticFeedback.notificationOccurred('success');
-                }
-            });
-        } else {
-            if (confirm('Remove this item from cart?')) {
-                removeFromCart(id);
+        if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+            window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+        }
+        setPendingDeleteItem(id);
+    };
+
+    const handleConfirmDelete = () => {
+        if (pendingDeleteItem) {
+            removeFromCart(pendingDeleteItem);
+            setPendingDeleteItem(null);
+            if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+                window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
             }
         }
     };
@@ -178,6 +179,17 @@ export default function CartPage() {
                     </button>
                 </div>
             </main>
+
+            <AdminConfirmModal
+                isOpen={pendingDeleteItem !== null}
+                title="Remove Item?"
+                description="Are you sure you want to remove this item from your cart?"
+                confirmText="Yes, Remove"
+                cancelText="Keep Item"
+                onConfirm={handleConfirmDelete}
+                onCancel={() => setPendingDeleteItem(null)}
+                variant="danger"
+            />
         </PageTransition>
     );
 }
