@@ -35,12 +35,13 @@ export default function CartPage() {
     };
 
     const handleDeleteItem = (id: string) => {
-        if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-            window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
-            window.Telegram.WebApp.showConfirm('Remove this item from cart?', (confirmed: boolean) => {
+        const webapp = typeof window !== 'undefined' ? window.Telegram?.WebApp : null;
+        if (webapp) {
+            webapp.HapticFeedback.impactOccurred('medium');
+            webapp.showConfirm('Remove this item from cart?', (confirmed: boolean) => {
                 if (confirmed) {
                     removeFromCart(id);
-                    window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+                    webapp.HapticFeedback.notificationOccurred('success');
                 }
             });
         } else {
