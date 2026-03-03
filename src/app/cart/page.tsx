@@ -13,26 +13,41 @@ export default function CartPage() {
     const { items, removeFromCart, totalPrice, clearCart } = useCart();
     const router = useRouter();
 
-    const [pendingDeleteId, setPendingDeleteId] = useState<number | string | null>(null);
+    const [isConfirmingClear, setIsConfirmingClear] = useState(false);
 
-    const pendingItem = items.find((i) => i.id === pendingDeleteId);
+    const handleClearClick = () => {
+        if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+            window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+        }
+        setIsConfirmingClear(true);
+    };
 
-    const handleDeleteClick = (id: string) => {
+    const handleConfirmClear = () => {
+        if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+            window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+        }
+        clearCart();
+        setIsConfirmingClear(false);
+    };
+
+    const handleCancelClear = () => {
+        setIsConfirmingClear(false);
+    };
+
+    const handleDeleteItem = (id: string) => {
         if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
             window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+            window.Telegram.WebApp.showConfirm('Remove this item from cart?', (confirmed: boolean) => {
+                if (confirmed) {
+                    removeFromCart(id);
+                    window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+                }
+            });
+        } else {
+            if (confirm('Remove this item from cart?')) {
+                removeFromCart(id);
+            }
         }
-        setPendingDeleteId(id);
-    };
-
-    const handleConfirmDelete = () => {
-        if (pendingDeleteId !== null) {
-            removeFromCart(pendingDeleteId as string);
-        }
-        setPendingDeleteId(null);
-    };
-
-    const handleCancelDelete = () => {
-        setPendingDeleteId(null);
     };
 
     const handleCheckout = () => {
@@ -55,7 +70,7 @@ export default function CartPage() {
                 </div>
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Your Cart is Empty</h2>
                 <p className="text-gray-500 dark:text-gray-400 mb-6">Looks like you haven&apos;t added anything yet.</p>
-                <Link href="/" className="bg-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-700 transition-colors">
+                <Link href="/" className="bg-[#cba153] text-black px-6 py-3 rounded-xl font-bold active:scale-95 transition-transform shadow-[0_4px_15px_rgba(203,161,83,0.2)]">
                     Start Shopping
                 </Link>
             </div>
@@ -65,13 +80,43 @@ export default function CartPage() {
     return (
         <PageTransition>
             <main className="min-h-[100dvh] bg-white dark:bg-gray-950 pb-40">
-                <header className="sticky top-0 z-10 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 px-4 py-3 flex items-center gap-4 pt-[calc(0.75rem+var(--tg-safe-area-inset-top,0px)+var(--tg-content-safe-area-inset-top,0px))]">
-                    <Link href="/" className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-700 dark:text-gray-200">
-                            <path d="m15 18-6-6 6-6" />
-                        </svg>
-                    </Link>
-                    <h1 className="text-lg font-bold text-gray-900 dark:text-white">Shopping Cart</h1>
+                <header className="sticky top-0 z-20 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 px-4 py-3 flex items-center justify-between pt-[calc(0.75rem+var(--tg-safe-area-inset-top,0px)+var(--tg-content-safe-area-inset-top,0px))] transition-all duration-300">
+                    <div className="flex items-center gap-3">
+                        <Link href="/" className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors active:scale-90">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-700 dark:text-gray-200">
+                                <path d="m15 18-6-6 6-6" />
+                            </svg>
+                        </Link>
+                        <h1 className="text-lg font-bold text-gray-900 dark:text-white">Shopping Cart</h1>
+                    </div>
+
+                    {!isConfirmingClear ? (
+                        <button
+                            onClick={handleClearClick}
+                            className="text-xs font-bold text-red-500 hover:text-red-600 bg-red-50 dark:bg-red-500/10 px-3 py-1.5 rounded-lg active:scale-95 transition-all flex items-center gap-1.5"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                            </svg>
+                            CLEAR
+                        </button>
+                    ) : (
+                        <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-4 duration-300">
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mr-1">Clear?</span>
+                            <button
+                                onClick={handleConfirmClear}
+                                className="text-[10px] font-black bg-red-500 text-white px-3 py-1.5 rounded-md active:scale-90 transition-transform shadow-lg shadow-red-500/20"
+                            >
+                                YES
+                            </button>
+                            <button
+                                onClick={handleCancelClear}
+                                className="text-[10px] font-black bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-3 py-1.5 rounded-md active:scale-90 transition-transform"
+                            >
+                                NO
+                            </button>
+                        </div>
+                    )}
                 </header>
 
                 <div className="p-4 flex flex-col gap-4">
@@ -102,7 +147,7 @@ export default function CartPage() {
                                         {new Intl.NumberFormat('en-ET', { style: 'currency', currency: 'ETB', maximumFractionDigits: 0 }).format(item.product.price * item.quantity)}
                                     </span>
                                     <button
-                                        onClick={() => handleDeleteClick(item.id)}
+                                        onClick={() => handleDeleteItem(item.id)}
                                         className="text-red-500 hover:text-red-600 p-1 active:scale-90 transition-transform"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -132,14 +177,6 @@ export default function CartPage() {
                     </button>
                 </div>
             </main>
-
-            {/* Delete confirmation modal */}
-            <DeleteConfirmModal
-                isOpen={pendingDeleteId !== null}
-                productName={pendingItem?.product.name ?? ''}
-                onConfirm={handleConfirmDelete}
-                onCancel={handleCancelDelete}
-            />
         </PageTransition>
     );
 }
