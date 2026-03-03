@@ -7,7 +7,7 @@ import { Database } from '@/types/supabase';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { use, useState, useCallback } from 'react';
+import { use, useState, useCallback, useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
 import PageTransition from '@/components/PageTransition';
 import CartIcon from '@/components/CartIcon';
@@ -50,6 +50,26 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     const [isAdded, setIsAdded] = useState(false);
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
     const [shakeSizeBtn, setShakeSizeBtn] = useState(false);
+
+    // Telegram Back Button Integration
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            import('@twa-dev/sdk').then((WebApp) => {
+                const twa = WebApp.default;
+                twa.BackButton.show();
+                twa.BackButton.onClick(handleBack);
+            });
+        }
+        return () => {
+            if (typeof window !== 'undefined') {
+                import('@twa-dev/sdk').then((WebApp) => {
+                    const twa = WebApp.default;
+                    twa.BackButton.hide();
+                    twa.BackButton.offClick(handleBack);
+                });
+            }
+        };
+    }, [handleBack]);
 
 
 
@@ -235,8 +255,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                                                 key={size}
                                                 onClick={() => setSelectedSize(selectedSize === size ? null : size)}
                                                 className={`shrink-0 min-w-[48px] h-10 flex items-center justify-center rounded-xl border text-[12px] font-black uppercase tracking-wide transition-all duration-200 active:scale-90 ${selectedSize === size
-                                                        ? 'bg-[#cba153] border-[#cba153] text-white shadow-lg shadow-[#cba153]/25 scale-105'
-                                                        : 'bg-gray-50 dark:bg-white/[0.04] border-gray-100 dark:border-white/[0.08] text-gray-500 dark:text-white/50'
+                                                    ? 'bg-[#cba153] border-[#cba153] text-white shadow-lg shadow-[#cba153]/25 scale-105'
+                                                    : 'bg-gray-50 dark:bg-white/[0.04] border-gray-100 dark:border-white/[0.08] text-gray-500 dark:text-white/50'
                                                     }`}
                                             >
                                                 {size}
