@@ -182,15 +182,27 @@ function ProductManageItem({
     const [descModalOpen, setDescModalOpen] = useState(false);
     const [modalDraft, setModalDraft] = useState('');
 
+    // Helper to get a clean stock object (numbers only) for comparison and saving
+    const getCleanStock = (stockMap: Record<string, string>, activeSizes: string[]) => {
+        const cleaned: Record<string, number> = {};
+        Object.entries(stockMap).forEach(([k, v]) => {
+            if (activeSizes.includes(k) && v !== '') {
+                cleaned[k] = parseInt(v);
+            }
+        });
+        return cleaned;
+    };
+
     // Track if there are unsaved changes
+    const currentCleanStock = getCleanStock(localStock, localSizes);
     const hasChanges =
         localName !== product.name ||
         localPrice !== product.price.toString() ||
         localCategory !== (product.category || '') ||
         localGender !== (product.gender || '') ||
         localDescription !== (product.description || '') ||
-        JSON.stringify(localStock) !== JSON.stringify(product.stock || {}) ||
-        JSON.stringify(localSizes.sort()) !== JSON.stringify((product.sizes || []).sort());
+        JSON.stringify(currentCleanStock) !== JSON.stringify(product.stock || {}) ||
+        JSON.stringify([...localSizes].sort()) !== JSON.stringify([...(product.sizes || [])].sort());
 
     // Keep local state in sync if product changes externally (e.g. image update)
     useEffect(() => {
@@ -225,15 +237,7 @@ function ProductManageItem({
                 gender: localGender,
                 description: localDescription.trim() || null,
                 sizes: localSizes,
-                stock: Object.keys(localStock).length > 0 ? (() => {
-                    const cleanedStock: Record<string, number> = {};
-                    Object.entries(localStock).forEach(([k, v]) => {
-                        if (localSizes.includes(k) && v !== '') {
-                            cleanedStock[k] = parseInt(v);
-                        }
-                    });
-                    return cleanedStock;
-                })() : null,
+                stock: Object.keys(currentCleanStock).length > 0 ? currentCleanStock : null,
             });
         } finally {
             setIsSaving(false);
