@@ -1351,9 +1351,11 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
     };
 
     const handleIndividualPublish = async (index: number) => {
+        if (isUploading) return;
         const item = images[index];
         if (!item) return;
 
+        setIsUploading(true);
         try {
             const fileExt = item.fileName.split('.').pop();
             const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
@@ -1431,6 +1433,8 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
         } catch (err: any) {
             setUploadStatus('ERROR: ' + err.message);
             throw err;
+        } finally {
+            setIsUploading(false);
         }
     };
 
@@ -1475,7 +1479,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
     };
 
     const handlePublish = async () => {
-        if (images.length === 0) return;
+        if (isUploading || images.length === 0) return;
         const invalid = images.find((img) => !img.price || parseFloat(img.price) <= 0 || !img.title.trim() || !img.gender);
         if (invalid) {
             setUploadStatus('ERROR: Title, price, and primary category are required.');
