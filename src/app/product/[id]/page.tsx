@@ -138,17 +138,25 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
                 {/* Refined Fixed Header */}
                 <header
-                    className="fixed top-0 left-0 right-0 z-50 px-4 flex items-center justify-end transition-all duration-300"
+                    className="fixed top-0 left-0 right-0 z-50 bg-white/70 dark:bg-black/40 backdrop-blur-2xl px-4 flex items-center justify-between transition-all duration-300"
                     style={{
-                        paddingTop: 'calc(0.75rem + var(--tg-safe-area-inset-top, 0px))',
+                        paddingTop: 'calc(2.2rem + var(--tg-safe-area-inset-top, 0px))',
+                        paddingBottom: '0.6rem'
                     }}
                 >
-                    <CartIcon />
+                    {/* Spacer to keep title centered since back button is now native Telegram one */}
+                    <div className="w-10" />
+                    <div className="flex flex-col items-center">
+                        <span className="text-[10px] font-black text-[#cba153] uppercase tracking-[0.2em]">Product Details</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                        <CartIcon />
+                    </div>
                 </header>
 
                 <div className="px-6 space-y-4 relative z-10"
                     style={{
-                        paddingTop: 'calc(0.2rem + var(--tg-safe-area-inset-top, 0px))'
+                        paddingTop: 'calc(0.5rem + var(--tg-safe-area-inset-top, 0px))'
                     }}
                 >
                     {/* Immersive Product Image */}
