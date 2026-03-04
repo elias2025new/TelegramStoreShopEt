@@ -50,6 +50,14 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     const [isAdded, setIsAdded] = useState(false);
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
     const [shakeSizeBtn, setShakeSizeBtn] = useState(false);
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+    // Update selectedImage when product data arrives
+    useEffect(() => {
+        if (product?.image_url) {
+            setSelectedImage(product.image_url);
+        }
+    }, [product]);
 
     // Telegram Back Button Integration
     useEffect(() => {
@@ -181,9 +189,9 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                             <div className="absolute inset-x-8 -bottom-4 h-12 bg-[#cba153]/20 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
 
                             <div className="relative aspect-[10/9] w-full rounded-[32px] overflow-hidden bg-gray-50 dark:bg-[#0a0a0a] border border-gray-100 dark:border-white/[0.03] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]">
-                                {product.image_url ? (
+                                {selectedImage ? (
                                     <Image
-                                        src={product.image_url}
+                                        src={selectedImage}
                                         alt={product.name}
                                         fill
                                         className="object-cover object-center"
@@ -198,6 +206,34 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                             </div>
                         </motion.div>
                     </motion.div>
+
+                    {/* Additional Images Thumbnails */}
+                    {product.additional_images && product.additional_images.length > 0 && (
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.3, duration: 0.8 }}
+                            className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-6 px-6"
+                        >
+                            {/* Main image thumbnail */}
+                            <button
+                                onClick={() => setSelectedImage(product.image_url)}
+                                className={`shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${selectedImage === product.image_url ? 'border-[#cba153] scale-105' : 'border-transparent opacity-60'}`}
+                            >
+                                <img src={product.image_url || ''} alt="main" className="w-full h-full object-cover" />
+                            </button>
+                            {/* Additional images thumbnails */}
+                            {product.additional_images.map((url, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => setSelectedImage(url)}
+                                    className={`shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${selectedImage === url ? 'border-[#cba153] scale-105' : 'border-transparent opacity-60'}`}
+                                >
+                                    <img src={url} alt={`extra-${i}`} className="w-full h-full object-cover" />
+                                </button>
+                            ))}
+                        </motion.div>
+                    )}
 
                     {/* Content Section */}
                     <div className="space-y-8 pb-10">

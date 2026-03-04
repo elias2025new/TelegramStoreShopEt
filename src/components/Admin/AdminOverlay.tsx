@@ -135,6 +135,7 @@ type Product = {
     image_url: string | null;
     stock: Record<string, number> | null;
     created_at: string;
+    additional_images?: string[] | null;
 };
 
 type Announcement = {
@@ -183,6 +184,9 @@ function ProductManageItem({
     const [isCustomCategory, setIsCustomCategory] = useState(false);
     const [descModalOpen, setDescModalOpen] = useState(false);
     const [modalDraft, setModalDraft] = useState('');
+    const [localAdditionalImages, setLocalAdditionalImages] = useState<string[]>(product.additional_images || []);
+    const [isUploadingAdditional, setIsUploadingAdditional] = useState(false);
+    const additionalImagesInputRef = useRef<HTMLInputElement>(null);
 
     // Helper to get a clean stock object (numbers only) for comparison and saving
     const getCleanStock = (stockMap: Record<string, string>, activeSizes: string[]) => {
@@ -204,7 +208,8 @@ function ProductManageItem({
         localGender !== (product.gender || '') ||
         localDescription !== (product.description || '') ||
         JSON.stringify(currentCleanStock) !== JSON.stringify(product.stock || {}) ||
-        JSON.stringify([...localSizes].sort()) !== JSON.stringify([...(product.sizes || [])].sort());
+        JSON.stringify([...localSizes].sort()) !== JSON.stringify([...(product.sizes || [])].sort()) ||
+        JSON.stringify(localAdditionalImages) !== JSON.stringify(product.additional_images || []);
 
     // Keep local state in sync if product changes externally (e.g. image update)
     useEffect(() => {
@@ -221,6 +226,7 @@ function ProductManageItem({
             });
         }
         setLocalStock(initialStock);
+        setLocalAdditionalImages(product.additional_images || []);
     }, [product]);
 
     const handleSave = async () => {
@@ -240,6 +246,7 @@ function ProductManageItem({
                 description: localDescription.trim() || null,
                 sizes: localSizes,
                 stock: Object.keys(currentCleanStock).length > 0 ? currentCleanStock : null,
+                additional_images: localAdditionalImages,
             });
         } finally {
             setIsSaving(false);
@@ -261,6 +268,50 @@ function ProductManageItem({
     const saveDesc = () => {
         setLocalDescription(modalDraft);
         setDescModalOpen(false);
+    };
+
+    const handleAdditionalImagesSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || []);
+        if (files.length === 0) return;
+
+        if (localAdditionalImages.length + files.length > 5) {
+            alert('Maximum 5 additional images allowed');
+            return;
+        }
+
+        setIsUploadingAdditional(true);
+        try {
+            const newImages: string[] = [];
+            for (const file of files) {
+                // Compress and convert to base64 for preview/storage
+                const base64 = await fileToBase64(file);
+                const compressed = await compressImage(base64);
+
+                // Upload to Supabase Storage
+                const fileName = `${product.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+                const { data, error } = await supabase.storage
+                    .from('product-images')
+                    .upload(fileName, file);
+
+                if (error) throw error;
+
+                const { data: { publicUrl } } = supabase.storage
+                    .from('product-images')
+                    .getPublicUrl(fileName);
+
+                newImages.push(publicUrl);
+            }
+            setLocalAdditionalImages(prev => [...prev, ...newImages]);
+        } catch (err: any) {
+            alert('Upload failed: ' + err.message);
+        } finally {
+            setIsUploadingAdditional(false);
+            if (additionalImagesInputRef.current) additionalImagesInputRef.current.value = '';
+        }
+    };
+
+    const removeAdditionalImage = (url: string) => {
+        setLocalAdditionalImages(prev => prev.filter(img => img !== url));
     };
 
     const isShoes = localCategory.toLowerCase().includes('shoes');
@@ -299,6 +350,51 @@ function ProductManageItem({
                         >
                             Confirm Description
                         </button>
+
+                        <div className="mt-4 pt-4 border-t border-gray-100 dark:border-[#2a2a2a]">
+                            <div className="flex items-center justify-between mb-3">
+                                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Additional Images ({localAdditionalImages.length}/5)</span>
+                                {localAdditionalImages.length < 5 && (
+                                    <button
+                                        onClick={() => additionalImagesInputRef.current?.click()}
+                                        disabled={isUploadingAdditional}
+                                        className="text-[10px] font-black text-[#cba153] uppercase border border-[#cba153]/30 px-2 py-1 rounded-lg hover:bg-[#cba153]/10 transition-colors"
+                                    >
+                                        {isUploadingAdditional ? 'Uploading...' : '+ Add'}
+                                    </button>
+                                )}
+                            </div>
+
+                            <input
+                                type="file"
+                                ref={additionalImagesInputRef}
+                                className="hidden"
+                                accept="image/*"
+                                multiple
+                                onChange={handleAdditionalImagesSelect}
+                            />
+
+                            <div className="grid grid-cols-5 gap-2">
+                                {localAdditionalImages.map((url, i) => (
+                                    <div key={i} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-black group">
+                                        <img src={url} alt={`extra-${i}`} className="w-full h-full object-cover" />
+                                        <button
+                                            onClick={() => removeAdditionalImage(url)}
+                                            className="absolute top-0.5 right-0.5 p-1 bg-red-600/80 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M18 6 6 18" /><path d="m6 6 12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                ))}
+                                {Array.from({ length: Math.max(0, 5 - localAdditionalImages.length) }).map((_, i) => (
+                                    <div key={`empty-${i}`} className="aspect-square rounded-lg border-2 border-dashed border-gray-200 dark:border-[#2a2a2a] flex items-center justify-center">
+                                        <span className="text-xs text-gray-400">+</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
@@ -489,6 +585,7 @@ interface ImageItem {
     sizes: string[];
     stock: Record<string, string>;
     fileName: string;
+    additionalImages: string[];
 }
 
 interface SerializedItem {
@@ -501,12 +598,13 @@ interface SerializedItem {
     sizes: string[];
     stock: Record<string, string>;
     fileName: string;
+    additionalImages: string[];
 }
 
 interface UploadItemRowProps {
     item: ImageItem;
     index: number;
-    updateItem: (index: number, field: 'title' | 'price' | 'category' | 'gender' | 'description' | 'sizes' | 'stock', value: any) => void;
+    updateItem: (index: number, field: 'title' | 'price' | 'category' | 'gender' | 'description' | 'sizes' | 'stock' | 'additionalImages', value: any) => void;
     removeItem: (index: number) => void;
     onPublish: (index: number) => Promise<void>;
 }
@@ -519,6 +617,9 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish }: Uploa
     const [localDescription, setLocalDescription] = useState(item.description);
     const [localSizes, setLocalSizes] = useState<string[]>(item.sizes || []);
     const [localStock, setLocalStock] = useState<Record<string, string>>(item.stock || {});
+    const [localAdditionalImages, setLocalAdditionalImages] = useState<string[]>(item.additionalImages || []);
+    const [isProcessingImages, setIsProcessingImages] = useState(false);
+    const additionalImagesInputRef = useRef<HTMLInputElement>(null);
     const [isCustomCategory, setIsCustomCategory] = useState(false);
     const [descModalOpen, setDescModalOpen] = useState(false);
     const [modalDraft, setModalDraft] = useState('');
@@ -533,7 +634,8 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish }: Uploa
         setLocalDescription(item.description);
         setLocalSizes(item.sizes || []);
         setLocalStock(item.stock || {});
-    }, [item.title, item.price, item.category, item.gender, item.description, item.sizes, item.stock]);
+        setLocalAdditionalImages(item.additionalImages || []);
+    }, [item.title, item.price, item.category, item.gender, item.description, item.sizes, item.stock, item.additionalImages]);
 
     const handleFocus = (e: React.FocusEvent<HTMLElement>) => {
         const target = e.target as HTMLElement;
@@ -551,6 +653,40 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish }: Uploa
         setLocalDescription(modalDraft);
         updateItem(index, 'description', modalDraft);
         setDescModalOpen(false);
+    };
+
+    const handleAdditionalImagesSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || []);
+        if (files.length === 0) return;
+
+        if (localAdditionalImages.length + files.length > 5) {
+            alert('Maximum 5 additional images allowed');
+            return;
+        }
+
+        setIsProcessingImages(true);
+        try {
+            const newImages: string[] = [];
+            for (const file of files) {
+                const base64 = await fileToBase64(file);
+                const compressed = await compressImage(base64);
+                newImages.push(compressed);
+            }
+            const updated = [...localAdditionalImages, ...newImages];
+            setLocalAdditionalImages(updated);
+            updateItem(index, 'additionalImages', updated);
+        } catch (err: any) {
+            alert('Image processing failed: ' + err.message);
+        } finally {
+            setIsProcessingImages(false);
+            if (additionalImagesInputRef.current) additionalImagesInputRef.current.value = '';
+        }
+    };
+
+    const removeAdditionalImage = (imgBase64: string) => {
+        const updated = localAdditionalImages.filter(img => img !== imgBase64);
+        setLocalAdditionalImages(updated);
+        updateItem(index, 'additionalImages', updated);
     };
 
     const handlePush = async () => {
@@ -617,6 +753,51 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish }: Uploa
                         >
                             Save Description
                         </button>
+
+                        <div className="mt-4 pt-4 border-t border-gray-100 dark:border-[#2a2a2a]">
+                            <div className="flex items-center justify-between mb-3">
+                                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Additional Images ({localAdditionalImages.length}/5)</span>
+                                {localAdditionalImages.length < 5 && (
+                                    <button
+                                        onClick={() => additionalImagesInputRef.current?.click()}
+                                        disabled={isProcessingImages}
+                                        className="text-[10px] font-black text-[#cba153] uppercase border border-[#cba153]/30 px-2 py-1 rounded-lg hover:bg-[#cba153]/10 transition-colors"
+                                    >
+                                        {isProcessingImages ? 'Processing...' : '+ Add'}
+                                    </button>
+                                )}
+                            </div>
+
+                            <input
+                                type="file"
+                                ref={additionalImagesInputRef}
+                                className="hidden"
+                                accept="image/*"
+                                multiple
+                                onChange={handleAdditionalImagesSelect}
+                            />
+
+                            <div className="grid grid-cols-5 gap-2">
+                                {localAdditionalImages.map((base64, i) => (
+                                    <div key={i} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-black group">
+                                        <img src={base64} alt={`extra-${i}`} className="w-full h-full object-cover" />
+                                        <button
+                                            onClick={() => removeAdditionalImage(base64)}
+                                            className="absolute top-0.5 right-0.5 p-1 bg-red-600/80 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M18 6 6 18" /><path d="m6 6 12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                ))}
+                                {Array.from({ length: Math.max(0, 5 - localAdditionalImages.length) }).map((_, i) => (
+                                    <div key={`empty-${i}`} className="aspect-square rounded-lg border-2 border-dashed border-gray-200 dark:border-[#2a2a2a] flex items-center justify-center">
+                                        <span className="text-xs text-gray-400">+</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
@@ -897,6 +1078,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                 sizes: s.sizes || [],
                 stock: s.stock || {},
                 fileName: s.fileName,
+                additionalImages: s.additionalImages || [],
             }));
 
             setImages(restored);
@@ -922,6 +1104,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
             sizes: item.sizes,
             stock: item.stock,
             fileName: item.fileName,
+            additionalImages: item.additionalImages || [],
         }));
         try {
             localStorage.setItem(DRAFT_KEY, JSON.stringify(serialized));
@@ -951,6 +1134,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                     sizes: [],
                     stock: {},
                     fileName: file.name,
+                    additionalImages: [],
                 };
             })
         );
@@ -959,7 +1143,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
         e.target.value = '';
     }, []);
 
-    const updateItem = (index: number, field: 'title' | 'price' | 'category' | 'gender' | 'description' | 'sizes' | 'stock', value: any) => {
+    const updateItem = (index: number, field: 'title' | 'price' | 'category' | 'gender' | 'description' | 'sizes' | 'stock' | 'additionalImages', value: any) => {
         setImages((prev) => prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)));
     };
 
@@ -1174,6 +1358,22 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                     return Object.keys(cleanedStock).length > 0 ? cleanedStock : null;
                 })(),
                 image_url: urlData.publicUrl,
+                additional_images: await (async () => {
+                    const extraUrls: string[] = [];
+                    if (item.additionalImages && item.additionalImages.length > 0) {
+                        for (let i = 0; i < item.additionalImages.length; i++) {
+                            const b64 = item.additionalImages[i];
+                            const file = base64ToFile(b64, `extra-${i}.jpg`);
+                            const extraPath = `products/${Date.now()}-extra-${i}-${Math.random().toString(36).slice(2)}.jpg`;
+                            const { error: err } = await supabase.storage.from('products').upload(extraPath, file);
+                            if (!err) {
+                                const { data } = supabase.storage.from('products').getPublicUrl(extraPath);
+                                extraUrls.push(data.publicUrl);
+                            }
+                        }
+                    }
+                    return extraUrls;
+                })(),
             };
 
             const { error: insertError } = await supabase.from('products').insert([productData]);
@@ -1285,6 +1485,22 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                             return Object.keys(cleanedStock).length > 0 ? cleanedStock : null;
                         })(),
                         image_url: urlData.publicUrl,
+                        additional_images: await (async () => {
+                            const extraUrls: string[] = [];
+                            if (item.additionalImages && item.additionalImages.length > 0) {
+                                for (let i = 0; i < item.additionalImages.length; i++) {
+                                    const b64 = item.additionalImages[i];
+                                    const file = base64ToFile(b64, `extra-${i}.jpg`);
+                                    const extraPath = `products/${Date.now()}-extra-${i}-${Math.random().toString(36).slice(2)}.jpg`;
+                                    const { error: err } = await supabase.storage.from('products').upload(extraPath, file);
+                                    if (!err) {
+                                        const { data } = supabase.storage.from('products').getPublicUrl(extraPath);
+                                        extraUrls.push(data.publicUrl);
+                                    }
+                                }
+                            }
+                            return extraUrls;
+                        })(),
                     };
                 })
             );

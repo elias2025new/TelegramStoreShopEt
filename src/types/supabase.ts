@@ -22,6 +22,7 @@ export interface Database {
                     gender: string | null
                     sizes: string[] | null
                     stock: Json | null
+                    additional_images: string[] | null
                 }
                 Insert: {
                     id?: string
@@ -34,6 +35,7 @@ export interface Database {
                     gender?: string | null
                     sizes?: string[] | null
                     stock?: Json | null
+                    additional_images?: string[] | null
                 }
                 Update: {
                     id?: string
@@ -46,6 +48,7 @@ export interface Database {
                     gender?: string | null
                     sizes?: string[] | null
                     stock?: Json | null
+                    additional_images?: string[] | null
                 }
                 Relationships: []
             }
