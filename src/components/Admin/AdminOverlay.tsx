@@ -297,13 +297,14 @@ function ProductManageItem({
             for (const file of files) {
                 // Compress and convert to base64 for preview/storage
                 const base64 = await fileToBase64(file);
-                const compressed = await compressImage(base64);
+                const compressed = await compressImage(base64, 1000, 0.8);
+                const compressedFile = base64ToFile(compressed, file.name);
 
                 // Upload to Supabase Storage
                 const fileName = `${product.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
-                const { data, error } = await supabase.storage
+                const { error } = await supabase.storage
                     .from('products')
-                    .upload(fileName, file);
+                    .upload(fileName, compressedFile);
 
                 if (error) throw error;
 
@@ -1007,8 +1008,8 @@ function base64ToFile(dataUrl: string, fileName: string): File {
     return new File([bytes], fileName, { type: mime });
 }
 
-/** Compress a base64 image for localStorage (Draft) */
-function compressImage(base64: string, maxWidth = 300, quality = 0.6): Promise<string> {
+/** Compress a base64 image (defaults to 1000px for good quality/fast loading) */
+function compressImage(base64: string, maxWidth = 1000, quality = 0.8): Promise<string> {
     return new Promise((resolve) => {
         const img = new window.Image();
         img.src = base64;
@@ -1027,6 +1028,10 @@ function compressImage(base64: string, maxWidth = 300, quality = 0.6): Promise<s
             const ctx = canvas.getContext('2d');
             ctx?.drawImage(img, 0, 0, width, height);
             resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = () => {
+            // If compression fails, return original
+            resolve(base64);
         };
     });
 }
@@ -1354,9 +1359,13 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
             const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
             const filePath = `products/${fileName}`;
 
+            // Compress main image
+            const compressedBase64 = await compressImage(item.preview, 1200, 0.8);
+            const compressedFile = base64ToFile(compressedBase64, item.fileName);
+
             const { error: storageError } = await supabase.storage
                 .from('products')
-                .upload(filePath, item.file);
+                .upload(filePath, compressedFile);
 
             if (storageError) throw storageError;
 
@@ -1481,9 +1490,13 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                     const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
                     const filePath = `products/${fileName}`;
 
+                    // Compress main image
+                    const compressedBase64 = await compressImage(item.preview, 1200, 0.8);
+                    const compressedFile = base64ToFile(compressedBase64, item.fileName);
+
                     const { error: storageError } = await supabase.storage
                         .from('products')
-                        .upload(filePath, item.file);
+                        .upload(filePath, compressedFile);
 
                     if (storageError) throw storageError;
 

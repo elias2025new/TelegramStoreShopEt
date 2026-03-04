@@ -51,11 +51,13 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
     const [shakeSizeBtn, setShakeSizeBtn] = useState(false);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [isImageLoading, setIsImageLoading] = useState(true);
 
     // Update selectedImage when product data arrives
     useEffect(() => {
         if (product?.image_url) {
             setSelectedImage(product.image_url);
+            setIsImageLoading(true);
         }
     }, [product]);
 
@@ -190,13 +192,21 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
                             <div className="relative aspect-[10/9] w-full rounded-[32px] overflow-hidden bg-gray-50 dark:bg-[#0a0a0a] border border-gray-100 dark:border-white/[0.03] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]">
                                 {selectedImage ? (
-                                    <Image
-                                        src={selectedImage}
-                                        alt={product.name}
-                                        fill
-                                        className="object-cover object-center"
-                                        priority
-                                    />
+                                    <>
+                                        <Image
+                                            src={selectedImage}
+                                            alt={product.name}
+                                            fill
+                                            className={`object-cover object-center transition-all duration-500 ${isImageLoading ? 'blur-xl scale-110 opacity-50' : 'blur-0 scale-100 opacity-100'}`}
+                                            priority
+                                            onLoad={() => setIsImageLoading(false)}
+                                        />
+                                        {isImageLoading && (
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <div className="w-8 h-8 border-2 border-[#cba153] border-t-transparent rounded-full animate-spin"></div>
+                                            </div>
+                                        )}
+                                    </>
                                 ) : (
                                     <div className="flex flex-col items-center justify-center h-full text-gray-300 dark:text-white/10 gap-3">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /><circle cx="9" cy="9" r="2" /><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></svg>
@@ -217,7 +227,12 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                         >
                             {/* Main image thumbnail */}
                             <button
-                                onClick={() => setSelectedImage(product.image_url)}
+                                onClick={() => {
+                                    if (selectedImage !== product.image_url) {
+                                        setSelectedImage(product.image_url);
+                                        setIsImageLoading(true);
+                                    }
+                                }}
                                 className={`shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${selectedImage === product.image_url ? 'border-[#cba153] scale-105' : 'border-transparent opacity-60'}`}
                             >
                                 <img src={product.image_url || ''} alt="main" className="w-full h-full object-cover" />
@@ -226,7 +241,12 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                             {product.additional_images.map((url, i) => url && (
                                 <button
                                     key={i}
-                                    onClick={() => setSelectedImage(url)}
+                                    onClick={() => {
+                                        if (selectedImage !== url) {
+                                            setSelectedImage(url);
+                                            setIsImageLoading(true);
+                                        }
+                                    }}
                                     className={`shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${selectedImage === url ? 'border-[#cba153] scale-105' : 'border-transparent opacity-60'}`}
                                 >
                                     <img src={url} alt={`extra-${i}`} className="w-full h-full object-cover" />
