@@ -70,10 +70,11 @@ interface MultiChoiceChipGroupProps {
     onChange: (value: string[]) => void;
     stockValues?: Record<string, string>;
     onStockChange?: (size: string, value: string) => void;
+    onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
     label?: string;
 }
 
-function MultiChoiceChipGroup({ options, selected, onChange, stockValues, onStockChange, label }: MultiChoiceChipGroupProps) {
+function MultiChoiceChipGroup({ options, selected, onChange, stockValues, onStockChange, onFocus, label }: MultiChoiceChipGroupProps) {
     const toggleOption = (opt: string) => {
         if (selected.includes(opt)) {
             onChange(selected.filter((s) => s !== opt));
@@ -111,6 +112,7 @@ function MultiChoiceChipGroup({ options, selected, onChange, stockValues, onStoc
                                             onStockChange(opt, e.target.value);
                                         }
                                     }}
+                                    onFocus={onFocus}
                                     className="w-10 h-6 bg-gray-900 border border-gray-700 rounded text-[10px] text-white text-center focus:outline-none focus:border-yellow-500"
                                 />
                             )}
@@ -435,6 +437,7 @@ function ProductManageItem({
                                 onStockChange={(size, val) => {
                                     setLocalStock(prev => ({ ...prev, [size]: val }));
                                 }}
+                                onFocus={handleFocus}
                             />
                         )}
 
@@ -766,6 +769,7 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish }: Uploa
                                 setLocalStock(nextStock);
                                 updateItem(index, 'stock', nextStock);
                             }}
+                            onFocus={handleFocus}
                         />
                     )}
                 </div>
