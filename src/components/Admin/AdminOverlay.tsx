@@ -837,6 +837,8 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
     const [isUploading, setIsUploading] = useState(false);
     const [uploadStatus, setUploadStatus] = useState('');
     const [draftRestored, setDraftRestored] = useState(false);
+    const [stats, setStats] = useState({ today: 0, week: 0, totalProducts: 0 });
+    const [isLoadingStats, setIsLoadingStats] = useState(true);
 
     const [announceModalOpen, setAnnounceModalOpen] = useState(false);
     const [announceForm, setAnnounceForm] = useState<Announcement>({
