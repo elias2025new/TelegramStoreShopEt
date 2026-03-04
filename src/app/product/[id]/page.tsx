@@ -208,12 +208,12 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                     </motion.div>
 
                     {/* Additional Images Thumbnails */}
-                    {product.additional_images && product.additional_images.length > 0 && (
+                    {product.additional_images && Array.isArray(product.additional_images) && product.additional_images.length > 0 && (
                         <motion.div
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.3, duration: 0.8 }}
-                            className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-6 px-6"
+                            className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-6 px-6 relative z-20"
                         >
                             {/* Main image thumbnail */}
                             <button
@@ -223,7 +223,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                                 <img src={product.image_url || ''} alt="main" className="w-full h-full object-cover" />
                             </button>
                             {/* Additional images thumbnails */}
-                            {product.additional_images.map((url, i) => (
+                            {product.additional_images.map((url, i) => url && (
                                 <button
                                     key={i}
                                     onClick={() => setSelectedImage(url)}
