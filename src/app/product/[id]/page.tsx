@@ -140,7 +140,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 <header
                     className="fixed top-0 left-0 right-0 z-50 bg-white/70 dark:bg-black/40 backdrop-blur-2xl px-4 flex items-center justify-between transition-all duration-300"
                     style={{
-                        paddingTop: 'calc(1.85rem + var(--tg-safe-area-inset-top, 0px))',
+                        paddingTop: 'calc(2.2rem + var(--tg-safe-area-inset-top, 0px))',
                         paddingBottom: '0.6rem'
                     }}
                 >
