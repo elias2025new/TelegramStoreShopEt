@@ -265,9 +265,21 @@ function ProductManageItem({
         setDescModalOpen(true);
     };
 
-    const saveDesc = () => {
-        setLocalDescription(modalDraft);
-        setDescModalOpen(false);
+    const saveDesc = async () => {
+        setIsSaving(true);
+        try {
+            await onUpdate(product.id, {
+                description: modalDraft.trim() || null,
+                additional_images: localAdditionalImages,
+            });
+            setLocalDescription(modalDraft);
+            setDescModalOpen(false);
+        } catch (err: any) {
+            // Error is handled by parent onUpdate normally, but we can alert here too
+            console.error("Save desc error:", err);
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     const handleAdditionalImagesSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -350,9 +362,10 @@ function ProductManageItem({
                             />
                             <button
                                 onClick={saveDesc}
-                                className="w-full py-2.5 rounded-xl font-bold text-sm text-black bg-[#cba153] hover:bg-[#b8860b] active:scale-95 transition-all"
+                                disabled={isSaving}
+                                className={`w-full py-2.5 rounded-xl font-bold text-sm text-black transition-all active:scale-95 ${isSaving ? 'bg-gray-600' : 'bg-[#cba153] hover:bg-[#b8860b]'}`}
                             >
-                                Confirm Description
+                                {isSaving ? 'Saving Changes...' : 'Save Description & Images'}
                             </button>
 
                             <div className="mt-4 pt-4 border-t border-gray-100 dark:border-[#2a2a2a]">
