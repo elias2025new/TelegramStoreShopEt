@@ -49,6 +49,27 @@ export interface Database {
                 }
                 Relationships: []
             }
+            store_visits: {
+                Row: {
+                    id: string
+                    store_id: string
+                    telegram_user_id: string
+                    visited_at: string
+                }
+                Insert: {
+                    id?: string
+                    store_id: string
+                    telegram_user_id: string
+                    visited_at?: string
+                }
+                Update: {
+                    id?: string
+                    store_id?: string
+                    telegram_user_id?: string
+                    visited_at?: string
+                }
+                Relationships: []
+            }
         }
         Views: {
             [_ in never]: never

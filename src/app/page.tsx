@@ -43,7 +43,7 @@ const CATEGORY_SUBCATEGORIES: Record<string, string[]> = {
 
 function HomeContent() {
   const { totalPrice } = useCart();
-  const { isOwner, adminOpen, setAdminOpen } = useAdmin();
+  const { isOwner, storeId, adminOpen, setAdminOpen } = useAdmin();
   const [isNotificationOpen, setIsNotificationOpen] = useState(false); // Added state
   const [announcements, setAnnouncements] = useState<Announcement[]>([]); // Added state
   const [hasNewNotifications, setHasNewNotifications] = useState(false); // Added state
@@ -182,13 +182,43 @@ function HomeContent() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       import('@twa-dev/sdk').then((WebApp) => {
-        if (WebApp.default.initDataUnsafe?.user) {
-          setUserPhotoUrl(WebApp.default.initDataUnsafe.user.photo_url || null);
-          setUserName(WebApp.default.initDataUnsafe.user.first_name || 'Guest');
+        const user = WebApp.default.initDataUnsafe?.user;
+        if (user) {
+          setUserPhotoUrl(user.photo_url || null);
+          setUserName(user.first_name || 'Guest');
+
+          // --- Silent Visitor Tracking ---
+          const logVisit = async () => {
+            try {
+              // 1. Get Store ID (independently of AdminContext for customers)
+              let targetStoreId = storeId;
+              if (!targetStoreId) {
+                const { data: storeData } = await supabase
+                  .from('stores')
+                  .select('id')
+                  .limit(1)
+                  .single();
+                if (storeData) targetStoreId = storeData.id;
+              }
+
+              if (targetStoreId) {
+                // 2. Log Visit (Silent Insert)
+                // The DB unique constraint (store_id, telegram_user_id, date) handles duplication
+                await supabase.from('store_visits').insert([{
+                  store_id: targetStoreId,
+                  telegram_user_id: user.id.toString()
+                }]);
+              }
+            } catch (err) {
+              // Silent fail - don't disrupt UX
+              console.debug('Visit tracking skipped/failed');
+            }
+          };
+          logVisit();
         }
       }).catch(console.error);
     }
-  }, []);
+  }, [storeId]);
 
   return (
     <main className="min-h-screen bg-[#f8f9fa] dark:bg-black pb-36 font-sans transition-colors duration-300">
