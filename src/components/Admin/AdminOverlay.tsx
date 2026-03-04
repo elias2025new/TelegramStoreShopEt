@@ -68,10 +68,12 @@ interface MultiChoiceChipGroupProps {
     options: string[];
     selected: string[];
     onChange: (value: string[]) => void;
+    stockValues?: Record<string, string>;
+    onStockChange?: (size: string, value: string) => void;
     label?: string;
 }
 
-function MultiChoiceChipGroup({ options, selected, onChange, label }: MultiChoiceChipGroupProps) {
+function MultiChoiceChipGroup({ options, selected, onChange, stockValues, onStockChange, label }: MultiChoiceChipGroupProps) {
     const toggleOption = (opt: string) => {
         if (selected.includes(opt)) {
             onChange(selected.filter((s) => s !== opt));
@@ -83,20 +85,38 @@ function MultiChoiceChipGroup({ options, selected, onChange, label }: MultiChoic
     return (
         <div className="flex flex-col gap-1">
             {label && <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{label}</span>}
-            <div className="flex flex-wrap gap-1.5">
-                {options.map((opt) => (
-                    <button
-                        key={opt}
-                        type="button"
-                        onClick={() => toggleOption(opt)}
-                        className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all duration-200 ${selected.includes(opt)
-                            ? 'bg-yellow-500 text-black border-yellow-500 shadow-sm'
-                            : 'bg-gray-800 text-gray-400 border-gray-700 hover:border-gray-500'
-                            }`}
-                    >
-                        {opt}
-                    </button>
-                ))}
+            <div className="flex flex-wrap gap-2">
+                {options.map((opt) => {
+                    const isSelected = selected.includes(opt);
+                    return (
+                        <div key={opt} className="flex items-center gap-1.5">
+                            <button
+                                type="button"
+                                onClick={() => toggleOption(opt)}
+                                className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all duration-200 ${isSelected
+                                    ? 'bg-yellow-500 text-black border-yellow-500 shadow-sm'
+                                    : 'bg-gray-800 text-gray-400 border-gray-700 hover:border-gray-500'
+                                    }`}
+                            >
+                                {opt}
+                            </button>
+                            {isSelected && onStockChange && (
+                                <input
+                                    type="number"
+                                    placeholder="Qty"
+                                    maxLength={4}
+                                    value={stockValues?.[opt] || ''}
+                                    onChange={(e) => {
+                                        if (e.target.value.length <= 4) {
+                                            onStockChange(opt, e.target.value);
+                                        }
+                                    }}
+                                    className="w-10 h-6 bg-gray-900 border border-gray-700 rounded text-[10px] text-white text-center focus:outline-none focus:border-yellow-500"
+                                />
+                            )}
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );
@@ -111,7 +131,7 @@ type Product = {
     description: string | null;
     sizes: string[] | null;
     image_url: string | null;
-    stock: number | null;
+    stock: Record<string, number> | null;
     created_at: string;
 };
 
@@ -147,7 +167,15 @@ function ProductManageItem({
     const [localGender, setLocalGender] = useState(product.gender || '');
     const [localDescription, setLocalDescription] = useState(product.description || '');
     const [localSizes, setLocalSizes] = useState<string[]>(product.sizes || []);
-    const [localStock, setLocalStock] = useState(product.stock?.toString() || '');
+    const [localStock, setLocalStock] = useState<Record<string, string>>(() => {
+        const initialStock: Record<string, string> = {};
+        if (product.stock) {
+            Object.entries(product.stock).forEach(([k, v]) => {
+                initialStock[k] = v.toString();
+            });
+        }
+        return initialStock;
+    });
     const [isSaving, setIsSaving] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [isCustomCategory, setIsCustomCategory] = useState(false);
@@ -161,7 +189,7 @@ function ProductManageItem({
         localCategory !== (product.category || '') ||
         localGender !== (product.gender || '') ||
         localDescription !== (product.description || '') ||
-        localStock !== (product.stock?.toString() || '') ||
+        JSON.stringify(localStock) !== JSON.stringify(product.stock || {}) ||
         JSON.stringify(localSizes.sort()) !== JSON.stringify((product.sizes || []).sort());
 
     // Keep local state in sync if product changes externally (e.g. image update)
@@ -172,7 +200,13 @@ function ProductManageItem({
         setLocalGender(product.gender || '');
         setLocalDescription(product.description || '');
         setLocalSizes(product.sizes || []);
-        setLocalStock(product.stock?.toString() || '');
+        const initialStock: Record<string, string> = {};
+        if (product.stock) {
+            Object.entries(product.stock).forEach(([k, v]) => {
+                initialStock[k] = v.toString();
+            });
+        }
+        setLocalStock(initialStock);
     }, [product]);
 
     const handleSave = async () => {
@@ -191,7 +225,15 @@ function ProductManageItem({
                 gender: localGender,
                 description: localDescription.trim() || null,
                 sizes: localSizes,
-                stock: localStock ? parseInt(localStock) : null,
+                stock: Object.keys(localStock).length > 0 ? (() => {
+                    const cleanedStock: Record<string, number> = {};
+                    Object.entries(localStock).forEach(([k, v]) => {
+                        if (localSizes.includes(k) && v !== '') {
+                            cleanedStock[k] = parseInt(v);
+                        }
+                    });
+                    return cleanedStock;
+                })() : null,
             });
         } finally {
             setIsSaving(false);
@@ -305,19 +347,6 @@ function ProductManageItem({
                     </div>
 
                     <div className="flex items-center gap-1">
-                        <div className="relative group">
-                            <input
-                                type="number"
-                                placeholder="0"
-                                value={localStock}
-                                onChange={(e) => {
-                                    if (e.target.value.length <= 4) setLocalStock(e.target.value);
-                                }}
-                                onFocus={handleFocus}
-                                className="w-12 h-7 bg-gray-100 dark:bg-[#2a2a2a] border-none text-[11px] font-bold text-gray-700 dark:text-gray-300 rounded-md focus:ring-1 focus:ring-[#cba153] text-center p-0"
-                            />
-                            <span className="absolute -top-6 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[9px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">Stock</span>
-                        </div>
                         <button
                             onClick={openDescModal}
                             className={`p-1.5 rounded-lg transition-colors ${localDescription ? 'text-[#cba153] bg-[#cba153]/10' : 'text-gray-400 bg-gray-100 dark:bg-[#2a2a2a]'}`}
@@ -384,10 +413,24 @@ function ProductManageItem({
 
                         {localCategory && localGender !== 'Accessories' && (
                             <MultiChoiceChipGroup
-                                label="Available Sizes"
+                                label="Available Sizes & Stock"
                                 options={isShoes ? SHOE_SIZES : CLOTHING_SIZES}
                                 selected={localSizes}
-                                onChange={setLocalSizes}
+                                onChange={(newSizes) => {
+                                    setLocalSizes(newSizes);
+                                    // Clean up stock values for sizes that were removed
+                                    setLocalStock(prev => {
+                                        const next = { ...prev };
+                                        Object.keys(next).forEach(k => {
+                                            if (!newSizes.includes(k)) delete next[k];
+                                        });
+                                        return next;
+                                    });
+                                }}
+                                stockValues={localStock}
+                                onStockChange={(size, val) => {
+                                    setLocalStock(prev => ({ ...prev, [size]: val }));
+                                }}
                             />
                         )}
 
@@ -437,7 +480,7 @@ interface ImageItem {
     gender: string;
     description: string;
     sizes: string[];
-    stock: string;
+    stock: Record<string, string>;
     fileName: string;
 }
 
@@ -449,7 +492,7 @@ interface SerializedItem {
     gender: string;
     description: string;
     sizes: string[];
-    stock: string;
+    stock: Record<string, string>;
     fileName: string;
 }
 
@@ -468,7 +511,7 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish }: Uploa
     const [localGender, setLocalGender] = useState(item.gender);
     const [localDescription, setLocalDescription] = useState(item.description);
     const [localSizes, setLocalSizes] = useState<string[]>(item.sizes || []);
-    const [localStock, setLocalStock] = useState(item.stock || '');
+    const [localStock, setLocalStock] = useState<Record<string, string>>(item.stock || {});
     const [isCustomCategory, setIsCustomCategory] = useState(false);
     const [descModalOpen, setDescModalOpen] = useState(false);
     const [modalDraft, setModalDraft] = useState('');
@@ -482,7 +525,7 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish }: Uploa
         setLocalGender(item.gender);
         setLocalDescription(item.description);
         setLocalSizes(item.sizes || []);
-        setLocalStock(item.stock || '');
+        setLocalStock(item.stock || {});
     }, [item.title, item.price, item.category, item.gender, item.description, item.sizes, item.stock]);
 
     const handleFocus = (e: React.FocusEvent<HTMLElement>) => {
@@ -606,22 +649,6 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish }: Uploa
                     </div>
 
                     <div className="flex items-center gap-1">
-                        <div className="relative group">
-                            <input
-                                type="number"
-                                placeholder="0"
-                                value={localStock}
-                                onChange={(e) => {
-                                    if (e.target.value.length <= 4) {
-                                        setLocalStock(e.target.value);
-                                        updateItem(index, 'stock', e.target.value);
-                                    }
-                                }}
-                                onFocus={handleFocus}
-                                className="w-12 h-7 bg-gray-100 dark:bg-[#2a2a2a] border-none text-[11px] font-bold text-gray-700 dark:text-gray-300 rounded-md focus:ring-1 focus:ring-[#cba153] text-center p-0"
-                            />
-                            <span className="absolute -top-6 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[9px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">Stock</span>
-                        </div>
                         <button
                             onClick={openDescModal}
                             title="Edit Description"
@@ -715,12 +742,25 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish }: Uploa
 
                     {localCategory && localGender !== 'Accessories' && (
                         <MultiChoiceChipGroup
-                            label="Available Sizes"
+                            label="Available Sizes & Stock"
                             options={isShoes ? SHOE_SIZES : CLOTHING_SIZES}
                             selected={localSizes}
                             onChange={(val) => {
                                 setLocalSizes(val);
                                 updateItem(index, 'sizes', val);
+                                // Clean up stock values
+                                const nextStock = { ...localStock };
+                                Object.keys(nextStock).forEach(k => {
+                                    if (!val.includes(k)) delete nextStock[k];
+                                });
+                                setLocalStock(nextStock);
+                                updateItem(index, 'stock', nextStock);
+                            }}
+                            stockValues={localStock}
+                            onStockChange={(size, val) => {
+                                const nextStock = { ...localStock, [size]: val };
+                                setLocalStock(nextStock);
+                                updateItem(index, 'stock', nextStock);
                             }}
                         />
                     )}
@@ -845,7 +885,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                 gender: s.gender || '',
                 description: s.description || '',
                 sizes: s.sizes || [],
-                stock: s.stock || '',
+                stock: s.stock || {},
                 fileName: s.fileName,
             }));
 
@@ -899,7 +939,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                     gender: '',
                     description: '',
                     sizes: [],
-                    stock: '',
+                    stock: {},
                     fileName: file.name,
                 };
             })
@@ -1068,7 +1108,17 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                 gender: item.gender,
                 description: item.description || null,
                 sizes: item.sizes || [],
-                stock: item.stock ? parseInt(item.stock) : null,
+                stock: (() => {
+                    const cleanedStock: Record<string, number> = {};
+                    if (item.stock) {
+                        Object.entries(item.stock).forEach(([k, v]) => {
+                            if (item.sizes.includes(k) && v !== '') {
+                                cleanedStock[k] = parseInt(v);
+                            }
+                        });
+                    }
+                    return Object.keys(cleanedStock).length > 0 ? cleanedStock : null;
+                })(),
                 image_url: urlData.publicUrl,
             };
 
@@ -1169,7 +1219,17 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                         gender: item.gender,
                         description: item.description || null,
                         sizes: item.sizes || [],
-                        stock: item.stock ? parseInt(item.stock) : null,
+                        stock: (() => {
+                            const cleanedStock: Record<string, number> = {};
+                            if (item.stock) {
+                                Object.entries(item.stock).forEach(([k, v]) => {
+                                    if (item.sizes.includes(k) && v !== '') {
+                                        cleanedStock[k] = parseInt(v);
+                                    }
+                                });
+                            }
+                            return Object.keys(cleanedStock).length > 0 ? cleanedStock : null;
+                        })(),
                         image_url: urlData.publicUrl,
                     };
                 })
