@@ -290,13 +290,13 @@ function ProductManageItem({
                 // Upload to Supabase Storage
                 const fileName = `${product.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
                 const { data, error } = await supabase.storage
-                    .from('product-images')
+                    .from('products')
                     .upload(fileName, file);
 
                 if (error) throw error;
 
                 const { data: { publicUrl } } = supabase.storage
-                    .from('product-images')
+                    .from('products')
                     .getPublicUrl(fileName);
 
                 newImages.push(publicUrl);
