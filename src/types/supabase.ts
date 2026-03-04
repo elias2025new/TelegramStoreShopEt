@@ -54,18 +54,21 @@ export interface Database {
                     id: string
                     store_id: string
                     telegram_user_id: string
+                    visit_date: string
                     visited_at: string
                 }
                 Insert: {
                     id?: string
                     store_id: string
                     telegram_user_id: string
+                    visit_date?: string
                     visited_at?: string
                 }
                 Update: {
                     id?: string
                     store_id?: string
                     telegram_user_id?: string
+                    visit_date?: string
                     visited_at?: string
                 }
                 Relationships: []

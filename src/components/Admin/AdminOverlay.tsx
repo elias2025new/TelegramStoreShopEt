@@ -837,8 +837,6 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
     const [isUploading, setIsUploading] = useState(false);
     const [uploadStatus, setUploadStatus] = useState('');
     const [draftRestored, setDraftRestored] = useState(false);
-    const [stats, setStats] = useState({ today: 0, week: 0, totalProducts: 0 });
-    const [isLoadingStats, setIsLoadingStats] = useState(true);
 
     const [announceModalOpen, setAnnounceModalOpen] = useState(false);
     const [announceForm, setAnnounceForm] = useState<Announcement>({
@@ -989,50 +987,6 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
             setIsLoadingProducts(false);
         }
     }, []);
-
-    // ── Fetch Analytics Stats ──────────────────────────────────────────────
-    const fetchStats = useCallback(async () => {
-        if (!storeId) return;
-        setIsLoadingStats(true);
-        try {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const todayStr = today.toISOString();
-
-            const lastWeek = new Date();
-            lastWeek.setDate(lastWeek.getDate() - 7);
-            const lastWeekStr = lastWeek.toISOString();
-
-            const [todayCount, weekCount, productsCount] = await Promise.all([
-                supabase.from('store_visits')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('store_id', storeId)
-                    .gte('visited_at', todayStr),
-                supabase.from('store_visits')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('store_id', storeId)
-                    .gte('visited_at', lastWeekStr),
-                supabase.from('products')
-                    .select('*', { count: 'exact', head: true })
-            ]);
-
-            setStats({
-                today: todayCount.count || 0,
-                week: weekCount.count || 0,
-                totalProducts: productsCount.count || 0
-            });
-        } catch (err) {
-            console.error('Stats fetch failed:', err);
-        } finally {
-            setIsLoadingStats(false);
-        }
-    }, [storeId]);
-
-    useEffect(() => {
-        if (isOpen && storeId) {
-            fetchStats();
-        }
-    }, [isOpen, storeId, fetchStats]);
 
     useEffect(() => {
         if (view === 'manage' && isOpen) {
@@ -1425,51 +1379,6 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
 
             {/* Content Body - Flexible area preventing button pushout */}
             <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4 scroll-smooth transform-gpu">
-                {/* Store Analytics Section */}
-                <div className="mb-6 space-y-3">
-                    <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-gray-900 dark:text-white uppercase text-[11px] tracking-wider flex items-center gap-1.5 font-sans">
-                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                            Store Analytics
-                        </h3>
-                        <button
-                            onClick={fetchStats}
-                            className="text-[10px] font-bold text-[#cba153] hover:underline"
-                        >
-                            Refresh
-                        </button>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-2.5">
-                        {/* KPI Card 1: Today */}
-                        <div className="bg-[#1a1a1a] border border-white/[0.05] p-3 rounded-2xl shadow-xl shadow-black/20 group hover:border-blue-500/30 transition-all duration-300">
-                            <div className="text-[10px] font-bold text-gray-400 mb-1 uppercase tracking-tighter">Visitors (Today)</div>
-                            <div className="text-xl font-black text-white group-hover:text-blue-400 transition-colors flex items-center gap-1">
-                                {isLoadingStats ? '...' : stats.today.toLocaleString()}
-                                <span className="text-[10px] font-normal text-blue-500/50">👀</span>
-                            </div>
-                        </div>
-
-                        {/* KPI Card 2: Week */}
-                        <div className="bg-[#1a1a1a] border border-white/[0.05] p-3 rounded-2xl shadow-xl shadow-black/20 group hover:border-[#cba153]/30 transition-all duration-300">
-                            <div className="text-[10px] font-bold text-gray-400 mb-1 uppercase tracking-tighter">Visitors (Week)</div>
-                            <div className="text-xl font-black text-white group-hover:text-[#cba153] transition-colors flex items-center gap-1">
-                                {isLoadingStats ? '...' : stats.week.toLocaleString()}
-                                <span className="text-[10px] font-normal text-[#cba153]/50">📈</span>
-                            </div>
-                        </div>
-
-                        {/* KPI Card 3: Products */}
-                        <div className="bg-[#1a1a1a] border border-white/[0.05] p-3 rounded-2xl shadow-xl shadow-black/20 group hover:border-emerald-500/30 transition-all duration-300">
-                            <div className="text-[10px] font-bold text-gray-400 mb-1 uppercase tracking-tighter">Total Items</div>
-                            <div className="text-xl font-black text-white group-hover:text-emerald-400 transition-colors flex items-center gap-1">
-                                {isLoadingStats ? '...' : stats.totalProducts.toLocaleString()}
-                                <span className="text-[10px] font-normal text-emerald-500/50">🛍️</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 {view === 'upload' ? (
                     <>
                         {/* Status Message rendered inline */}
