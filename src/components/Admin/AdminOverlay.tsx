@@ -1410,12 +1410,15 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
 
             const { error: insertError } = await supabase.from('products').insert([productData]);
             if (insertError) throw insertError;
-
             // Update local state
             const updatedImages = images.filter((_, i) => i !== index);
             setImages(updatedImages);
 
-            // Draft is automatically updated via useEffect on 'images'
+            // ✅ If all items published, clear draft immediately
+            if (updatedImages.length === 0) {
+                localStorage.removeItem(DRAFT_KEY);
+                hasRestoredRef.current = false;
+            }
 
             queryClient.resetQueries({ queryKey: ['products'] });
             setUploadStatus('✅ PRODUCT PUBLISHED: ' + item.title);
