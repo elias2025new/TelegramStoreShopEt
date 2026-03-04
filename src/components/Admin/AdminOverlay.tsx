@@ -321,11 +321,11 @@ function ProductManageItem({
             {/* Description Modal */}
             {descModalOpen && (
                 <div
-                    className="fixed inset-0 z-[200] flex items-end justify-center bg-black/70 backdrop-blur-sm"
+                    className="fixed inset-0 z-[200] flex items-end justify-center bg-black/70 backdrop-blur-sm p-4"
                     onClick={() => setDescModalOpen(false)}
                 >
                     <div
-                        className="w-full max-w-lg bg-white dark:bg-[#1c1c1e] rounded-t-2xl p-5 pb-8 border-t border-gray-200 dark:border-[#3a3a3a] flex flex-col gap-3"
+                        className="w-full max-w-lg bg-white dark:bg-[#1c1c1e] rounded-2xl p-5 pb-8 border-t border-gray-200 dark:border-[#3a3a3a] flex flex-col gap-3 max-h-[90vh] overflow-y-auto"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex items-center justify-between">
@@ -724,11 +724,11 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish }: Uploa
             {/* Description Modal */}
             {descModalOpen && (
                 <div
-                    className="fixed inset-0 z-[200] flex items-end justify-center bg-black/70 backdrop-blur-sm"
+                    className="fixed inset-0 z-[200] flex items-end justify-center bg-black/70 backdrop-blur-sm p-4"
                     onClick={() => setDescModalOpen(false)}
                 >
                     <div
-                        className="w-full max-w-lg bg-white dark:bg-[#1c1c1e] rounded-t-2xl p-5 pb-8 border-t border-gray-200 dark:border-[#3a3a3a] flex flex-col gap-3"
+                        className="w-full max-w-lg bg-white dark:bg-[#1c1c1e] rounded-2xl p-5 pb-8 border-t border-gray-200 dark:border-[#3a3a3a] flex flex-col gap-3 max-h-[90vh] overflow-y-auto"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex items-center justify-between">
