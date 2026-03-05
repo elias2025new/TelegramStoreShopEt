@@ -54,10 +54,9 @@ export default function CartPage() {
 
     const handleCheckout = () => {
         if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-            window.Telegram.WebApp.showAlert('Checkout is not available right now. We are working on it!');
-        } else {
-            alert('Checkout is not available right now. We are working on it!');
+            window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
         }
+        router.push('/checkout');
     };
 
     if (items.length === 0) {
