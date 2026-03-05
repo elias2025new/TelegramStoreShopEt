@@ -10,6 +10,7 @@ create table public.orders (
   total_price numeric not null,
   status text not null default 'pending',
   payment_method text not null default 'cash_on_delivery',
+  delivered_at timestamp with time zone null,
   constraint orders_pkey primary key (id)
 );
 

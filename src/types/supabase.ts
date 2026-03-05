@@ -85,9 +85,11 @@ export interface Database {
                     full_name: string
                     phone_number: string
                     shipping_address: string
+                    location_data: Json | null
                     total_price: number
                     status: string
                     payment_method: string
+                    delivered_at: string | null
                 }
                 Insert: {
                     id?: string
@@ -97,9 +99,11 @@ export interface Database {
                     full_name: string
                     phone_number: string
                     shipping_address: string
+                    location_data?: Json | null
                     total_price: number
                     status?: string
-                    payment_method: string
+                    payment_method?: string
+                    delivered_at?: string | null
                 }
                 Update: {
                     id?: string
@@ -109,9 +113,11 @@ export interface Database {
                     full_name?: string
                     phone_number?: string
                     shipping_address?: string
+                    location_data?: Json | null
                     total_price?: number
                     status?: string
                     payment_method?: string
+                    delivered_at?: string | null
                 }
                 Relationships: []
             },
