@@ -9,6 +9,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import PageTransition from '@/components/PageTransition';
 import { motion, AnimatePresence } from 'framer-motion';
+import { sendTelegramNotification, formatOrderMessage } from '@/utils/telegram';
 import {
     ChevronLeft,
     ChevronRight,
@@ -174,6 +175,10 @@ export default function CheckoutPage() {
             if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
                 window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
             }
+
+            // 3. Send Telegram Notification to Owner
+            const ownerMessage = formatOrderMessage(orderData, items, totalPrice);
+            await sendTelegramNotification(ownerMessage);
         } catch (err: any) {
             console.error('Checkout error:', err);
             setError(err.message || 'Failed to place order. Please try again.');
