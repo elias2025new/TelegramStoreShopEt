@@ -401,9 +401,13 @@ export default function CheckoutPage() {
                                                     >
                                                         <div className="w-12 h-12 rounded-xl bg-[#6f2b91]/10 flex items-center justify-center mb-2 group-hover:bg-[#6f2b91]/20 transition-colors">
                                                             <img
-                                                                src="https://yt3.googleusercontent.com/ytc/AIdro_nLzN-2m9S0_2u7Q9W4YxVn-9e9-12-12=s900-c-k-c0x00ffffff-no-rj"
+                                                                src="https://raw.githubusercontent.com/Chapa-Et/ethiopianlogos/main/logos/commercial_bank_of_ethiopia/commercial_bank_of_ethiopia.png"
                                                                 alt="CBE"
-                                                                className="w-8 h-8 rounded-lg object-contain"
+                                                                className="w-10 h-10 object-contain"
+                                                                onError={(e) => {
+                                                                    const target = e.target as HTMLImageElement;
+                                                                    target.src = "https://upload.wikimedia.org/wikipedia/commons/2/21/CBE_Logo2.png";
+                                                                }}
                                                             />
                                                         </div>
                                                         <span className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-wider">Pay with CBE</span>
@@ -414,9 +418,13 @@ export default function CheckoutPage() {
                                                     >
                                                         <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mb-2 group-hover:bg-blue-500/20 transition-colors">
                                                             <img
-                                                                src="https://www.telebirr.com.et/wp-content/uploads/2021/04/telebirr-logo.png"
+                                                                src="https://raw.githubusercontent.com/Chapa-Et/ethiopianlogos/main/logos/tele_birr/tele_birr.png"
                                                                 alt="Telebirr"
-                                                                className="w-10 h-10 object-contain"
+                                                                className="w-12 h-12 object-contain scale-110"
+                                                                onError={(e) => {
+                                                                    const target = e.target as HTMLImageElement;
+                                                                    target.src = "https://www.telebirr.com.et/wp-content/uploads/2021/04/telebirr-logo.png";
+                                                                }}
                                                             />
                                                         </div>
                                                         <span className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-wider">Pay with Telebirr</span>
