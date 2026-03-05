@@ -1,4 +1,5 @@
 export const OWNER_ID = '5908397596';
+export const OWNER_USERNAME = 'gamfis';
 const BOT_TOKEN = process.env.NEXT_PUBLIC_BOT_TOKEN;
 
 export async function sendTelegramNotification(message: string) {
@@ -53,4 +54,11 @@ ${orderData.shipping_address}
 
 <i>Check the admin panel for more details.</i>
 `.trim();
+}
+
+export function getDirectMessageLink(orderData: any, items: any[], totalPrice: number) {
+    const text = formatOrderMessage(orderData, items, totalPrice);
+    // Remove HTML tags for the text parameter in URL
+    const plainText = text.replace(/<[^>]*>/g, '');
+    return `https://t.me/${OWNER_USERNAME}?text=${encodeURIComponent(plainText)}`;
 }
