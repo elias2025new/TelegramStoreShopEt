@@ -29,6 +29,7 @@ interface FormData {
     phoneNumber: string;
     address: string;
     paymentMethod: 'cash_on_delivery' | 'bank_transfer';
+    bankMethod: 'cbe' | 'telebirr' | null;
 }
 
 export default function CheckoutPage() {
@@ -46,6 +47,7 @@ export default function CheckoutPage() {
         phoneNumber: '',
         address: '',
         paymentMethod: 'cash_on_delivery',
+        bankMethod: null,
     });
 
     // Auto-fill from Telegram if available
@@ -101,6 +103,11 @@ export default function CheckoutPage() {
         } else if (currentStep === 'shipping') {
             if (!formData.address) {
                 setError('Please provide a shipping address');
+                return;
+            }
+        } else if (currentStep === 'payment') {
+            if (formData.paymentMethod === 'bank_transfer' && !formData.bankMethod) {
+                setError('Please choose a payment method (CBE or Telebirr)');
                 return;
             }
         }
@@ -359,7 +366,7 @@ export default function CheckoutPage() {
                                             type="radio"
                                             className="accent-[#cba153] w-5 h-5"
                                             checked={formData.paymentMethod === 'cash_on_delivery'}
-                                            onChange={() => setFormData(prev => ({ ...prev, paymentMethod: 'cash_on_delivery' }))}
+                                            onChange={() => setFormData(prev => ({ ...prev, paymentMethod: 'cash_on_delivery', bankMethod: null }))}
                                         />
                                     </label>
 
@@ -397,39 +404,54 @@ export default function CheckoutPage() {
                                                 <div className="grid grid-cols-2 gap-3 pt-1">
                                                     <button
                                                         type="button"
-                                                        className="flex flex-col items-center justify-center p-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-[#cba153] transition-all group scale-95"
+                                                        onClick={() => setFormData(prev => ({ ...prev, bankMethod: 'cbe' }))}
+                                                        className={`flex flex-col items-center justify-center p-4 rounded-2xl border transition-all group scale-95 ${formData.bankMethod === 'cbe'
+                                                            ? 'border-[#cba153] bg-[#cba153]/10 ring-1 ring-[#cba153]'
+                                                            : 'border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-[#cba153]/50'}`}
                                                     >
-                                                        <div className="w-12 h-12 rounded-xl bg-[#6f2b91]/10 flex items-center justify-center mb-2 group-hover:bg-[#6f2b91]/20 transition-colors">
+                                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-2 transition-colors ${formData.bankMethod === 'cbe' ? 'bg-[#cba153] text-black' : 'bg-[#6f2b91]/10 group-hover:bg-[#6f2b91]/20'}`}>
                                                             <img
                                                                 src="https://raw.githubusercontent.com/Chapa-Et/ethiopianlogos/main/logos/commercial_bank_of_ethiopia/commercial_bank_of_ethiopia.png"
                                                                 alt="CBE"
-                                                                className="w-10 h-10 object-contain"
+                                                                className={`w-10 h-10 object-contain ${formData.bankMethod === 'cbe' ? 'brightness-0' : ''}`}
                                                                 onError={(e) => {
                                                                     const target = e.target as HTMLImageElement;
                                                                     target.src = "https://upload.wikimedia.org/wikipedia/commons/2/21/CBE_Logo2.png";
                                                                 }}
                                                             />
                                                         </div>
-                                                        <span className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-wider">Pay with CBE</span>
+                                                        <span className={`text-[10px] font-black uppercase tracking-wider ${formData.bankMethod === 'cbe' ? 'text-[#cba153]' : 'text-gray-900 dark:text-white'}`}>CBE Birr</span>
                                                     </button>
                                                     <button
                                                         type="button"
-                                                        className="flex flex-col items-center justify-center p-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-[#cba153] transition-all group scale-95"
+                                                        onClick={() => setFormData(prev => ({ ...prev, bankMethod: 'telebirr' }))}
+                                                        className={`flex flex-col items-center justify-center p-4 rounded-2xl border transition-all group scale-95 ${formData.bankMethod === 'telebirr'
+                                                            ? 'border-[#cba153] bg-[#cba153]/10 ring-1 ring-[#cba153]'
+                                                            : 'border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-[#cba153]/50'}`}
                                                     >
-                                                        <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mb-2 group-hover:bg-blue-500/20 transition-colors">
+                                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-2 transition-colors ${formData.bankMethod === 'telebirr' ? 'bg-[#cba153] text-black' : 'bg-blue-500/10 group-hover:bg-blue-500/20'}`}>
                                                             <img
                                                                 src="https://raw.githubusercontent.com/Chapa-Et/ethiopianlogos/main/logos/tele_birr/tele_birr.png"
                                                                 alt="Telebirr"
-                                                                className="w-12 h-12 object-contain scale-110"
+                                                                className={`w-12 h-12 object-contain scale-110 ${formData.bankMethod === 'telebirr' ? 'brightness-0' : ''}`}
                                                                 onError={(e) => {
                                                                     const target = e.target as HTMLImageElement;
                                                                     target.src = "https://www.telebirr.com.et/wp-content/uploads/2021/04/telebirr-logo.png";
                                                                 }}
                                                             />
                                                         </div>
-                                                        <span className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-wider">Pay with Telebirr</span>
+                                                        <span className={`text-[10px] font-black uppercase tracking-wider ${formData.bankMethod === 'telebirr' ? 'text-[#cba153]' : 'text-gray-900 dark:text-white'}`}>Telebirr</span>
                                                     </button>
                                                 </div>
+                                                {error && error.includes('payment method') && (
+                                                    <motion.p
+                                                        initial={{ opacity: 0, y: -5 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        className="text-[10px] font-bold text-red-500 mt-2 px-2 flex items-center gap-1"
+                                                    >
+                                                        <AlertCircle className="w-3 h-3" /> {error}
+                                                    </motion.p>
+                                                )}
                                             </motion.div>
                                         )}
                                     </AnimatePresence>
@@ -486,7 +508,9 @@ export default function CheckoutPage() {
                                         <div className="p-3 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl space-y-1">
                                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Payment</p>
                                             <p className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-tight">
-                                                {formData.paymentMethod === 'cash_on_delivery' ? 'Cash on Delivery' : 'Bank Transfer'}
+                                                {formData.paymentMethod === 'cash_on_delivery'
+                                                    ? 'Cash on Delivery'
+                                                    : `Bank Transfer (${formData.bankMethod === 'cbe' ? 'CBE Birr' : 'Telebirr'})`}
                                             </p>
                                         </div>
                                     </div>
