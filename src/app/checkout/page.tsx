@@ -9,7 +9,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import PageTransition from '@/components/PageTransition';
 import { motion, AnimatePresence } from 'framer-motion';
-import { sendTelegramNotification, formatOrderMessage, getDirectMessageLink } from '@/utils/telegram';
+import { sendTelegramNotification, formatOrderMessage } from '@/utils/telegram';
 import {
     ChevronLeft,
     ChevronRight,
@@ -39,8 +39,6 @@ export default function CheckoutPage() {
     const [currentStep, setCurrentStep] = useState<Step>('contact');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [orderId, setOrderId] = useState<string | null>(null);
-    const [lastOrder, setLastOrder] = useState<any>(null);
-    const [lastOrderItems, setLastOrderItems] = useState<any[]>([]);
     const [error, setError] = useState<string | null>(null);
 
     const [formData, setFormData] = useState<FormData>({
@@ -171,8 +169,6 @@ export default function CheckoutPage() {
 
             // Success
             setOrderId(orderData.id.split('-')[0].toUpperCase()); // Short version for display
-            setLastOrder(orderData);
-            setLastOrderItems([...items]);
             setCurrentStep('success');
             clearCart();
 
@@ -456,29 +452,12 @@ export default function CheckoutPage() {
                                     Thank you for shopping with us. We will contact you shortly to confirm your delivery.
                                 </p>
 
-                                <div className="w-full space-y-3">
-                                    <button
-                                        onClick={() => {
-                                            const link = getDirectMessageLink(lastOrder, lastOrderItems, lastOrder.total_price);
-                                            if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-                                                window.Telegram.WebApp.openTelegramLink(link);
-                                            } else {
-                                                window.open(link, '_blank');
-                                            }
-                                        }}
-                                        className="w-full bg-[#0088cc] text-white font-black py-4 rounded-2xl shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z" /><path d="M22 2 11 13" /></svg>
-                                        SEND ORDER VIA DM
-                                    </button>
-
-                                    <Link
-                                        href="/"
-                                        className="w-full bg-white dark:bg-gray-900 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-800 font-black py-4 rounded-2xl active:scale-95 transition-transform flex items-center justify-center"
-                                    >
-                                        BACK TO HOME
-                                    </Link>
-                                </div>
+                                <Link
+                                    href="/"
+                                    className={`w-full bg-[#cba153] text-black font-black py-4 rounded-2xl shadow-lg active:scale-95 transition-transform flex items-center justify-center mt-6`}
+                                >
+                                    BACK TO HOME
+                                </Link>
                             </motion.div>
                         )}
                     </AnimatePresence>
