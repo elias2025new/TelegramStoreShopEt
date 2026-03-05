@@ -36,8 +36,9 @@ export default function BottomNav() {
     ];
     const isCartPage = pathname === '/cart' || pathname.startsWith('/cart/');
     const isProductPage = pathname.startsWith('/product/');
+    const isCheckoutPage = pathname === '/checkout';
 
-    if (adminOpen || isCartPage || isProductPage || isInputFocused) return null;
+    if (adminOpen || isCartPage || isProductPage || isCheckoutPage || isInputFocused) return null;
 
     return (
         <div className="fixed inset-x-0 bottom-0 z-50 flex justify-center pointer-events-none pb-14 px-6 will-change-transform">

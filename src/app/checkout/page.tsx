@@ -89,6 +89,14 @@ export default function CheckoutPage() {
                 setError('Please fill in your contact details');
                 return;
             }
+
+            // Ethiopian Phone Validation
+            // Standard: +2517..., +2519..., 07..., 09...
+            const ethioPhoneRegex = /^(\+251|0)(9|7)\d{8}$/;
+            if (!ethioPhoneRegex.test(formData.phoneNumber.replace(/\s/g, ''))) {
+                setError('Please enter a valid Ethiopian phone number (Ethio Telecom or Safaricom)');
+                return;
+            }
         } else if (currentStep === 'shipping') {
             if (!formData.address) {
                 setError('Please provide a shipping address');
