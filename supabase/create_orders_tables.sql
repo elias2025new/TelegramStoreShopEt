@@ -46,3 +46,19 @@ create policy "Admins can view all orders"
 create policy "Admins can view all order items"
   on public.order_items for select
   using ( true );
+
+-- Allow admins to update orders (status changes, delivered_at, etc.)
+create policy "Allow public to update orders"
+  on public.orders for update
+  using ( true )
+  with check ( true );
+
+-- Allow admins to delete orders
+create policy "Allow public to delete orders"
+  on public.orders for delete
+  using ( true );
+
+-- Allow admins to delete order items
+create policy "Allow public to delete order items"
+  on public.order_items for delete
+  using ( true );

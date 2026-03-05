@@ -419,21 +419,22 @@ export default function AdminOrders() {
                                             </div>
 
                                             {/* Actions */}
-                                            <div className="space-y-3 pt-2">
+                                            <div className="space-y-3 pt-2 relative z-20">
                                                 <h5 className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Update Order Status</h5>
                                                 <div className="flex flex-wrap gap-2">
                                                     {['pending', 'paid', 'shipped', 'delivered', 'cancelled'].map((status) => (
                                                         <button
                                                             key={status}
+                                                            type="button"
                                                             disabled={isUpdating === order.id}
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 updateOrderStatus(order.id, status);
                                                             }}
-                                                            className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${order.status === status
+                                                            className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer ${order.status === status
                                                                 ? 'ring-2 ring-offset-2 ring-offset-white dark:ring-offset-[#1a1a1a] ring-[#cba153] bg-[#cba153] text-black shadow-lg shadow-[#cba153]/20'
-                                                                : 'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10'
-                                                                }`}
+                                                                : 'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10 active:scale-95'
+                                                                } disabled:opacity-50 disabled:cursor-not-allowed`}
                                                         >
                                                             {status}
                                                         </button>
