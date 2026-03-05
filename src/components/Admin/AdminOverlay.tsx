@@ -1636,64 +1636,76 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
             }}
         >
             {/* Header */}
-            <div className="flex items-center justify-between gap-1.5 px-3 py-2 border-b border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#0a0a0a]">
-                <div className="flex items-center gap-1.5 min-w-0 overflow-hidden">
-                    <img src="https://img.icons8.com/ios-filled/50/cba153/manager.png" alt="admin" className="w-4 h-4 flex-shrink-0" />
-                    <h2 className="text-sm font-black text-[#cba153] truncate">Admin</h2>
-                    {draftRestored && view === 'upload' && (
-                        <span className="flex-shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#cba153]/20 text-[#cba153] animate-pulse">
-                            Draft
-                        </span>
-                    )}
+            <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-gray-200 dark:border-[#2a2a2a] bg-white dark:bg-[#0a0a0a]">
+                <div className="flex items-center gap-2 min-w-0 overflow-hidden">
+                    <div className="w-8 h-8 rounded-full bg-[#cba153]/10 flex items-center justify-center shrink-0">
+                        <img src="https://img.icons8.com/ios-filled/50/cba153/manager.png" alt="admin" className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                        <h2 className="text-sm font-black text-gray-900 dark:text-white truncate">Admin Panel</h2>
+                        {draftRestored && view === 'upload' && (
+                            <span className="text-[9px] font-bold text-[#cba153] animate-pulse flex items-center gap-1">
+                                <span className="w-1 h-1 rounded-full bg-[#cba153]" />
+                                UNSAVED DRAFT
+                            </span>
+                        )}
+                    </div>
                 </div>
-                <div className="flex items-center gap-1.5 flex-shrink-0">
-                    <button
-                        onClick={() => setView(view === 'upload' ? 'manage' : 'upload')}
-                        className={`px-2 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${view === 'manage'
-                            ? 'bg-[#cba153]/20 text-[#cba153] border border-[#cba153]/30'
-                            : 'bg-gray-100 dark:bg-[#1c1c1e] text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-[#2a2a2a]'
-                            }`}
-                    >
-                        <img
-                            src={view === 'upload' ? "https://img.icons8.com/ios-filled/50/cba153/settings.png" : "https://img.icons8.com/ios-filled/50/cba153/plus-math.png"}
-                            alt="icon"
-                            className="w-3.5 h-3.5"
-                        />
-                        <span>{view === 'upload' ? 'Manage' : 'Add'}</span>
-                    </button>
-                    <button
-                        onClick={() => setView('orders')}
-                        className={`px-2 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${view === 'orders'
-                            ? 'bg-[#cba153]/20 text-[#cba153] border border-[#cba153]/30'
-                            : 'bg-gray-100 dark:bg-[#1c1c1e] text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-[#2a2a2a]'
-                            }`}
-                    >
-                        <img
-                            src="https://img.icons8.com/ios-filled/50/cba153/shopping-bag.png"
-                            alt="icon"
-                            className="w-3.5 h-3.5"
-                        />
-                        <span>Orders</span>
-                    </button>
+
+                <div className="flex items-center gap-2 flex-shrink-0">
                     <button
                         onClick={() => setAnnounceModalOpen(true)}
-                        className="px-2 py-1 rounded-lg text-xs font-bold bg-[#cba153]/10 text-[#cba153] border border-[#cba153]/30 transition-all flex items-center gap-1.5"
+                        className="p-2 rounded-xl bg-gray-100 dark:bg-[#1c1c1e] text-[#cba153] hover:bg-[#cba153]/10 transition-all border border-transparent hover:border-[#cba153]/30"
                     >
                         <img
                             src="https://img.icons8.com/ios-filled/50/cba153/megaphone.png"
-                            alt="icon"
-                            className="w-3.5 h-3.5"
+                            alt="broadcast"
+                            className="w-4 h-4"
                         />
-                        <span>Broadcast</span>
                     </button>
                     <button
                         onClick={onClose}
-                        className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#1c1c1e] transition-colors text-gray-700 dark:text-white"
+                        className="p-2 rounded-xl bg-gray-100 dark:bg-[#1c1c1e] text-gray-400 hover:text-white transition-all"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M18 6 6 18" /><path d="m6 6 12 12" />
                         </svg>
                     </button>
+                </div>
+            </div>
+
+            {/* View Navigation Segmented Control */}
+            <div className="px-4 py-3 bg-white dark:bg-[#0a0a0a] border-b border-gray-100 dark:border-[#1a1a1a]">
+                <div className="bg-gray-100 dark:bg-[#1c1c1e] p-1 rounded-xl flex gap-1 relative overflow-hidden">
+                    <button
+                        onClick={() => setView('upload')}
+                        className={`flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all relative z-10 ${view === 'upload' ? 'text-black' : 'text-gray-500'}`}
+                    >
+                        Add
+                    </button>
+                    <button
+                        onClick={() => setView('manage')}
+                        className={`flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all relative z-10 ${view === 'manage' ? 'text-black' : 'text-gray-500'}`}
+                    >
+                        Manage
+                    </button>
+                    <button
+                        onClick={() => setView('orders')}
+                        className={`flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all relative z-10 ${view === 'orders' ? 'text-black' : 'text-gray-500'}`}
+                    >
+                        Orders
+                    </button>
+
+                    {/* Animated Sliding Background */}
+                    <motion.div
+                        className="absolute inset-y-1 bg-[#cba153] rounded-lg shadow-lg shadow-[#cba153]/20"
+                        initial={false}
+                        animate={{
+                            x: view === 'upload' ? '0%' : view === 'manage' ? '100.5%' : '201%',
+                            width: '32.1%'
+                        }}
+                        transition={{ type: "spring", stiffness: 400, damping: 35 }}
+                    />
                 </div>
             </div>
 
