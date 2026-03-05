@@ -75,6 +75,85 @@ export interface Database {
                     visited_at?: string
                 }
                 Relationships: []
+            },
+            orders: {
+                Row: {
+                    id: string
+                    created_at: string
+                    store_id: string
+                    telegram_user_id: string
+                    full_name: string
+                    phone_number: string
+                    shipping_address: string
+                    total_price: number
+                    status: string
+                    payment_method: string
+                }
+                Insert: {
+                    id?: string
+                    created_at?: string
+                    store_id: string
+                    telegram_user_id: string
+                    full_name: string
+                    phone_number: string
+                    shipping_address: string
+                    total_price: number
+                    status?: string
+                    payment_method: string
+                }
+                Update: {
+                    id?: string
+                    created_at?: string
+                    store_id?: string
+                    telegram_user_id?: string
+                    full_name?: string
+                    phone_number?: string
+                    shipping_address?: string
+                    total_price?: number
+                    status?: string
+                    payment_method?: string
+                }
+                Relationships: []
+            },
+            order_items: {
+                Row: {
+                    id: string
+                    order_id: string
+                    product_id: string
+                    quantity: number
+                    price_at_time: number
+                    selected_size: string | null
+                }
+                Insert: {
+                    id?: string
+                    order_id: string
+                    product_id: string
+                    quantity: number
+                    price_at_time: number
+                    selected_size?: string | null
+                }
+                Update: {
+                    id?: string
+                    order_id?: string
+                    product_id?: string
+                    quantity?: number
+                    price_at_time?: number
+                    selected_size?: string | null
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "order_items_order_id_fkey"
+                        columns: ["order_id"]
+                        referencedRelation: "orders"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "order_items_product_id_fkey"
+                        columns: ["product_id"]
+                        referencedRelation: "products"
+                        referencedColumns: ["id"]
+                    }
+                ]
             }
         }
         Views: {

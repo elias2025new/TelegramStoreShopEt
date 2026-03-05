@@ -177,8 +177,12 @@ export default function CheckoutPage() {
             }
 
             // 3. Send Telegram Notification to Owner
+            const imageUrls = items
+                .map(item => item.product.image_url)
+                .filter((url): url is string => !!url);
+
             const ownerMessage = formatOrderMessage(orderData, items, totalPrice);
-            await sendTelegramNotification(ownerMessage);
+            await sendTelegramNotification(ownerMessage, imageUrls);
         } catch (err: any) {
             console.error('Checkout error:', err);
             setError(err.message || 'Failed to place order. Please try again.');

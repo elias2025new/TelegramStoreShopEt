@@ -2,28 +2,59 @@ export const OWNER_ID = '5908397596';
 export const OWNER_USERNAME = 'gamfis';
 const BOT_TOKEN = process.env.NEXT_PUBLIC_BOT_TOKEN;
 
-export async function sendTelegramNotification(message: string) {
+export async function sendTelegramNotification(message: string, imageUrls: string[] = []) {
     if (!BOT_TOKEN) {
         console.error('Telegram Bot Token is missing');
         return;
     }
 
     try {
-        const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                chat_id: OWNER_ID,
-                text: message,
-                parse_mode: 'HTML',
-            }),
-        });
+        if (imageUrls.length === 0) {
+            // Send as text only
+            const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: OWNER_ID,
+                    text: message,
+                    parse_mode: 'HTML',
+                }),
+            });
+            const result = await response.json();
+            if (!result.ok) console.error('Telegram notification failed:', result.description);
+        } else if (imageUrls.length === 1) {
+            // Send as photo with caption
+            const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: OWNER_ID,
+                    photo: imageUrls[0],
+                    caption: message,
+                    parse_mode: 'HTML',
+                }),
+            });
+            const result = await response.json();
+            if (!result.ok) console.error('Telegram photo notification failed:', result.description);
+        } else {
+            // Send as media group (up to 10)
+            const media = imageUrls.slice(0, 10).map((url, index) => ({
+                type: 'photo',
+                media: url,
+                caption: index === 0 ? message : '',
+                parse_mode: 'HTML'
+            }));
 
-        const result = await response.json();
-        if (!result.ok) {
-            console.error('Telegram notification failed:', result.description);
+            const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMediaGroup`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: OWNER_ID,
+                    media: media
+                }),
+            });
+            const result = await response.json();
+            if (!result.ok) console.error('Telegram media group notification failed:', result.description);
         }
     } catch (error) {
         console.error('Error sending Telegram notification:', error);

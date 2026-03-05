@@ -8,6 +8,7 @@ import { useAdmin } from '@/context/AdminContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import AdminConfirmModal from './AdminConfirmModal';
+import AdminOrders from './AdminOrders';
 
 
 const DRAFT_KEY = 'admin_product_draft';
@@ -1039,7 +1040,7 @@ function compressImage(base64: string, maxWidth = 1000, quality = 0.8): Promise<
 export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
     const { storeId } = useAdmin();
     const queryClient = useQueryClient();
-    const [view, setView] = useState<'upload' | 'manage'>('upload');
+    const [view, setView] = useState<'upload' | 'manage' | 'orders'>('upload');
     const [images, setImages] = useState<ImageItem[]>([]);
     const [existingProducts, setExistingProducts] = useState<Product[]>([]);
     const [isLoadingProducts, setIsLoadingProducts] = useState(false);
@@ -1661,6 +1662,20 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                         <span>{view === 'upload' ? 'Manage' : 'Add'}</span>
                     </button>
                     <button
+                        onClick={() => setView('orders')}
+                        className={`px-2 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${view === 'orders'
+                            ? 'bg-[#cba153]/20 text-[#cba153] border border-[#cba153]/30'
+                            : 'bg-gray-100 dark:bg-[#1c1c1e] text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-[#2a2a2a]'
+                            }`}
+                    >
+                        <img
+                            src="https://img.icons8.com/ios-filled/50/cba153/shopping-bag.png"
+                            alt="icon"
+                            className="w-3.5 h-3.5"
+                        />
+                        <span>Orders</span>
+                    </button>
+                    <button
                         onClick={() => setAnnounceModalOpen(true)}
                         className="px-2 py-1 rounded-lg text-xs font-bold bg-[#cba153]/10 text-[#cba153] border border-[#cba153]/30 transition-all flex items-center gap-1.5"
                     >
@@ -1829,9 +1844,8 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                         )}
 
                         {/* Keyboard spacer */}
-                        <div className="h-48 w-full opacity-0 pointer-events-none"></div>
                     </>
-                ) : (
+                ) : view === 'manage' ? (
                     <>
                         {/* Status Message rendered inline */}
                         {uploadStatus && (
@@ -1946,6 +1960,8 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                             onChange={(e) => editingProductId && handleChangeProductImage(editingProductId, e)}
                         />
                     </>
+                ) : (
+                    <AdminOrders />
                 )}
             </div>
 
