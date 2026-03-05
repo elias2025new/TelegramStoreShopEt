@@ -363,22 +363,68 @@ export default function CheckoutPage() {
                                         />
                                     </label>
 
-                                    <div className="opacity-50 cursor-not-allowed">
-                                        <div className="flex items-center justify-between p-4 rounded-2xl border-2 border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
-                                            <div className="flex items-center gap-4">
-                                                <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-400">
-                                                    <CreditCard className="w-6 h-6" />
-                                                </div>
-                                                <div>
-                                                    <div className="flex items-center gap-2">
-                                                        <p className="font-bold text-gray-400 dark:text-gray-500">Bank Transfer</p>
-                                                        <span className="text-[9px] font-black bg-gray-200 dark:bg-gray-800 px-1.5 py-0.5 rounded text-gray-500">UNAVAILABLE</span>
-                                                    </div>
-                                                    <p className="text-xs text-gray-500">Currently not available</p>
-                                                </div>
+                                    <label className={`
+                                        flex items-center justify-between p-4 rounded-2xl border-2 transition-all cursor-pointer
+                                        ${formData.paymentMethod === 'bank_transfer'
+                                            ? 'border-[#cba153] bg-[#cba153]/5'
+                                            : 'border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700'}
+                                    `}>
+                                        <div className="flex items-center gap-4">
+                                            <div className={`p-2 rounded-lg ${formData.paymentMethod === 'bank_transfer' ? 'bg-[#cba153] text-black' : 'bg-gray-100 dark:bg-gray-800 text-gray-400'}`}>
+                                                <CreditCard className="w-6 h-6" />
+                                            </div>
+                                            <div>
+                                                <p className="font-bold text-gray-900 dark:text-white">Bank Transfer</p>
+                                                <p className="text-xs text-gray-500">Pay via CBE or Telebirr</p>
                                             </div>
                                         </div>
-                                    </div>
+                                        <input
+                                            type="radio"
+                                            className="accent-[#cba153] w-5 h-5"
+                                            checked={formData.paymentMethod === 'bank_transfer'}
+                                            onChange={() => setFormData(prev => ({ ...prev, paymentMethod: 'bank_transfer' }))}
+                                        />
+                                    </label>
+
+                                    <AnimatePresence>
+                                        {formData.paymentMethod === 'bank_transfer' && (
+                                            <motion.div
+                                                initial={{ height: 0, opacity: 0 }}
+                                                animate={{ height: 'auto', opacity: 1 }}
+                                                exit={{ height: 0, opacity: 0 }}
+                                                className="overflow-hidden"
+                                            >
+                                                <div className="grid grid-cols-2 gap-3 pt-1">
+                                                    <button
+                                                        type="button"
+                                                        className="flex flex-col items-center justify-center p-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-[#cba153] transition-all group scale-95"
+                                                    >
+                                                        <div className="w-12 h-12 rounded-xl bg-[#6f2b91]/10 flex items-center justify-center mb-2 group-hover:bg-[#6f2b91]/20 transition-colors">
+                                                            <img
+                                                                src="https://yt3.googleusercontent.com/ytc/AIdro_nLzN-2m9S0_2u7Q9W4YxVn-9e9-12-12=s900-c-k-c0x00ffffff-no-rj"
+                                                                alt="CBE"
+                                                                className="w-8 h-8 rounded-lg object-contain"
+                                                            />
+                                                        </div>
+                                                        <span className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-wider">Pay with CBE</span>
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className="flex flex-col items-center justify-center p-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-[#cba153] transition-all group scale-95"
+                                                    >
+                                                        <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mb-2 group-hover:bg-blue-500/20 transition-colors">
+                                                            <img
+                                                                src="https://www.telebirr.com.et/wp-content/uploads/2021/04/telebirr-logo.png"
+                                                                alt="Telebirr"
+                                                                className="w-10 h-10 object-contain"
+                                                            />
+                                                        </div>
+                                                        <span className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-wider">Pay with Telebirr</span>
+                                                    </button>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
                                 </div>
                             </motion.div>
                         )}
@@ -431,7 +477,9 @@ export default function CheckoutPage() {
                                         </div>
                                         <div className="p-3 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl space-y-1">
                                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Payment</p>
-                                            <p className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-tight">Cash on Delivery</p>
+                                            <p className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-tight">
+                                                {formData.paymentMethod === 'cash_on_delivery' ? 'Cash on Delivery' : 'Bank Transfer'}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
