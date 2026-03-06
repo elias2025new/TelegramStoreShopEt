@@ -30,7 +30,7 @@ interface FormData {
     address: string;
     paymentMethod: 'cash_on_delivery' | 'bank_transfer';
     bankMethod: 'cbe' | 'telebirr' | null;
-    telebirrReceiptLink: string;
+    telebirrSmsText: string;
 }
 
 export default function CheckoutPage() {
@@ -49,7 +49,7 @@ export default function CheckoutPage() {
         address: '',
         paymentMethod: 'cash_on_delivery',
         bankMethod: null,
-        telebirrReceiptLink: '',
+        telebirrSmsText: '',
     });
 
     // Auto-fill from Telegram if available
@@ -113,8 +113,8 @@ export default function CheckoutPage() {
                 return;
             }
             if (formData.paymentMethod === 'bank_transfer' && formData.bankMethod === 'telebirr') {
-                if (!formData.telebirrReceiptLink || !formData.telebirrReceiptLink.includes('transactioninfo.ethiotelecom.et/receipt/')) {
-                    setError('Please paste a valid Telebirr receipt link to proceed');
+                if (!formData.telebirrSmsText || formData.telebirrSmsText.length < 30) {
+                    setError('Please paste the FULL SMS message from Telebirr to proceed');
                     return;
                 }
             }
@@ -154,7 +154,7 @@ export default function CheckoutPage() {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        url: formData.telebirrReceiptLink,
+                        smsText: formData.telebirrSmsText,
                         expectedAmount: totalPrice
                     })
                 });
@@ -502,14 +502,14 @@ export default function CheckoutPage() {
                                                                 </div>
 
                                                                 <div className="space-y-2">
-                                                                    <p className="text-xs font-bold text-gray-900 dark:text-white">Step 2: Verify Receipt</p>
-                                                                    <p className="text-[11px] text-gray-500">Paste the receipt link you received in your SMS here:</p>
-                                                                    <input
-                                                                        type="url"
-                                                                        value={formData.telebirrReceiptLink}
-                                                                        onChange={(e) => setFormData(prev => ({ ...prev, telebirrReceiptLink: e.target.value.trim() }))}
-                                                                        placeholder="https://transactioninfo.ethiotelecom.et/..."
-                                                                        className="w-full bg-gray-50 dark:bg-gray-800 border-none outline-none focus:ring-2 focus:ring-[#cba153] rounded-xl px-4 py-3 text-sm transition"
+                                                                    <p className="text-xs font-bold text-gray-900 dark:text-white">Step 2: Paste SMS</p>
+                                                                    <p className="text-[11px] text-gray-500">Paste the FULL SMS message you received from Telebirr here:</p>
+                                                                    <textarea
+                                                                        rows={4}
+                                                                        value={formData.telebirrSmsText}
+                                                                        onChange={(e) => setFormData(prev => ({ ...prev, telebirrSmsText: e.target.value }))}
+                                                                        placeholder="Dear customer, you have transferred ETB..."
+                                                                        className="w-full bg-gray-50 dark:bg-gray-800 border-none outline-none focus:ring-2 focus:ring-[#cba153] rounded-xl px-4 py-3 text-sm transition resize-none"
                                                                     />
                                                                 </div>
                                                             </div>
