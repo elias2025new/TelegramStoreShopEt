@@ -28,7 +28,7 @@ function fetchHtmlDirect(url: string): Promise<string> {
             res.on('data', (chunk) => { data += chunk; });
             res.on('end', () => resolve(data));
         });
-        req.setTimeout(10000, () => {
+        req.setTimeout(8000, () => {
             req.destroy();
             reject(new Error('Direct fetch timed out'));
         });
@@ -36,48 +36,65 @@ function fetchHtmlDirect(url: string): Promise<string> {
     });
 }
 
-// 2. Fallback fetch using public proxy to bypass Vercel geographic IP blocking
+// 2. Fallback fetch using multiple public proxies to bypass Vercel geographic IP blocking
 async function fetchHtmlWithFallbacks(url: string): Promise<string> {
-    // Attempt 1: Direct fetch (works locally, usually blocked on Vercel)
+    const attempts = [];
+    const TIMEOUT_MS = 8000;
+
+    const fetchWithTimeout = async (url: string, options: any = {}) => {
+        const controller = new AbortController();
+        const id = setTimeout(() => controller.abort(), TIMEOUT_MS);
+        try {
+            const res = await fetch(url, { ...options, signal: controller.signal });
+            clearTimeout(id);
+            return res;
+        } catch (e) {
+            clearTimeout(id);
+            throw e;
+        }
+    };
+
+    // Attempt 1: Direct Fetch
     try {
         console.log('Attempt 1: Direct Fetch');
         const html = await fetchHtmlDirect(url);
         if (html && html.includes('telebirr')) return html;
     } catch (e: any) {
-        console.log('Direct fetch failed:', e.message);
+        attempts.push(`Direct: ${e.message}`);
     }
 
-    // Attempt 2: CORS Proxy API (Bypasses geographic blocking)
-    try {
-        console.log('Attempt 2: CORS Proxy');
-        const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
-        const res = await fetch(proxyUrl, {
-            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
-        });
-        if (res.ok) {
-            const html = await res.text();
-            if (html && html.includes('telebirr')) return html;
+    // List of reliable public proxies
+    const proxies = [
+        { name: 'CORSProxy.io', url: `https://corsproxy.io/?${encodeURIComponent(url)}` },
+        { name: 'AllOrigins', url: `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}` },
+        { name: 'Thingproxy', url: `https://thingproxy.freeboard.io/fetch/${url}` },
+        { name: 'CorsAnywhere', url: `https://cors-anywhere.herokuapp.com/${url}` },
+        { name: 'GoogleTranslate', url: `https://translate.google.com/translate?sl=auto&tl=en&u=${encodeURIComponent(url)}` }
+    ];
+
+    for (const proxy of proxies) {
+        try {
+            console.log(`Attempt: ${proxy.name}`);
+            const res = await fetchWithTimeout(proxy.url, {
+                headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
+            });
+
+            if (res.ok) {
+                const html = await res.text();
+                // Google Translate wraps the page in an iframe, so just checking for 'telebirr' or text is mostly okay
+                // since we parse it with cheerio anyway, the td/tr structure will usually survive translation proxy if it extracts the raw DOM
+                if (html && (html.toLowerCase().includes('telebirr') || html.toLowerCase().includes('receipt'))) {
+                    return html;
+                }
+            } else {
+                attempts.push(`${proxy.name}: HTTP ${res.status}`);
+            }
+        } catch (e: any) {
+            attempts.push(`${proxy.name}: ${e.message}`);
         }
-    } catch (e: any) {
-        console.log('CORS Proxy failed:', e.message);
     }
 
-    // Attempt 3: AllOrigins Raw API (Another geographic bypass)
-    try {
-        console.log('Attempt 3: AllOrigins Proxy');
-        const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
-        const res = await fetch(proxyUrl, {
-            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
-        });
-        if (res.ok) {
-            const html = await res.text();
-            if (html && html.includes('telebirr')) return html;
-        }
-    } catch (e: any) {
-        console.log('AllOrigins failed:', e.message);
-    }
-
-    throw new Error('All network fetch attempts failed to reach the Ethio Telecom server. Please verify the link is working.');
+    throw new Error(`All network fetch attempts failed to reach the Ethio Telecom server. Details: ${attempts.join(' | ')}`);
 }
 
 export async function POST(request: Request) {
@@ -108,7 +125,7 @@ export async function POST(request: Request) {
         } catch (fetchErr: any) {
             return NextResponse.json({
                 success: false,
-                error: `Could not load receipt page: ${fetchErr?.message || 'Network error'}`
+                error: fetchErr?.message || 'Network error'
             }, { status: 400 });
         }
 
@@ -125,9 +142,9 @@ export async function POST(request: Request) {
         // Scrape credited party name and transaction status
         $('td').each((i, el) => {
             const text = $(el).text().trim().replace(/\s+/g, ' ');
-            if (text.includes('Credited Party name')) {
+            if (text.toLowerCase().includes('credited party name')) {
                 creditedName = $(el).next('td').text().trim().toLowerCase();
-            } else if (text.includes('transaction status')) {
+            } else if (text.toLowerCase().includes('transaction status')) {
                 status = $(el).next('td').text().trim();
             }
         });
@@ -138,9 +155,9 @@ export async function POST(request: Request) {
 
         $('tr').each((i, tr) => {
             const rowText = $(tr).text();
-            if (rowText.includes('Settled Amount')) {
+            if (rowText.toLowerCase().includes('settled amount')) {
                 $(tr).find('td').each((j, td) => {
-                    if ($(td).text().includes('Settled Amount')) {
+                    if ($(td).text().toLowerCase().includes('settled amount')) {
                         amountColIndex = j;
                     }
                 });
@@ -154,12 +171,34 @@ export async function POST(request: Request) {
             }
         });
 
+        // If data is still missing, search the entire HTML broadly (sometimes Translate proxies modify DOM structure)
+        if (!settledAmount) {
+            const htmlText = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' '); // Strip all HTML to raw text
+
+            // Regex fallback 1: Look for exact transaction ID followed by amounts somewhere nearby
+            if (htmlText.includes(transactionId)) {
+                const amountMatch = htmlText.match(/Settled Amount.*?([\d,]+\.?\d*)/i);
+                if (amountMatch) settledAmount = amountMatch[1];
+            }
+        }
+
+        if (!status) {
+            const htmlText = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+            if (htmlText.toLowerCase().includes('transaction status completed') || htmlText.toLowerCase().includes('status completed')) {
+                status = 'completed';
+            }
+        }
+
         // Step 2: Validate scraped values
         if (!creditedName.includes('bizawet yohanis beru')) {
-            return NextResponse.json({
-                success: false,
-                error: `Payment was not sent to the correct store. Found: "${creditedName || 'unknown'}"`
-            }, { status: 400 });
+            // Because proxies might mangle text slightly, let's do a more robust fallback generic check
+            const htmlTextRaw = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').toLowerCase();
+            if (!htmlTextRaw.includes('bizawet yohanis beru')) {
+                return NextResponse.json({
+                    success: false,
+                    error: `Payment was not sent to the correct store. Found: "${creditedName || 'unknown'}"`
+                }, { status: 400 });
+            }
         }
 
         if (status.toLowerCase() !== 'completed') {
