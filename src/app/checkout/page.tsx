@@ -30,6 +30,7 @@ interface FormData {
     address: string;
     paymentMethod: 'cash_on_delivery' | 'bank_transfer';
     bankMethod: 'cbe' | 'telebirr' | null;
+    telebirrReceiptLink: string;
 }
 
 export default function CheckoutPage() {
@@ -48,6 +49,7 @@ export default function CheckoutPage() {
         address: '',
         paymentMethod: 'cash_on_delivery',
         bankMethod: null,
+        telebirrReceiptLink: '',
     });
 
     // Auto-fill from Telegram if available
@@ -110,6 +112,12 @@ export default function CheckoutPage() {
                 setError('Please choose a payment method (CBE or Telebirr)');
                 return;
             }
+            if (formData.paymentMethod === 'bank_transfer' && formData.bankMethod === 'telebirr') {
+                if (!formData.telebirrReceiptLink || !formData.telebirrReceiptLink.includes('transactioninfo.ethiotelecom.et/receipt/')) {
+                    setError('Please paste a valid Telebirr receipt link to proceed');
+                    return;
+                }
+            }
         }
 
         setError(null);
@@ -139,6 +147,27 @@ export default function CheckoutPage() {
         setError(null);
 
         try {
+            let transactionId = null;
+
+            if (formData.paymentMethod === 'bank_transfer' && formData.bankMethod === 'telebirr') {
+                const verifyRes = await fetch('/api/verify-telebirr', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        url: formData.telebirrReceiptLink,
+                        expectedAmount: totalPrice
+                    })
+                });
+
+                const verifyData = await verifyRes.json();
+
+                if (!verifyRes.ok || !verifyData.success) {
+                    throw new Error(verifyData.error || 'Payment verification failed. Please check your receipt link.');
+                }
+
+                transactionId = verifyData.transactionId;
+            }
+
             const telegramUser = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initDataUnsafe?.user : null;
             const telegramUserId = telegramUser?.id?.toString() || 'anonymous';
 
@@ -152,7 +181,8 @@ export default function CheckoutPage() {
                     shipping_address: formData.address,
                     total_price: totalPrice,
                     payment_method: formData.paymentMethod,
-                    status: 'pending'
+                    status: formData.paymentMethod === 'bank_transfer' && formData.bankMethod === 'telebirr' ? 'paid' : 'pending',
+                    transaction_id: transactionId
                 }])
                 .select()
                 .single();
@@ -443,6 +473,50 @@ export default function CheckoutPage() {
                                                         <span className={`text-[10px] font-black uppercase tracking-wider ${formData.bankMethod === 'telebirr' ? 'text-[#cba153]' : 'text-gray-900 dark:text-white'}`}>Telebirr</span>
                                                     </button>
                                                 </div>
+
+                                                <AnimatePresence>
+                                                    {formData.bankMethod === 'telebirr' && (
+                                                        <motion.div
+                                                            initial={{ height: 0, opacity: 0 }}
+                                                            animate={{ height: 'auto', opacity: 1 }}
+                                                            exit={{ height: 0, opacity: 0 }}
+                                                            className="overflow-hidden mt-3"
+                                                        >
+                                                            <div className="p-4 bg-white dark:bg-gray-900 border border-[#cba153]/30 rounded-2xl space-y-4 shadow-sm shadow-[#cba153]/5">
+                                                                <div className="space-y-1">
+                                                                    <p className="text-xs font-bold text-gray-900 dark:text-white">Step 1: Send Payment</p>
+                                                                    <p className="text-[11px] text-gray-500">Send <span className="font-bold text-[#cba153]">{new Intl.NumberFormat('en-ET', { style: 'currency', currency: 'ETB', maximumFractionDigits: 0 }).format(totalPrice)}</span> to the following number:</p>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            navigator.clipboard.writeText('0963138123');
+                                                                            if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+                                                                                window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+                                                                            }
+                                                                        }}
+                                                                        className="mt-2 w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                                                                    >
+                                                                        <span className="font-mono font-bold text-lg tracking-widest text-[#cba153]">09 63 13 81 23</span>
+                                                                        <span className="text-[10px] font-bold text-gray-400 bg-white dark:bg-gray-900 px-2 py-1 rounded shadow-sm">COPY</span>
+                                                                    </button>
+                                                                </div>
+
+                                                                <div className="space-y-2">
+                                                                    <p className="text-xs font-bold text-gray-900 dark:text-white">Step 2: Verify Receipt</p>
+                                                                    <p className="text-[11px] text-gray-500">Paste the receipt link you received in your SMS here:</p>
+                                                                    <input
+                                                                        type="url"
+                                                                        value={formData.telebirrReceiptLink}
+                                                                        onChange={(e) => setFormData(prev => ({ ...prev, telebirrReceiptLink: e.target.value.trim() }))}
+                                                                        placeholder="https://transactioninfo.ethiotelecom.et/..."
+                                                                        className="w-full bg-gray-50 dark:bg-gray-800 border-none outline-none focus:ring-2 focus:ring-[#cba153] rounded-xl px-4 py-3 text-sm transition"
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        </motion.div>
+                                                    )}
+                                                </AnimatePresence>
+
                                                 {error && error.includes('payment method') && (
                                                     <motion.p
                                                         initial={{ opacity: 0, y: -5 }}

@@ -90,6 +90,7 @@ export interface Database {
                     status: string
                     payment_method: string
                     delivered_at: string | null
+                    transaction_id: string | null
                 }
                 Insert: {
                     id?: string
@@ -104,6 +105,7 @@ export interface Database {
                     status?: string
                     payment_method?: string
                     delivered_at?: string | null
+                    transaction_id?: string | null
                 }
                 Update: {
                     id?: string
@@ -118,6 +120,7 @@ export interface Database {
                     status?: string
                     payment_method?: string
                     delivered_at?: string | null
+                    transaction_id?: string | null
                 }
                 Relationships: []
             },
