@@ -1,6 +1,36 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/utils/supabase/client';
 import * as cheerio from 'cheerio';
+import https from 'https';
+
+// Uses native Node https to bypass SSL cert issues from Vercel -> Ethiopian servers
+function fetchHtml(url: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const agent = new https.Agent({ rejectUnauthorized: false });
+        const req = https.get(url, {
+            agent, headers: {
+                'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.5',
+            }
+        }, (res) => {
+            if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+                // Handle redirects
+                fetchHtml(res.headers.location).then(resolve).catch(reject);
+                return;
+            }
+            let data = '';
+            res.setEncoding('utf8');
+            res.on('data', (chunk) => { data += chunk; });
+            res.on('end', () => resolve(data));
+        });
+        req.setTimeout(15000, () => {
+            req.destroy();
+            reject(new Error('Request timed out after 15 seconds'));
+        });
+        req.on('error', reject);
+    });
+}
 
 export async function POST(request: Request) {
     try {
@@ -18,46 +48,14 @@ export async function POST(request: Request) {
             return NextResponse.json({ success: false, error: 'Could not extract Transaction ID from URL' }, { status: 400 });
         }
 
-        // Step 1: Fetch receipt HTML from Telebirr using full browser-like headers
+        // Step 1: Fetch receipt HTML using native https (bypasses SSL issues)
         let html = '';
         try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-
-            const response = await fetch(url, {
-                signal: controller.signal,
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
-                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-                    'Accept-Language': 'en-US,en;q=0.5',
-                    'Accept-Encoding': 'gzip, deflate, br',
-                    'Connection': 'keep-alive',
-                    'Upgrade-Insecure-Requests': '1',
-                    'Sec-Fetch-Dest': 'document',
-                    'Sec-Fetch-Mode': 'navigate',
-                    'Sec-Fetch-Site': 'none',
-                    'Cache-Control': 'max-age=0',
-                },
-                cache: 'no-store',
-            });
-
-            clearTimeout(timeoutId);
-
-            if (!response.ok) {
-                return NextResponse.json({
-                    success: false,
-                    error: `Could not reach Telebirr receipt server (HTTP ${response.status}). Please check the link is correct.`
-                }, { status: 400 });
-            }
-
-            html = await response.text();
+            html = await fetchHtml(url.trim());
         } catch (fetchErr: any) {
-            const isTimeout = fetchErr?.name === 'AbortError';
             return NextResponse.json({
                 success: false,
-                error: isTimeout
-                    ? 'Telebirr receipt page took too long to load. Please try again.'
-                    : `Could not load receipt page: ${fetchErr?.message || 'Network error'}. Please check the link.`
+                error: `Could not load receipt: ${fetchErr?.message || 'Network error'}. Please check your link.`
             }, { status: 400 });
         }
 
