@@ -508,7 +508,7 @@ export default function CheckoutPage() {
                                                                         rows={4}
                                                                         value={formData.telebirrSmsText}
                                                                         onChange={(e) => setFormData(prev => ({ ...prev, telebirrSmsText: e.target.value }))}
-                                                                        placeholder="Dear customer, you have transferred ETB..."
+                                                                        placeholder="Dear TSegalem You have transferred ETB..."
                                                                         className="w-full bg-gray-50 dark:bg-gray-800 border-none outline-none focus:ring-2 focus:ring-[#cba153] rounded-xl px-4 py-3 text-sm transition resize-none"
                                                                     />
                                                                 </div>
