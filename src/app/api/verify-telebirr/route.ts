@@ -18,16 +18,53 @@ export async function POST(request: Request) {
             return NextResponse.json({ success: false, error: 'Could not extract Transaction ID from URL' }, { status: 400 });
         }
 
-        // Step 1: Fetch receipt HTML from Telebirr
-        const response = await fetch(url, {
-            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
-        });
+        // Step 1: Fetch receipt HTML from Telebirr using full browser-like headers
+        let html = '';
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
 
-        if (!response.ok) {
-            return NextResponse.json({ success: false, error: 'Failed to access the receipt URL. Make sure it is valid.' }, { status: 400 });
+            const response = await fetch(url, {
+                signal: controller.signal,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+                    'Accept-Language': 'en-US,en;q=0.5',
+                    'Accept-Encoding': 'gzip, deflate, br',
+                    'Connection': 'keep-alive',
+                    'Upgrade-Insecure-Requests': '1',
+                    'Sec-Fetch-Dest': 'document',
+                    'Sec-Fetch-Mode': 'navigate',
+                    'Sec-Fetch-Site': 'none',
+                    'Cache-Control': 'max-age=0',
+                },
+                cache: 'no-store',
+            });
+
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                return NextResponse.json({
+                    success: false,
+                    error: `Could not reach Telebirr receipt server (HTTP ${response.status}). Please check the link is correct.`
+                }, { status: 400 });
+            }
+
+            html = await response.text();
+        } catch (fetchErr: any) {
+            const isTimeout = fetchErr?.name === 'AbortError';
+            return NextResponse.json({
+                success: false,
+                error: isTimeout
+                    ? 'Telebirr receipt page took too long to load. Please try again.'
+                    : `Could not load receipt page: ${fetchErr?.message || 'Network error'}. Please check the link.`
+            }, { status: 400 });
         }
 
-        const html = await response.text();
+        if (!html || html.length < 100) {
+            return NextResponse.json({ success: false, error: 'Receipt page returned empty content' }, { status: 400 });
+        }
+
         const $ = cheerio.load(html);
 
         let creditedName = '';
@@ -91,7 +128,7 @@ export async function POST(request: Request) {
             }, { status: 400 });
         }
 
-        // Step 3: Check for duplicate transaction ID in DB (only after all scraping passed)
+        // Step 3: Check for duplicate transaction ID in DB
         try {
             const { data: existingOrder } = await supabase
                 .from('orders')
@@ -103,8 +140,7 @@ export async function POST(request: Request) {
                 return NextResponse.json({ success: false, error: 'This receipt has already been used for another order' }, { status: 400 });
             }
         } catch (dbErr) {
-            // If the column doesn't exist yet in DB, log it but don't block the order
-            console.warn('Could not check duplicate transaction_id (run the SQL migration in Supabase):', dbErr);
+            console.warn('Could not check duplicate transaction_id:', dbErr);
         }
 
         return NextResponse.json({
