@@ -12,12 +12,12 @@ export async function POST(request: Request) {
         const normalizedText = smsText.toLowerCase().replace(/\s+/g, ' ');
 
         // 1. Verify it was sent to the correct store
-        // The SMS should say something like "...to your telebirr account 251963138123" or "...telebirr account 0963138123"
-        // Adjust these to match the exact wording of the SMS you receive
-        if (!normalizedText.includes('963138123')) {
+        // Telebirr P2P SMS masks the number like: 2519****8123
+        // So we check for the name "bizawet yohanis" or the unmasked digits "8123"
+        if (!normalizedText.includes('bizawet yohanis') && !normalizedText.includes('8123')) {
             return NextResponse.json({
                 success: false,
-                error: 'Payment does not appear to be sent to the correct store number (096 313 8123).'
+                error: 'Payment does not appear to be sent to the correct store (bizawet yohanis / ****8123).'
             }, { status: 400 });
         }
 
