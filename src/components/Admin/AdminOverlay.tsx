@@ -984,9 +984,6 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish }: Uploa
     );
 }
 
-import AdminBroadcasts from './AdminBroadcasts';
-import AdminDashboard from './AdminDashboard';
-
 interface AdminOverlayProps {
     isOpen: boolean;
     onClose: () => void;
