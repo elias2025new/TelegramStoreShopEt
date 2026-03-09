@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
@@ -11,6 +11,13 @@ interface PageTransitionProps {
 
 export default function PageTransition({ children }: PageTransitionProps) {
     const pathname = usePathname();
+
+    useEffect(() => {
+        // Reset scroll position to top on pathname changes
+        if (typeof window !== 'undefined') {
+            window.scrollTo({ top: 0, behavior: 'instant' });
+        }
+    }, [pathname]);
 
     return (
         <AnimatePresence mode="popLayout" initial={false}>

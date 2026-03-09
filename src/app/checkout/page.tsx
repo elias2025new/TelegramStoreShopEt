@@ -491,7 +491,7 @@ export default function CheckoutPage() {
                                                 exit={{ height: 0, opacity: 0 }}
                                                 className="overflow-hidden"
                                             >
-                                                <div className="grid grid-cols-1 gap-3 pt-1">
+                                                <div className="flex justify-center pt-2">
                                                     {/* CBE Birr hidden for now
                                                     <button
                                                         type="button"
@@ -513,18 +513,14 @@ export default function CheckoutPage() {
                                                     <button
                                                         type="button"
                                                         onClick={() => setFormData(prev => ({ ...prev, bankMethod: 'telebirr' }))}
-                                                        className={`flex flex-col items-center justify-center p-4 rounded-2xl border transition-all group scale-95 ${formData.bankMethod === 'telebirr'
-                                                            ? 'border-[#cba153] bg-[#cba153]/10 ring-1 ring-[#cba153]'
-                                                            : 'border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-[#cba153]/50'}`}
+                                                        className={`flex flex-col items-center justify-center transition-all duration-300 group ${formData.bankMethod === 'telebirr' ? 'scale-110' : 'opacity-60 grayscale hover:opacity-100 hover:grayscale-0'}`}
                                                     >
-                                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-2 transition-colors ${formData.bankMethod === 'telebirr' ? 'bg-[#cba153] text-black' : 'bg-blue-500/10 group-hover:bg-blue-500/20'}`}>
-                                                            <img
-                                                                src="/payment-icons/telebirr-logo.png"
-                                                                alt="Telebirr"
-                                                                className="w-12 h-12 object-contain scale-110"
-                                                            />
-                                                        </div>
-                                                        <span className={`text-[10px] font-black uppercase tracking-wider ${formData.bankMethod === 'telebirr' ? 'text-[#cba153]' : 'text-gray-900 dark:text-white'}`}>Telebirr</span>
+                                                        <img
+                                                            src="/payment-icons/telebirr-logo.png"
+                                                            alt="Telebirr"
+                                                            className="w-20 h-20 object-contain"
+                                                        />
+                                                        <span className={`text-[10px] font-black uppercase tracking-wider mt-1 ${formData.bankMethod === 'telebirr' ? 'text-[#cba153]' : 'text-gray-500'}`}>Telebirr</span>
                                                     </button>
                                                 </div>
 
