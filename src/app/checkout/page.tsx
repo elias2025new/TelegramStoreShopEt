@@ -45,7 +45,7 @@ export default function CheckoutPage() {
 
     const [formData, setFormData] = useState<FormData>({
         fullName: '',
-        phoneNumber: '',
+        phoneNumber: '+251',
         address: '',
         paymentMethod: 'cash_on_delivery',
         bankMethod: null,
@@ -96,15 +96,27 @@ export default function CheckoutPage() {
             }
 
             // Ethiopian Phone Validation
-            // Standard: +2517..., +2519..., 07..., 09...
-            const ethioPhoneRegex = /^(\+251|0)(9|7)\d{8}$/;
-            if (!ethioPhoneRegex.test(formData.phoneNumber.replace(/\s/g, ''))) {
-                setError('Please enter a valid Ethiopian phone number (Ethio Telecom or Safaricom)');
+            const cleanPhone = formData.phoneNumber.replace(/\s/g, '');
+            // Accepts +2519..., +2517..., 09..., 07..., 9..., 7...
+            const ethioPhoneRegex = /^(\+251|0)?(9|7)\d{8}$/;
+
+            if (!ethioPhoneRegex.test(cleanPhone)) {
+                setError('Please enter a valid Ethiopian phone number');
                 return;
             }
 
+            // Normalize to standardize DB format: +251...
+            let normalizedPhone = cleanPhone;
+            if (cleanPhone.startsWith('0')) {
+                normalizedPhone = '+251' + cleanPhone.substring(1);
+            } else if (cleanPhone.startsWith('9') || cleanPhone.startsWith('7')) {
+                normalizedPhone = '+251' + cleanPhone;
+            }
+
+            setFormData(prev => ({ ...prev, phoneNumber: normalizedPhone }));
+
             if (!formData.address) {
-                setError('Please provide a shipping address');
+                setError('Please provide a delivery location');
                 return;
             }
         } else if (currentStep === 'payment') {
@@ -301,6 +313,11 @@ export default function CheckoutPage() {
                                             <input
                                                 type="text"
                                                 value={formData.fullName}
+                                                onFocus={(e) => {
+                                                    setTimeout(() => {
+                                                        e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                                    }, 300);
+                                                }}
                                                 onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
                                                 placeholder="Enter your name"
                                                 className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-[#cba153]/20 focus:border-[#cba153] outline-none transition-all"
@@ -313,9 +330,33 @@ export default function CheckoutPage() {
                                             <input
                                                 type="tel"
                                                 value={formData.phoneNumber}
-                                                onChange={(e) => setFormData(prev => ({ ...prev, phoneNumber: e.target.value }))}
-                                                placeholder="+251 ..."
-                                                className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-[#cba153]/20 focus:border-[#cba153] outline-none transition-all"
+                                                onFocus={(e) => {
+                                                    setTimeout(() => {
+                                                        e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                                    }, 300);
+                                                }}
+                                                onChange={(e) => {
+                                                    let val = e.target.value;
+                                                    if (!val.startsWith('+251')) {
+                                                        // Prevent deleting the prefix
+                                                        if (val.length < 4) val = '+251';
+                                                        // Automatically fix pasted local numbers with 09... or 07...
+                                                        else if (val.startsWith('09') || val.startsWith('07')) {
+                                                            val = '+251' + val.substring(1);
+                                                        }
+                                                        // Automatically fix pasted local numbers without 0
+                                                        else if (val.startsWith('9') || val.startsWith('7')) {
+                                                            val = '+251' + val;
+                                                        }
+                                                        // Otherwise ensure the prefix stays
+                                                        else {
+                                                            val = '+251' + val.replace(/^\+?2?5?1?/, '');
+                                                        }
+                                                    }
+                                                    setFormData(prev => ({ ...prev, phoneNumber: val }));
+                                                }}
+                                                placeholder="+251 9/7... "
+                                                className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-[#cba153]/20 focus:border-[#cba153] outline-none transition-all font-mono"
                                             />
                                         </div>
                                     </div>
@@ -328,7 +369,7 @@ export default function CheckoutPage() {
                                         <div className="space-y-2">
                                             <div className="flex justify-between items-center">
                                                 <label className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
-                                                    <MapPin className="w-3 h-3" /> Address Details
+                                                    <MapPin className="w-3 h-3" /> Location
                                                 </label>
                                                 <button
                                                     onClick={() => {
@@ -339,19 +380,32 @@ export default function CheckoutPage() {
                                                     <MapPin className="w-3 h-3" /> {locationEnabled ? 'Location Ready' : 'Share Location'}
                                                 </button>
                                             </div>
-                                            <textarea
-                                                rows={4}
+                                            <input
+                                                type="text"
                                                 value={formData.address}
+                                                onFocus={(e) => {
+                                                    setTimeout(() => {
+                                                        e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                                    }, 300);
+                                                }}
                                                 onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
-                                                placeholder="House No, Street, Landmark..."
+                                                placeholder="Enter Delivery Location..."
                                                 className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-[#cba153]/20 focus:border-[#cba153] outline-none transition-all"
                                             />
                                         </div>
                                         {locationName && (
-                                            <div className="p-3 bg-blue-50 dark:bg-blue-500/10 rounded-lg flex gap-3 border border-blue-100 dark:border-blue-500/20">
+                                            <div
+                                                onClick={() => {
+                                                    setFormData(prev => ({ ...prev, address: locationName }));
+                                                    if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+                                                        window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+                                                    }
+                                                }}
+                                                className="p-3 bg-blue-50 dark:bg-blue-500/10 rounded-lg flex gap-3 border border-blue-100 dark:border-blue-500/20 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-500/20 active:scale-[0.98] transition-all"
+                                            >
                                                 <MapPin className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
                                                 <div>
-                                                    <p className="text-xs font-bold text-blue-700 dark:text-blue-400 uppercase tracking-tight">Detected Location</p>
+                                                    <p className="text-xs font-bold text-blue-700 dark:text-blue-400 uppercase tracking-tight">Detected Location (Tap to Use)</p>
                                                     <p className="text-[11px] text-blue-600 dark:text-blue-300 mt-0.5">{locationName}</p>
                                                 </div>
                                             </div>
