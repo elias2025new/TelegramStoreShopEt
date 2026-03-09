@@ -6,6 +6,7 @@ import { supabase } from '@/utils/supabase/client';
 import { Database } from '@/types/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, ChevronUp, Package, Clock, CheckCircle2, XCircle, Truck, MapPin, Phone, User, Calendar, CreditCard } from 'lucide-react';
+import AdminConfirmModal from './AdminConfirmModal';
 
 type Order = Database['public']['Tables']['orders']['Row'];
 type OrderItem = Database['public']['Tables']['order_items']['Row'] & {
@@ -39,6 +40,8 @@ export default function AdminOrders() {
     const [selectedOrderIds, setSelectedOrderIds] = useState<Set<string>>(new Set());
     const [deleteMenuOpen, setDeleteMenuOpen] = useState(false);
     const [isDeletingBulk, setIsDeletingBulk] = useState(false);
+    const [isDeleteAllModalOpen, setIsDeleteAllModalOpen] = useState(false);
+    const [isDeleteSelectedModalOpen, setIsDeleteSelectedModalOpen] = useState(false);
 
     const DELETE_AFTER_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -194,7 +197,6 @@ export default function AdminOrders() {
     };
 
     const handleDeleteAll = async () => {
-        if (!confirm('Delete ALL orders? This cannot be undone.')) return;
         setIsDeletingBulk(true);
         try {
             const ids = orders.map(o => o.id);
@@ -283,7 +285,7 @@ export default function AdminOrders() {
                                             className="absolute right-0 top-full mt-2 w-36 bg-white dark:bg-[#2a2a2a] rounded-xl shadow-xl border border-gray-100 dark:border-gray-800 py-1 z-[120] overflow-hidden"
                                         >
                                             <button
-                                                onClick={() => { setDeleteMenuOpen(false); handleDeleteAll(); }}
+                                                onClick={() => { setDeleteMenuOpen(false); setIsDeleteAllModalOpen(true); }}
                                                 className="w-full px-4 py-2 text-left text-[11px] font-bold text-red-500 hover:bg-red-500/10 transition-colors"
                                             >
                                                 DELETE ALL
@@ -480,7 +482,7 @@ export default function AdminOrders() {
                         className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-white dark:bg-[#0a0a0a] border-t border-gray-200 dark:border-[#2a2a2a] pb-safe"
                     >
                         <button
-                            onClick={handleDeleteSelected}
+                            onClick={() => setIsDeleteSelectedModalOpen(true)}
                             disabled={isDeletingBulk}
                             className={`w-full py-3.5 px-4 rounded-xl font-extrabold text-white transition-all ${isDeletingBulk ? 'bg-gray-600 cursor-not-allowed' : 'bg-red-500 hover:bg-red-600 active:scale-[0.98] shadow-[0_4px_20px_rgba(239,68,68,0.3)]'}`}
                         >
@@ -489,6 +491,28 @@ export default function AdminOrders() {
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            <AdminConfirmModal
+                isOpen={isDeleteAllModalOpen}
+                title="Delete All Orders"
+                description="Are you sure you want to delete all orders? This action cannot be undone and will permanently remove all order records."
+                confirmText={isDeletingBulk ? "Deleting..." : "Yes, Delete All"}
+                cancelText="Cancel"
+                onConfirm={handleDeleteAll}
+                onCancel={() => setIsDeleteAllModalOpen(false)}
+                variant="danger"
+            />
+
+            <AdminConfirmModal
+                isOpen={isDeleteSelectedModalOpen}
+                title="Delete Selected Orders"
+                description={`Are you sure you want to delete ${selectedOrderIds.size} selected order(s)? This action cannot be undone.`}
+                confirmText={isDeletingBulk ? "Deleting..." : "Yes, Delete Selected"}
+                cancelText="Cancel"
+                onConfirm={handleDeleteSelected}
+                onCancel={() => setIsDeleteSelectedModalOpen(false)}
+                variant="danger"
+            />
         </div>
     );
 }

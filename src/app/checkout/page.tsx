@@ -22,7 +22,7 @@ import {
     AlertCircle
 } from 'lucide-react';
 
-type Step = 'contact' | 'shipping' | 'payment' | 'summary' | 'success';
+type Step = 'details' | 'payment' | 'summary' | 'success';
 
 interface FormData {
     fullName: string;
@@ -38,7 +38,7 @@ export default function CheckoutPage() {
     const { items, totalPrice, clearCart } = useCart();
     const { locationName, locationEnabled, enableLocation } = useLocation();
 
-    const [currentStep, setCurrentStep] = useState<Step>('contact');
+    const [currentStep, setCurrentStep] = useState<Step>('details');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [orderId, setOrderId] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -85,11 +85,11 @@ export default function CheckoutPage() {
         );
     }
 
-    const stepsArray: Step[] = ['contact', 'shipping', 'payment', 'summary'];
+    const stepsArray: Step[] = ['details', 'payment', 'summary'];
     const currentStepIndex = stepsArray.indexOf(currentStep);
 
     const handleNext = () => {
-        if (currentStep === 'contact') {
+        if (currentStep === 'details') {
             if (!formData.fullName || !formData.phoneNumber) {
                 setError('Please fill in your contact details');
                 return;
@@ -102,7 +102,7 @@ export default function CheckoutPage() {
                 setError('Please enter a valid Ethiopian phone number (Ethio Telecom or Safaricom)');
                 return;
             }
-        } else if (currentStep === 'shipping') {
+
             if (!formData.address) {
                 setError('Please provide a shipping address');
                 return;
@@ -132,7 +132,7 @@ export default function CheckoutPage() {
 
     const handleBack = () => {
         setError(null);
-        if (currentStep === 'contact') {
+        if (currentStep === 'details') {
             router.back();
             return;
         }
@@ -272,93 +272,85 @@ export default function CheckoutPage() {
 
                 <div className="flex-1 overflow-y-auto p-4 pb-32">
                     <AnimatePresence mode="wait">
-                        {currentStep === 'contact' && (
+                        {currentStep === 'details' && (
                             <motion.div
-                                key="contact"
+                                key="details"
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -20 }}
                                 className="space-y-6"
                             >
                                 <div className="space-y-4">
-                                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">Contact Information</h2>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400">Please provide your details for delivery updates.</p>
+                                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">Delivery Details</h2>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">Please provide your contact and shipping information.</p>
                                 </div>
 
                                 <div className="space-y-4">
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
-                                            <User className="w-3 h-3" /> Full Name
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={formData.fullName}
-                                            onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
-                                            placeholder="Enter your name"
-                                            className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-[#cba153]/20 focus:border-[#cba153] outline-none transition-all"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
-                                            <Phone className="w-3 h-3" /> Phone Number
-                                        </label>
-                                        <input
-                                            type="tel"
-                                            value={formData.phoneNumber}
-                                            onChange={(e) => setFormData(prev => ({ ...prev, phoneNumber: e.target.value }))}
-                                            placeholder="+251 ..."
-                                            className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-[#cba153]/20 focus:border-[#cba153] outline-none transition-all"
-                                        />
-                                    </div>
-                                </div>
-                            </motion.div>
-                        )}
-
-                        {currentStep === 'shipping' && (
-                            <motion.div
-                                key="shipping"
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -20 }}
-                                className="space-y-6"
-                            >
-                                <div className="space-y-4">
-                                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">Shipping Address</h2>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400">Where should we deliver your order?</p>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between items-center">
+                                    {/* Contact Section */}
+                                    <div className="space-y-4">
+                                        <div className="space-y-2">
                                             <label className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
-                                                <MapPin className="w-3 h-3" /> Address Details
+                                                <User className="w-3 h-3" /> Full Name
                                             </label>
-                                            <button
-                                                onClick={() => {
-                                                    if (!locationEnabled) enableLocation();
-                                                }}
-                                                className="text-[10px] font-bold text-[#cba153] hover:underline flex items-center gap-1"
-                                            >
-                                                <MapPin className="w-3 h-3" /> {locationEnabled ? 'Location Ready' : 'Share Location'}
-                                            </button>
+                                            <input
+                                                type="text"
+                                                value={formData.fullName}
+                                                onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
+                                                placeholder="Enter your name"
+                                                className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-[#cba153]/20 focus:border-[#cba153] outline-none transition-all"
+                                            />
                                         </div>
-                                        <textarea
-                                            rows={4}
-                                            value={formData.address}
-                                            onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
-                                            placeholder="House No, Street, Landmark..."
-                                            className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-[#cba153]/20 focus:border-[#cba153] outline-none transition-all"
-                                        />
+                                        <div className="space-y-2">
+                                            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                                                <Phone className="w-3 h-3" /> Phone Number
+                                            </label>
+                                            <input
+                                                type="tel"
+                                                value={formData.phoneNumber}
+                                                onChange={(e) => setFormData(prev => ({ ...prev, phoneNumber: e.target.value }))}
+                                                placeholder="+251 ..."
+                                                className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-[#cba153]/20 focus:border-[#cba153] outline-none transition-all"
+                                            />
+                                        </div>
                                     </div>
-                                    {locationName && (
-                                        <div className="p-3 bg-blue-50 dark:bg-blue-500/10 rounded-lg flex gap-3 border border-blue-100 dark:border-blue-500/20">
-                                            <MapPin className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
-                                            <div>
-                                                <p className="text-xs font-bold text-blue-700 dark:text-blue-400 uppercase tracking-tight">Detected Location</p>
-                                                <p className="text-[11px] text-blue-600 dark:text-blue-300 mt-0.5">{locationName}</p>
+
+                                    {/* Divider */}
+                                    <div className="h-px w-full bg-gray-100 dark:bg-gray-800 my-2"></div>
+
+                                    {/* Shipping Section */}
+                                    <div className="space-y-4">
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between items-center">
+                                                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                                                    <MapPin className="w-3 h-3" /> Address Details
+                                                </label>
+                                                <button
+                                                    onClick={() => {
+                                                        if (!locationEnabled) enableLocation();
+                                                    }}
+                                                    className="text-[10px] font-bold text-[#cba153] hover:underline flex items-center gap-1"
+                                                >
+                                                    <MapPin className="w-3 h-3" /> {locationEnabled ? 'Location Ready' : 'Share Location'}
+                                                </button>
                                             </div>
+                                            <textarea
+                                                rows={4}
+                                                value={formData.address}
+                                                onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+                                                placeholder="House No, Street, Landmark..."
+                                                className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-[#cba153]/20 focus:border-[#cba153] outline-none transition-all"
+                                            />
                                         </div>
-                                    )}
+                                        {locationName && (
+                                            <div className="p-3 bg-blue-50 dark:bg-blue-500/10 rounded-lg flex gap-3 border border-blue-100 dark:border-blue-500/20">
+                                                <MapPin className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+                                                <div>
+                                                    <p className="text-xs font-bold text-blue-700 dark:text-blue-400 uppercase tracking-tight">Detected Location</p>
+                                                    <p className="text-[11px] text-blue-600 dark:text-blue-300 mt-0.5">{locationName}</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </motion.div>
                         )}
