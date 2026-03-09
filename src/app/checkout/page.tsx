@@ -328,7 +328,7 @@ export default function CheckoutPage() {
                                                 }}
                                                 onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
                                                 placeholder="Enter your name"
-                                                className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-[#cba153]/20 focus:border-[#cba153] outline-none transition-all"
+                                                className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-[#cba153] focus:border-[#cba153] outline-none transition-all duration-300 shadow-[inset_0_2px_4px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.4),0_1px_2px_rgba(255,255,255,0.02)] active:scale-[0.98] focus:scale-[1.01] focus:shadow-[0_4px_12px_rgba(203,161,83,0.15)]"
                                             />
                                         </div>
                                         <div className="space-y-2">
@@ -364,7 +364,7 @@ export default function CheckoutPage() {
                                                     setFormData(prev => ({ ...prev, phoneNumber: val }));
                                                 }}
                                                 placeholder="+251 9/7... "
-                                                className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-[#cba153]/20 focus:border-[#cba153] outline-none transition-all font-mono"
+                                                className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-[#cba153] focus:border-[#cba153] outline-none transition-all duration-300 shadow-[inset_0_2px_4px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.4),0_1px_2px_rgba(255,255,255,0.02)] active:scale-[0.98] focus:scale-[1.01] focus:shadow-[0_4px_12px_rgba(203,161,83,0.15)] font-mono"
                                             />
                                         </div>
                                     </div>
@@ -398,7 +398,7 @@ export default function CheckoutPage() {
                                                 }}
                                                 onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
                                                 placeholder="Enter Delivery Location..."
-                                                className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-[#cba153]/20 focus:border-[#cba153] outline-none transition-all"
+                                                className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-[#cba153] focus:border-[#cba153] outline-none transition-all duration-300 shadow-[inset_0_2px_4px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.4),0_1px_2px_rgba(255,255,255,0.02)] active:scale-[0.98] focus:scale-[1.01] focus:shadow-[0_4px_12px_rgba(203,161,83,0.15)]"
                                             />
                                         </div>
                                         {locationName && (
@@ -501,13 +501,9 @@ export default function CheckoutPage() {
                                                     >
                                                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-2 transition-colors ${formData.bankMethod === 'cbe' ? 'bg-[#cba153] text-black' : 'bg-[#6f2b91]/10 group-hover:bg-[#6f2b91]/20'}`}>
                                                             <img
-                                                                src="https://raw.githubusercontent.com/Chapa-Et/ethiopianlogos/main/logos/commercial_bank_of_ethiopia/commercial_bank_of_ethiopia.png"
+                                                                src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0OCIgZmlsbD0iI2ZmZiIgc3Ryb2tlPSIjNmYyYjkxIiBzdHJva2Utd2lkdGg9IjQiLz48cGF0aCBkPSJNNDAgMzB2NDBMODAgNTB6IiBmaWxsPSIjNmYyYjkxIi8+PC9zdmc+"
                                                                 alt="CBE"
                                                                 className={`w-10 h-10 object-contain ${formData.bankMethod === 'cbe' ? 'brightness-0' : ''}`}
-                                                                onError={(e) => {
-                                                                    const target = e.target as HTMLImageElement;
-                                                                    target.src = "https://upload.wikimedia.org/wikipedia/commons/2/21/CBE_Logo2.png";
-                                                                }}
                                                             />
                                                         </div>
                                                         <span className={`text-[10px] font-black uppercase tracking-wider ${formData.bankMethod === 'cbe' ? 'text-[#cba153]' : 'text-gray-900 dark:text-white'}`}>CBE Birr</span>
@@ -521,13 +517,9 @@ export default function CheckoutPage() {
                                                     >
                                                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-2 transition-colors ${formData.bankMethod === 'telebirr' ? 'bg-[#cba153] text-black' : 'bg-blue-500/10 group-hover:bg-blue-500/20'}`}>
                                                             <img
-                                                                src="https://raw.githubusercontent.com/Chapa-Et/ethiopianlogos/main/logos/tele_birr/tele_birr.png"
+                                                                src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0OCIgZmlsbD0iI2ZmZiIgc3Ryb2tlPSIjMDA1MGEwIiBzdHJva2Utd2lkdGg9IjQiLz48cGF0aCBkPSJNMzAgMzBoNDB2MjBIMzB6IiBmaWxsPSIjMDA1MGEwIi8+PHBhdGggZD0iTTUwIDUwdjMweiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDA1MGEwIiBzdHJva2Utd2lkdGg9IjEwIi8+PC9zdmc+"
                                                                 alt="Telebirr"
                                                                 className={`w-12 h-12 object-contain scale-110 ${formData.bankMethod === 'telebirr' ? 'brightness-0' : ''}`}
-                                                                onError={(e) => {
-                                                                    const target = e.target as HTMLImageElement;
-                                                                    target.src = "https://www.telebirr.com.et/wp-content/uploads/2021/04/telebirr-logo.png";
-                                                                }}
                                                             />
                                                         </div>
                                                         <span className={`text-[10px] font-black uppercase tracking-wider ${formData.bankMethod === 'telebirr' ? 'text-[#cba153]' : 'text-gray-900 dark:text-white'}`}>Telebirr</span>
@@ -568,7 +560,7 @@ export default function CheckoutPage() {
                                                                         rows={4}
                                                                         value={formData.telebirrSmsText}
                                                                         onChange={(e) => setFormData(prev => ({ ...prev, telebirrSmsText: e.target.value }))}
-                                                                        placeholder="Dear TSegalem You have transferred ETB..."
+                                                                        placeholder="Paste here..."
                                                                         className="w-full bg-gray-50 dark:bg-gray-800 border-none outline-none focus:ring-2 focus:ring-[#cba153] rounded-xl px-4 py-3 text-sm transition resize-none"
                                                                     />
                                                                 </div>

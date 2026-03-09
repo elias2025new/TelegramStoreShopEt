@@ -984,6 +984,9 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish }: Uploa
     );
 }
 
+import AdminBroadcasts from './AdminBroadcasts';
+import AdminDashboard from './AdminDashboard';
+
 interface AdminOverlayProps {
     isOpen: boolean;
     onClose: () => void;
@@ -1038,8 +1041,29 @@ function compressImage(base64: string, maxWidth = 1000, quality = 0.8): Promise<
 }
 
 export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
-    const { storeId } = useAdmin();
+    const { storeId, isOwner } = useAdmin();
     const queryClient = useQueryClient();
+
+    useEffect(() => {
+        if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+            const tg = window.Telegram.WebApp;
+
+            if (isOpen) {
+                tg.BackButton.show();
+                const handleBack = () => {
+                    onClose();
+                };
+                tg.BackButton.onClick(handleBack);
+
+                return () => {
+                    tg.BackButton.offClick(handleBack);
+                    tg.BackButton.hide();
+                };
+            } else {
+                tg.BackButton.hide();
+            }
+        }
+    }, [isOpen, onClose]);
     const [view, setView] = useState<'upload' | 'manage' | 'orders'>('upload');
     const [images, setImages] = useState<ImageItem[]>([]);
     const [existingProducts, setExistingProducts] = useState<Product[]>([]);
