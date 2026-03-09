@@ -1,19 +1,15 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useCallback } from 'react';
+
 
 /**
  * A custom hook to safely access the Telegram WebApp SDK.
  * Handles 'undefined' checks for SSR and provides helper methods.
  */
 export function useTelegram() {
-    const [webApp, setWebApp] = useState<any>(null);
-
-    useEffect(() => {
-        if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-            setWebApp(window.Telegram.WebApp);
-        }
-    }, []);
+    const webApp =
+        typeof window !== 'undefined' ? (window.Telegram?.WebApp ?? null) : null;
 
     const hapticFeedback = useCallback((type: 'light' | 'medium' | 'heavy' | 'success' | 'warning' | 'error') => {
         if (!webApp) return;

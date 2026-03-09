@@ -14,19 +14,16 @@ interface FavoritesContextType {
 const FavoritesContext = createContext<FavoritesContextType | undefined>(undefined);
 
 export function FavoritesProvider({ children }: { children: React.ReactNode }) {
-    const [favorites, setFavorites] = useState<Product[]>([]);
-
-    // Use localStorage only on the client side
-    useEffect(() => {
-        const stored = localStorage.getItem('favorites');
-        if (stored) {
-            try {
-                setFavorites(JSON.parse(stored));
-            } catch (e) {
-                console.error("Failed to parse favorites", e);
-            }
+    const [favorites, setFavorites] = useState<Product[]>(() => {
+        // Lazy initialize from localStorage to avoid setState-in-effect
+        if (typeof window === 'undefined') return [];
+        try {
+            const stored = localStorage.getItem('favorites');
+            return stored ? JSON.parse(stored) : [];
+        } catch {
+            return [];
         }
-    }, []);
+    });
 
     // Sync state with localStorage whenever favorites change
     useEffect(() => {

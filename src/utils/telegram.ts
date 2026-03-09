@@ -1,3 +1,5 @@
+import { CartItem } from '@/context/CartContext';
+
 export const OWNER_ID = '5908397596';
 export const OWNER_USERNAME = 'gamfis';
 const BOT_TOKEN = process.env.NEXT_PUBLIC_BOT_TOKEN;
@@ -61,7 +63,18 @@ export async function sendTelegramNotification(message: string, imageUrls: strin
     }
 }
 
-export function formatOrderMessage(orderData: any, items: any[], totalPrice: number) {
+interface OrderData {
+    id: string;
+    full_name: string;
+    phone_number: string;
+    shipping_address: string;
+    total_price: number;
+    payment_method: string;
+    status: string;
+    transaction_id?: string | null;
+}
+
+export function formatOrderMessage(orderData: OrderData, items: CartItem[], totalPrice: number) {
     const itemsList = items.map(item =>
         `• ${item.product.name}${item.selectedSize ? ` (Size: ${item.selectedSize})` : ''} x ${item.quantity} - ${new Intl.NumberFormat('en-ET', { style: 'currency', currency: 'ETB', maximumFractionDigits: 0 }).format(item.product.price * item.quantity)}`
     ).join('\n');
@@ -87,7 +100,7 @@ ${orderData.shipping_address}
 `.trim();
 }
 
-export function getDirectMessageLink(orderData: any, items: any[], totalPrice: number) {
+export function getDirectMessageLink(orderData: OrderData, items: CartItem[], totalPrice: number) {
     const text = formatOrderMessage(orderData, items, totalPrice);
     // Remove HTML tags for the text parameter in URL
     const plainText = text.replace(/<[^>]*>/g, '');

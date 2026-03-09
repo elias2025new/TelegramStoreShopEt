@@ -90,7 +90,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         if (!locationEnabled) return;
 
-        const telegram = typeof window !== 'undefined' ? (window as any).Telegram?.WebApp : null;
+        const telegram = typeof window !== 'undefined' ? window.Telegram?.WebApp : null;
 
         // ── Path A: Telegram LocationManager (preferred — no repeated native prompts) ──
         if (telegram?.LocationManager) {
@@ -98,7 +98,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
 
             const fetchViaLM = () => {
                 if (!lm.isLocationAvailable) return;
-                lm.getLocation(async (data: any) => {
+                lm.getLocation(async (data: { latitude?: number; longitude?: number } | null) => {
                     if (!data?.latitude || !data?.longitude) return;
                     const { latitude: lat, longitude: lon } = data;
                     const last = lastCoordsRef.current;
@@ -155,7 +155,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem('location_asked', 'true');
         setLocationAsked(true);
 
-        const telegram = (window as any).Telegram?.WebApp;
+        const telegram = window.Telegram?.WebApp;
 
         // Try Telegram's native LocationManager first (v7.2+)
         if (telegram?.LocationManager) {
@@ -167,7 +167,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
                     return;
                 }
 
-                lm.getLocation(async (data: any) => {
+                lm.getLocation(async (data: { latitude?: number; longitude?: number } | null) => {
                     if (data && data.latitude && data.longitude) {
                         try {
                             const name = await reverseGeocode(data.latitude, data.longitude);

@@ -16,17 +16,20 @@ const ThemeContext = createContext<ThemeContextType>({
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-    const [theme, setTheme] = useState<Theme>('dark');
+    const [theme, setTheme] = useState<Theme>(() => {
+        // Initialize from localStorage directly to avoid setState-in-effect
+        if (typeof window !== 'undefined') {
+            return (localStorage.getItem('theme') as Theme) ?? 'dark';
+        }
+        return 'dark';
+    });
 
-    // On mount, read localStorage and apply the stored theme class to <html>
+    // On mount, apply the theme classes to <html> without calling setState
     useEffect(() => {
-        const stored = localStorage.getItem('theme') as Theme | null;
-        const resolved = stored ?? 'dark';
-        setTheme(resolved);
-        document.documentElement.classList.toggle('dark', resolved === 'dark');
-        document.documentElement.classList.toggle('light', resolved === 'light');
-        document.documentElement.style.setProperty('color-scheme', resolved);
-    }, []);
+        document.documentElement.classList.toggle('dark', theme === 'dark');
+        document.documentElement.classList.toggle('light', theme === 'light');
+        document.documentElement.style.setProperty('color-scheme', theme);
+    }, [theme]);
 
     const toggleTheme = (newTheme: Theme) => {
         setTheme(newTheme);
