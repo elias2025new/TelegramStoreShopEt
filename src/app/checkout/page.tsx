@@ -501,9 +501,9 @@ export default function CheckoutPage() {
                                                     >
                                                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-2 transition-colors ${formData.bankMethod === 'cbe' ? 'bg-[#cba153] text-black' : 'bg-[#6f2b91]/10 group-hover:bg-[#6f2b91]/20'}`}>
                                                             <img
-                                                                src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0OCIgZmlsbD0iI2ZmZiIgc3Ryb2tlPSIjNmYyYjkxIiBzdHJva2Utd2lkdGg9IjQiLz48cGF0aCBkPSJNNDAgMzB2NDBMODAgNTB6IiBmaWxsPSIjNmYyYjkxIi8+PC9zdmc+"
+                                                                src="/payment-icons/cbe-logo.png"
                                                                 alt="CBE"
-                                                                className={`w-10 h-10 object-contain ${formData.bankMethod === 'cbe' ? 'brightness-0' : ''}`}
+                                                                className="w-10 h-10 object-contain"
                                                             />
                                                         </div>
                                                         <span className={`text-[10px] font-black uppercase tracking-wider ${formData.bankMethod === 'cbe' ? 'text-[#cba153]' : 'text-gray-900 dark:text-white'}`}>CBE Birr</span>
@@ -517,9 +517,9 @@ export default function CheckoutPage() {
                                                     >
                                                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-2 transition-colors ${formData.bankMethod === 'telebirr' ? 'bg-[#cba153] text-black' : 'bg-blue-500/10 group-hover:bg-blue-500/20'}`}>
                                                             <img
-                                                                src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0OCIgZmlsbD0iI2ZmZiIgc3Ryb2tlPSIjMDA1MGEwIiBzdHJva2Utd2lkdGg9IjQiLz48cGF0aCBkPSJNMzAgMzBoNDB2MjBIMzB6IiBmaWxsPSIjMDA1MGEwIi8+PHBhdGggZD0iTTUwIDUwdjMweiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDA1MGEwIiBzdHJva2Utd2lkdGg9IjEwIi8+PC9zdmc+"
+                                                                src="/payment-icons/telebirr-logo.png"
                                                                 alt="Telebirr"
-                                                                className={`w-12 h-12 object-contain scale-110 ${formData.bankMethod === 'telebirr' ? 'brightness-0' : ''}`}
+                                                                className="w-12 h-12 object-contain scale-110"
                                                             />
                                                         </div>
                                                         <span className={`text-[10px] font-black uppercase tracking-wider ${formData.bankMethod === 'telebirr' ? 'text-[#cba153]' : 'text-gray-900 dark:text-white'}`}>Telebirr</span>

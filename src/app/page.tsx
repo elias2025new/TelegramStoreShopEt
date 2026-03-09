@@ -12,22 +12,11 @@ import { useTheme } from '@/context/ThemeContext';
 import { useLocation } from '@/context/LocationContext';
 import ProductGrid from '@/components/ProductGrid';
 import AdminOverlay from '@/components/Admin/AdminOverlay';
-import { User as UserIcon, Bell, Search, SlidersHorizontal } from 'lucide-react';
+import { User as UserIcon, Search, SlidersHorizontal } from 'lucide-react';
 import Toast from '@/components/Toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import PageTransition from '@/components/PageTransition';
 import CartIcon from '@/components/CartIcon';
-import NotificationDrawer from '@/components/NotificationDrawer';
-
-interface Announcement {
-  id: string;
-  title: string;
-  content: string;
-  type: 'announcement' | 'news' | 'vlog';
-  media_url: string | null;
-  created_at: string;
-}
-
 const CATEGORIES = [
   { name: 'All' },
   { name: 'Men', image: 'https://images.unsplash.com/photo-1488161628813-04466f872be2?q=80&w=200&auto=format&fit=crop' },
@@ -44,9 +33,6 @@ const CATEGORY_SUBCATEGORIES: Record<string, string[]> = {
 function HomeContent() {
   const { totalPrice } = useCart();
   const { isOwner, storeId, adminOpen, setAdminOpen } = useAdmin();
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false); // Added state
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]); // Added state
-  const [hasNewNotifications, setHasNewNotifications] = useState(false); // Added state
   const { theme } = useTheme();
   const { locationName, locationEnabled } = useLocation();
   const router = useRouter();
@@ -149,35 +135,7 @@ function HomeContent() {
     return () => clearInterval(timer);
   }, [slides.length]);
 
-  useEffect(() => {
-    const fetchAnnouncements = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('announcements')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(15);
 
-        if (error) throw error;
-        if (data) {
-          setAnnouncements(data);
-          // Simple badge logic: check if there are recent notifications
-          const lastSeen = localStorage.getItem('last_seen_announcement');
-          if (data.length > 0 && data[0].id !== lastSeen) {
-            setHasNewNotifications(true);
-            // Trigger a light haptic feedback to get attention if first time seeing it this mount
-            if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-              window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
-            }
-          }
-        }
-      } catch (err) {
-        console.error('Error fetching announcements:', err);
-      }
-    };
-
-    fetchAnnouncements();
-  }, []);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -271,33 +229,6 @@ function HomeContent() {
           </div>
           <div className="flex items-center gap-4">
             <CartIcon />
-            <motion.button
-              animate={hasNewNotifications ? {
-                rotate: [0, -10, 10, -10, 10, 0],
-                scale: [1, 1.1, 1]
-              } : {}}
-              transition={{
-                duration: 0.5,
-                repeat: hasNewNotifications ? Infinity : 0,
-                repeatDelay: 3
-              }}
-              onClick={() => {
-                setIsNotificationOpen(true);
-                setHasNewNotifications(false);
-                if (announcements.length > 0) {
-                  localStorage.setItem('last_seen_announcement', announcements[0].id);
-                }
-              }}
-              className="relative text-gray-800 dark:text-white hover:text-[#cba153] dark:hover:text-[#cba153] transition-colors"
-            >
-              <Bell size={24} />
-              {hasNewNotifications && (
-                <>
-                  <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-red-500 animate-ping opacity-75"></span>
-                  <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-red-500 border-2 border-white dark:border-black animate-pulse"></span>
-                </>
-              )}
-            </motion.button>
           </div>
         </header>
 
@@ -540,13 +471,6 @@ function HomeContent() {
           // Final safety sync when closing
           queryClient.invalidateQueries({ queryKey: ['products'] });
         }}
-      />
-
-      {/* Notification Drawer */}
-      <NotificationDrawer
-        isOpen={isNotificationOpen}
-        onClose={() => setIsNotificationOpen(false)}
-        notifications={announcements}
       />
     </main>
   );

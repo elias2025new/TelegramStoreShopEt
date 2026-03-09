@@ -154,14 +154,14 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                         paddingBottom: '0.6rem'
                     }}
                 >
-                    {/* Spacer to keep title centered since back button is now native Telegram one */}
-                    <div className="w-10" />
-                    <div className="flex flex-col items-center">
-                        <span className="text-[10px] font-black text-[#cba153] uppercase tracking-[0.2em]">Product Details</span>
-                    </div>
                     <div className="flex items-center gap-1">
                         <CartIcon />
                     </div>
+                    <div className="flex flex-col items-center">
+                        <span className="text-[10px] font-black text-[#cba153] uppercase tracking-[0.2em]">Product Details</span>
+                    </div>
+                    {/* Spacer to keep title centered since back button is now native Telegram one */}
+                    <div className="w-10" />
                 </header>
 
                 <div className="px-6 space-y-4 relative z-10"
