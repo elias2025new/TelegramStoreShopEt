@@ -244,7 +244,13 @@ export default function CheckoutPage() {
         <PageTransition>
             <main className="min-h-screen bg-[#f8f9fa] dark:bg-black flex flex-col">
                 {/* Header */}
-                <header className="sticky top-0 z-50 bg-white/90 dark:bg-black/90 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 px-4 py-4 flex items-center justify-between">
+                <header
+                    className="sticky top-0 z-50 bg-white/90 dark:bg-black/90 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 px-4 flex items-center justify-between pb-4 transition-all duration-300"
+                    style={{
+                        marginTop: 'calc(-1 * (var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px)))',
+                        paddingTop: 'calc(1rem + var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px))'
+                    }}
+                >
                     <button
                         onClick={handleBack}
                         className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
@@ -270,7 +276,7 @@ export default function CheckoutPage() {
                     <div className="w-10" /> {/* Spacer */}
                 </header>
 
-                <div className="flex-1 overflow-y-auto p-4 pb-32">
+                <div className="flex-1 p-4 pb-32">
                     <AnimatePresence mode="wait">
                         {currentStep === 'details' && (
                             <motion.div

@@ -42,7 +42,7 @@ body {
 /* Base Mobile Overhaul */
 html {
   /* Only on html – body must stay as scroll container or vertical scroll breaks */
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 html,
