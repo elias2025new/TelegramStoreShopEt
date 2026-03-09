@@ -136,6 +136,10 @@ export default function CheckoutPage() {
         const nextIndex = currentStepIndex + 1;
         if (nextIndex < stepsArray.length) {
             setCurrentStep(stepsArray[nextIndex]);
+            // Reset scroll position to top
+            if (typeof window !== 'undefined') {
+                window.scrollTo({ top: 0, behavior: 'instant' });
+            }
             if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
                 window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
             }
@@ -151,6 +155,10 @@ export default function CheckoutPage() {
         const prevIndex = currentStepIndex - 1;
         if (prevIndex >= 0) {
             setCurrentStep(stepsArray[prevIndex]);
+            // Reset scroll position to top
+            if (typeof window !== 'undefined') {
+                window.scrollTo({ top: 0, behavior: 'instant' });
+            }
         }
     };
 
