@@ -121,7 +121,7 @@ export default function CheckoutPage() {
             }
         } else if (currentStep === 'payment') {
             if (formData.paymentMethod === 'bank_transfer' && !formData.bankMethod) {
-                setError('Please choose a payment method (CBE or Telebirr)');
+                setError('Please choose a payment method (Telebirr)');
                 return;
             }
             if (formData.paymentMethod === 'bank_transfer' && formData.bankMethod === 'telebirr') {
@@ -472,7 +472,7 @@ export default function CheckoutPage() {
                                             </div>
                                             <div>
                                                 <p className="font-bold text-gray-900 dark:text-white">Bank Transfer</p>
-                                                <p className="text-xs text-gray-500">Pay via CBE or Telebirr</p>
+                                                <p className="text-xs text-gray-500">Pay via Telebirr</p>
                                             </div>
                                         </div>
                                         <input
@@ -491,7 +491,8 @@ export default function CheckoutPage() {
                                                 exit={{ height: 0, opacity: 0 }}
                                                 className="overflow-hidden"
                                             >
-                                                <div className="grid grid-cols-2 gap-3 pt-1">
+                                                <div className="grid grid-cols-1 gap-3 pt-1">
+                                                    {/* CBE Birr hidden for now
                                                     <button
                                                         type="button"
                                                         onClick={() => setFormData(prev => ({ ...prev, bankMethod: 'cbe' }))}
@@ -508,6 +509,7 @@ export default function CheckoutPage() {
                                                         </div>
                                                         <span className={`text-[10px] font-black uppercase tracking-wider ${formData.bankMethod === 'cbe' ? 'text-[#cba153]' : 'text-gray-900 dark:text-white'}`}>CBE Birr</span>
                                                     </button>
+                                                    */}
                                                     <button
                                                         type="button"
                                                         onClick={() => setFormData(prev => ({ ...prev, bankMethod: 'telebirr' }))}
