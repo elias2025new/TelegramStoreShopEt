@@ -5,8 +5,9 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { supabase } from '@/utils/supabase/client';
 import { useAdmin } from '@/context/AdminContext';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
+import { CATEGORY_SUBCATEGORIES as DEFAULT_SUBCATEGORIES } from '@/constants/categories';
 import AdminConfirmModal from './AdminConfirmModal';
 import AdminOrders from './AdminOrders';
 
@@ -14,12 +15,8 @@ import AdminOrders from './AdminOrders';
 const DRAFT_KEY = 'admin_product_draft';
 const GENDERS = ['Men', 'Women', 'Unisex', 'Accessories'];
 
-const CATEGORY_SUBCATEGORIES: Record<string, string[]> = {
-    'Men': ['Shoes', 'Jackets & Coats', 'T-shirts', 'Trousers'],
-    'Women': ['Dresses', 'Tops', 'Shoes', 'Bags'],
-    'Unisex': ['Shoes', 'T-shirts', 'Trousers'],
-    'Accessories': ['Watches', 'Sunglasses', 'Belts', 'Jewelry']
-};
+// Initial defaults, will be merged with database categories
+const INITIAL_CATEGORY_SUBCATEGORIES: Record<string, string[]> = DEFAULT_SUBCATEGORIES;
 
 const CLOTHING_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 const SHOE_SIZES = ['36', '37', '38', '39', '40', '41', '42', '43', '44', '45'];
@@ -154,6 +151,7 @@ interface ProductManageItemProps {
     isSelectMode?: boolean;
     isSelected?: boolean;
     onToggleSelect?: (id: string) => void;
+    categories: Record<string, string[]>;
 }
 
 function ProductManageItem({
@@ -163,7 +161,8 @@ function ProductManageItem({
     onChangeImage,
     isSelectMode = false,
     isSelected = false,
-    onToggleSelect
+    onToggleSelect,
+    categories
 }: ProductManageItemProps) {
     const [localName, setLocalName] = useState(product.name);
     const [localPrice, setLocalPrice] = useState(product.price.toString());
@@ -522,7 +521,7 @@ function ProductManageItem({
                             ) : (
                                 <ChoiceChipGroup
                                     label="Sub Category"
-                                    options={CATEGORY_SUBCATEGORIES[localGender] || []}
+                                    options={categories[localGender] || []}
                                     selected={localCategory}
                                     onChange={(val) => {
                                         setLocalCategory(val);
@@ -627,9 +626,10 @@ interface UploadItemRowProps {
     updateItem: (index: number, field: 'title' | 'price' | 'category' | 'gender' | 'description' | 'sizes' | 'stock' | 'additionalImages', value: any) => void;
     removeItem: (index: number) => void;
     onPublish: (index: number) => Promise<void>;
+    categories: Record<string, string[]>;
 }
 
-function UploadItemRow({ item, index, updateItem, removeItem, onPublish }: UploadItemRowProps) {
+function UploadItemRow({ item, index, updateItem, removeItem, onPublish, categories }: UploadItemRowProps) {
     const [localTitle, setLocalTitle] = useState(item.title);
     const [localPrice, setLocalPrice] = useState(item.price);
     const [localCategory, setLocalCategory] = useState(item.category);
@@ -939,7 +939,7 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish }: Uploa
                         ) : (
                             <ChoiceChipGroup
                                 label="What is it?"
-                                options={CATEGORY_SUBCATEGORIES[localGender] || []}
+                                options={categories[localGender] || []}
                                 selected={localCategory}
                                 onChange={(val) => {
                                     setLocalCategory(val);
@@ -1040,6 +1040,42 @@ function compressImage(base64: string, maxWidth = 1000, quality = 0.8): Promise<
 export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
     const { storeId, isOwner } = useAdmin();
     const queryClient = useQueryClient();
+
+    // Fetch unique categories from database to make "+" button additions persistent
+    const { data: dbCategories } = useQuery({
+        queryKey: ['availableCategories'],
+        queryFn: async () => {
+            const { data, error } = await supabase
+                .from('products')
+                .select('category, gender');
+            if (error) throw error;
+            return data as { category: string; gender: string }[];
+        },
+        staleTime: 5 * 60 * 1000,
+    });
+
+    // Merge defaults with database categories
+    const CATEGORY_SUBCATEGORIES = React.useMemo(() => {
+        const merged = { ...INITIAL_CATEGORY_SUBCATEGORIES };
+        if (dbCategories) {
+            dbCategories.forEach(item => {
+                const gender = item.gender || 'Unisex';
+                const cat = item.category;
+                if (cat && merged[gender]) {
+                    if (!merged[gender].includes(cat)) {
+                        merged[gender] = [...merged[gender], cat];
+                    }
+                } else if (cat) {
+                    // Handle case where gender might be new or Accessories
+                    if (!merged[gender]) merged[gender] = [];
+                    if (!merged[gender].includes(cat)) {
+                        merged[gender].push(cat);
+                    }
+                }
+            });
+        }
+        return merged;
+    }, [dbCategories]);
 
     useEffect(() => {
         if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
@@ -1871,6 +1907,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                                         updateItem={updateItem}
                                         removeItem={removeItem}
                                         onPublish={handleIndividualPublish}
+                                        categories={CATEGORY_SUBCATEGORIES}
                                     />
                                 ))}
                             </div>
@@ -1981,6 +2018,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                                             else next.add(id);
                                             setSelectedProductIds(next);
                                         }}
+                                        categories={CATEGORY_SUBCATEGORIES}
                                     />
                                 ))}
                             </div>

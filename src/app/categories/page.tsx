@@ -25,27 +25,32 @@ async function fetchCategoryItems(): Promise<CatItem[]> {
 
     const items: CatItem[] = [];
 
-    // Helper to find image for a subcategory + gender
-    const getImageUrl = (gender: string, subCat: string) => {
-        const product = products.find(p =>
-            (p.gender?.toLowerCase() === gender.toLowerCase() || p.gender?.toLowerCase() === 'unisex') &&
-            p.category?.toLowerCase() === subCat.toLowerCase()
-        );
-        return product?.image_url;
-    };
+    // Find all unique gender + category pairs from products
+    const uniquePairs = new Set<string>();
+    products.forEach(p => {
+        if (p.gender && p.category) {
+            uniquePairs.add(`${p.gender}:${p.category}`);
+        }
+    });
 
-    // Generate items for each subcategory under Men, Women, Accessories
-    Object.entries(CATEGORY_SUBCATEGORIES).forEach(([mainCat, subCats]) => {
-        const gender = (mainCat === 'Men' || mainCat === 'Women') ? mainCat : 'Unisex';
+    // Generate items for each unique pair found
+    uniquePairs.forEach(pair => {
+        const [gender, sub] = pair.split(':');
 
-        subCats.forEach(sub => {
-            const img = getImageUrl(gender, sub);
-            items.push({
-                name: sub,
-                parentCategory: mainCat,
-                image: img || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=200&auto=format&fit=crop'
-            });
+        // Find the best image (already have products sorted by created_at)
+        const product = products.find(p => p.gender === gender && p.category === sub);
+
+        items.push({
+            name: sub,
+            parentCategory: gender,
+            image: product?.image_url || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=200&auto=format&fit=crop'
         });
+    });
+
+    // Sort items by parent category then name
+    items.sort((a, b) => {
+        if (a.parentCategory !== b.parentCategory) return a.parentCategory.localeCompare(b.parentCategory);
+        return a.name.localeCompare(b.name);
     });
 
     return items;
