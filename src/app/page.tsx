@@ -17,18 +17,7 @@ import Toast from '@/components/Toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import PageTransition from '@/components/PageTransition';
 import CartIcon from '@/components/CartIcon';
-const CATEGORIES = [
-  { name: 'All' },
-  { name: 'Men', image: 'https://images.unsplash.com/photo-1488161628813-04466f872be2?q=80&w=200&auto=format&fit=crop' },
-  { name: 'Women', image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=200&auto=format&fit=crop' },
-  { name: 'Accessories', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=200&auto=format&fit=crop' }
-];
-
-const CATEGORY_SUBCATEGORIES: Record<string, string[]> = {
-  'Men': ['Shoes', 'Jackets & Coats', 'T-shirts', 'Trousers'],
-  'Women': ['Dresses', 'Tops', 'Shoes', 'Bags'],
-  'Accessories': ['Watches', 'Sunglasses', 'Belts', 'Jewelry']
-};
+import { CATEGORIES, CATEGORY_SUBCATEGORIES } from '@/constants/categories';
 
 function HomeContent() {
   const { totalPrice } = useCart();
@@ -40,7 +29,7 @@ function HomeContent() {
   const selectedCategory = searchParams.get('category') || 'All';
   const [searchQuery, setSearchQuery] = useState('');
   const [searchInput, setSearchInput] = useState('');
-  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(searchParams.get('subcategory'));
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const handleSearch = () => {
@@ -78,8 +67,10 @@ function HomeContent() {
     const params = new URLSearchParams(searchParams.toString());
     if (category === 'All') {
       params.delete('category');
+      params.delete('subcategory');
     } else {
       params.set('category', category);
+      params.delete('subcategory');
     }
     router.replace(`/?${params.toString()}`, { scroll: false });
     // Reset subcategory when switching main category
