@@ -1,69 +1,63 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import PageTransition from '@/components/PageTransition';
 import Link from 'next/link';
 import { supabase } from '@/utils/supabase/client';
 import { CATEGORY_SUBCATEGORIES, CATEGORIES } from '@/constants/categories';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
 
 interface CatItem {
     name: string;
     parentCategory: string; // Men, Women, Accessories
-    image?: string;
+    image: string;
+}
+
+async function fetchCategoryItems(): Promise<CatItem[]> {
+    // Fetch products to use their images
+    const { data: products } = await supabase
+        .from('products')
+        .select('image_url, category, gender')
+        .order('created_at', { ascending: false });
+
+    if (!products) return [];
+
+    const items: CatItem[] = [];
+
+    // Helper to find image for a subcategory + gender
+    const getImageUrl = (gender: string, subCat: string) => {
+        const product = products.find(p =>
+            (p.gender?.toLowerCase() === gender.toLowerCase() || p.gender?.toLowerCase() === 'unisex') &&
+            p.category?.toLowerCase() === subCat.toLowerCase()
+        );
+        return product?.image_url;
+    };
+
+    // Generate items for each subcategory under Men, Women, Accessories
+    Object.entries(CATEGORY_SUBCATEGORIES).forEach(([mainCat, subCats]) => {
+        const gender = (mainCat === 'Men' || mainCat === 'Women') ? mainCat : 'Unisex';
+
+        subCats.forEach(sub => {
+            const img = getImageUrl(gender, sub);
+            items.push({
+                name: sub,
+                parentCategory: mainCat,
+                image: img || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=200&auto=format&fit=crop'
+            });
+        });
+    });
+
+    return items;
 }
 
 export default function CategoriesPage() {
-    const [catItems, setCatItems] = useState<CatItem[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        async function fetchCategoryImages() {
-            setLoading(true);
-            try {
-                // Fetch products to use their images
-                const { data: products } = await supabase
-                    .from('products')
-                    .select('image_url, category, gender')
-                    .order('created_at', { ascending: false });
-
-                if (!products) return;
-
-                const items: CatItem[] = [];
-
-                // Helper to find image for a subcategory + gender
-                const getImageUrl = (gender: string, subCat: string) => {
-                    const product = products.find(p =>
-                        (p.gender?.toLowerCase() === gender.toLowerCase() || p.gender?.toLowerCase() === 'unisex') &&
-                        p.category?.toLowerCase() === subCat.toLowerCase()
-                    );
-                    return product?.image_url;
-                };
-
-                // Generate items for each subcategory under Men, Women, Accessories
-                Object.entries(CATEGORY_SUBCATEGORIES).forEach(([mainCat, subCats]) => {
-                    const gender = (mainCat === 'Men' || mainCat === 'Women') ? mainCat : 'Unisex';
-
-                    subCats.forEach(sub => {
-                        const img = getImageUrl(gender, sub);
-                        items.push({
-                            name: sub,
-                            parentCategory: mainCat,
-                            image: img || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=200&auto=format&fit=crop'
-                        });
-                    });
-                });
-
-                setCatItems(items);
-            } catch (error) {
-                console.error('Error fetching categories:', error);
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        fetchCategoryImages();
-    }, []);
+    const { data: catItems, isLoading } = useQuery({
+        queryKey: ['categoryItems'],
+        queryFn: fetchCategoryItems,
+        staleTime: 10 * 60 * 1000, // 10 minutes
+        gcTime: 30 * 60 * 1000, // 30 minutes
+    });
 
     return (
         <PageTransition>
@@ -90,40 +84,56 @@ export default function CategoriesPage() {
                 <div className="px-6 py-8">
                     <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 font-serif">Picks for You</h2>
 
-                    {loading ? (
-                        <div className="grid grid-cols-3 gap-y-8 gap-x-4">
-                            {[...Array(9)].map((_, i) => (
-                                <div key={i} className="flex flex-col items-center gap-2 animate-pulse">
-                                    <div className="w-24 h-24 rounded-full bg-gray-200 dark:bg-white/5" />
-                                    <div className="w-16 h-3 bg-gray-100 dark:bg-white/5 rounded" />
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-3 gap-y-10 gap-x-4">
-                            {catItems.map((item, idx) => (
-                                <Link
-                                    key={`${item.parentCategory}-${item.name}-${idx}`}
-                                    href={`/category/${item.parentCategory}/${item.name}`}
-                                    className="flex flex-col items-center gap-3 transition-transform active:scale-95 group"
-                                >
-                                    <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-2 border-transparent group-hover:border-[#cba153]/50 transition-colors shadow-lg shadow-black/5 dark:shadow-none">
-                                        <img
-                                            src={item.image}
-                                            alt={item.name}
-                                            className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
-                                            loading="lazy"
-                                        />
-                                        <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
-                                    </div>
-                                    <span className="text-center text-[10px] sm:text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest leading-tight">
-                                        {item.parentCategory} <br />
-                                        <span className="text-[#cba153]">{item.name}</span>
-                                    </span>
-                                </Link>
-                            ))}
-                        </div>
-                    )}
+                    <div className="grid grid-cols-3 gap-y-10 gap-x-4">
+                        <AnimatePresence mode="popLayout">
+                            {isLoading || !catItems ? (
+                                [...Array(9)].map((_, i) => (
+                                    <motion.div
+                                        key={`skeleton-${i}`}
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        className="flex flex-col items-center gap-2 animate-pulse"
+                                    >
+                                        <div className="w-24 h-24 rounded-full bg-gray-200 dark:bg-white/5" />
+                                        <div className="w-16 h-3 bg-gray-100 dark:bg-white/5 rounded" />
+                                    </motion.div>
+                                ))
+                            ) : (
+                                catItems.map((item, idx) => (
+                                    <motion.div
+                                        key={`${item.parentCategory}-${item.name}`}
+                                        initial={{ opacity: 0, scale: 0.9 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{
+                                            duration: 0.4,
+                                            delay: idx * 0.05,
+                                            ease: [0.22, 1, 0.36, 1]
+                                        }}
+                                    >
+                                        <Link
+                                            href={`/category/${item.parentCategory}/${item.name}`}
+                                            className="flex flex-col items-center gap-3 transition-transform active:scale-95 group"
+                                        >
+                                            <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-2 border-transparent group-hover:border-[#cba153]/50 transition-colors shadow-lg shadow-black/5 dark:shadow-none">
+                                                <img
+                                                    src={item.image}
+                                                    alt={item.name}
+                                                    className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110"
+                                                    loading="lazy"
+                                                />
+                                                <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
+                                            </div>
+                                            <span className="text-center text-[10px] sm:text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest leading-tight">
+                                                {item.parentCategory} <br />
+                                                <span className="text-[#cba153]">{item.name}</span>
+                                            </span>
+                                        </Link>
+                                    </motion.div>
+                                ))
+                            )}
+                        </AnimatePresence>
+                    </div>
                 </div>
 
                 {/* Section for main Categories if they want to browse broad */}
