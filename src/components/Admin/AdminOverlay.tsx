@@ -222,6 +222,7 @@ function ProductManageItem({
     const [modalDraft, setModalDraft] = useState('');
     const [localAdditionalImages, setLocalAdditionalImages] = useState<string[]>(product.additional_images || []);
     const [isUploadingAdditional, setIsUploadingAdditional] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(false);
     const additionalImagesInputRef = useRef<HTMLInputElement>(null);
 
     // Helper to get a clean stock object (numbers only) for comparison and saving
@@ -530,103 +531,132 @@ function ProductManageItem({
                 </div>
 
                 {!showDeleteConfirm && (
-                    <div className="flex flex-col gap-3 mt-1 pt-2 border-t border-gray-100 dark:border-[#2a2a2a]">
-                        <ChoiceChipGroup
-                            label="Primary Category"
-                            options={GENDERS}
-                            selected={localGender}
-                            onChange={(val) => {
-                                setLocalGender(val);
-                                setLocalCategory('');
-                                setLocalSubSubCategory('');
-                                setLocalSizes([]);
-                            }}
-                        />
-
-                        {localGender && (
-                            isCustomCategory ? (
-                                <div className="flex flex-col gap-1.5">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Sub Category</span>
-                                        <button onClick={() => setIsCustomCategory(false)} className="text-[10px] text-yellow-500 font-bold">Back</button>
-                                    </div>
-                                    <input
-                                        type="text"
-                                        value={localCategory}
-                                        onChange={(e) => setLocalCategory(e.target.value)}
-                                        placeholder="Type category..."
-                                        className="w-full px-2 py-1 text-xs border border-gray-200 dark:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-white focus:ring-1 focus:ring-yellow-500 focus:outline-none"
-                                    />
-                                </div>
-                            ) : (
-                                <ChoiceChipGroup
-                                    label="Sub Category"
-                                    options={categories[localGender] || []}
-                                    selected={localCategory}
-                                    onChange={(val) => {
-                                        setLocalCategory(val);
-                                        setLocalSubSubCategory('');
-                                        setLocalSizes([]);
-                                    }}
-                                    onAddNew={() => setIsCustomCategory(true)}
-                                    isDeleteMode={isCategoryDeleteMode}
-                                    onToggleDeleteMode={onToggleCategoryDeleteMode}
-                                    onDeleteOption={(opt) => onDeleteCategory(opt, localGender)}
-                                />
-                            )
-                        )}
-
-                        {localCategory && (
-                            <div className="flex flex-col gap-3">
-                                <ChoiceChipGroup
-                                    label="Sub-Sub Category"
-                                    options={categories[`${localGender}:${localCategory}`] || []}
-                                    selected={localSubSubCategory}
-                                    onChange={(val) => setLocalSubSubCategory(val)}
-                                    onAddNew={() => {
-                                        const newSubSub = prompt('Enter new sub-sub category:');
-                                        if (newSubSub) setLocalSubSubCategory(newSubSub);
-                                    }}
-                                    isDeleteMode={isCategoryDeleteMode}
-                                    onToggleDeleteMode={onToggleCategoryDeleteMode}
-                                    onDeleteOption={(opt) => onDeleteCategory(opt, `${localGender}:${localCategory}`)}
-                                />
-                            </div>
-                        )}
-
-                        {localCategory && localGender !== 'Accessories' && (
-                            <MultiChoiceChipGroup
-                                label="Available Sizes & Stock"
-                                options={isShoes ? SHOE_SIZES : CLOTHING_SIZES}
-                                selected={localSizes}
-                                onChange={(newSizes) => {
-                                    setLocalSizes(newSizes);
-                                    // Clean up stock values for sizes that were removed
-                                    setLocalStock(prev => {
-                                        const next = { ...prev };
-                                        Object.keys(next).forEach(k => {
-                                            if (!newSizes.includes(k)) delete next[k];
-                                        });
-                                        return next;
-                                    });
-                                }}
-                                stockValues={localStock}
-                                onStockChange={(size, val) => {
-                                    setLocalStock(prev => ({ ...prev, [size]: val }));
-                                }}
-                                onFocus={handleFocus}
-                            />
-                        )}
-
-                        {hasChanges && (
-                            <button
-                                onClick={handleSave}
-                                disabled={isSaving}
-                                className={`w-full py-1.5 rounded-lg text-[11px] font-bold text-black transition-all ${isSaving ? 'bg-gray-600' : 'bg-[#cba153] hover:bg-[#b8860b]'}`}
+                    <AnimatePresence initial={false}>
+                        {isExpanded && (
+                            <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
+                                className="overflow-hidden"
                             >
-                                {isSaving ? 'Saving...' : 'Save Changes'}
-                            </button>
+                                <div className="flex flex-col gap-3 mt-1 pt-2 border-t border-gray-100 dark:border-[#2a2a2a]">
+                                    <ChoiceChipGroup
+                                        label="Primary Category"
+                                        options={GENDERS}
+                                        selected={localGender}
+                                        onChange={(val) => {
+                                            setLocalGender(val);
+                                            setLocalCategory('');
+                                            setLocalSubSubCategory('');
+                                            setLocalSizes([]);
+                                        }}
+                                    />
+
+                                    {localGender && (
+                                        isCustomCategory ? (
+                                            <div className="flex flex-col gap-1.5">
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Sub Category</span>
+                                                    <button onClick={() => setIsCustomCategory(false)} className="text-[10px] text-yellow-500 font-bold">Back</button>
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    value={localCategory}
+                                                    onChange={(e) => setLocalCategory(e.target.value)}
+                                                    placeholder="Type category..."
+                                                    className="w-full px-2 py-1 text-xs border border-gray-200 dark:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-white focus:ring-1 focus:ring-yellow-500 focus:outline-none"
+                                                />
+                                            </div>
+                                        ) : (
+                                            <ChoiceChipGroup
+                                                label="Sub Category"
+                                                options={categories[localGender] || []}
+                                                selected={localCategory}
+                                                onChange={(val) => {
+                                                    setLocalCategory(val);
+                                                    setLocalSubSubCategory('');
+                                                    setLocalSizes([]);
+                                                }}
+                                                onAddNew={() => setIsCustomCategory(true)}
+                                                isDeleteMode={isCategoryDeleteMode}
+                                                onToggleDeleteMode={onToggleCategoryDeleteMode}
+                                                onDeleteOption={(opt) => onDeleteCategory(opt, localGender)}
+                                            />
+                                        )
+                                    )}
+
+                                    {localCategory && (
+                                        <div className="flex flex-col gap-3">
+                                            <ChoiceChipGroup
+                                                label="Sub-Sub Category"
+                                                options={categories[`${localGender}:${localCategory}`] || []}
+                                                selected={localSubSubCategory}
+                                                onChange={(val) => setLocalSubSubCategory(val)}
+                                                onAddNew={() => {
+                                                    const newSubSub = prompt('Enter new sub-sub category:');
+                                                    if (newSubSub) setLocalSubSubCategory(newSubSub);
+                                                }}
+                                                isDeleteMode={isCategoryDeleteMode}
+                                                onToggleDeleteMode={onToggleCategoryDeleteMode}
+                                                onDeleteOption={(opt) => onDeleteCategory(opt, `${localGender}:${localCategory}`)}
+                                            />
+                                        </div>
+                                    )}
+
+                                    {localCategory && localGender !== 'Accessories' && (
+                                        <MultiChoiceChipGroup
+                                            label="Available Sizes & Stock"
+                                            options={isShoes ? SHOE_SIZES : CLOTHING_SIZES}
+                                            selected={localSizes}
+                                            onChange={(newSizes) => {
+                                                setLocalSizes(newSizes);
+                                                // Clean up stock values for sizes that were removed
+                                                setLocalStock(prev => {
+                                                    const next = { ...prev };
+                                                    Object.keys(next).forEach(k => {
+                                                        if (!newSizes.includes(k)) delete next[k];
+                                                    });
+                                                    return next;
+                                                });
+                                            }}
+                                            stockValues={localStock}
+                                            onStockChange={(size, val) => {
+                                                setLocalStock(prev => ({ ...prev, [size]: val }));
+                                            }}
+                                            onFocus={handleFocus}
+                                        />
+                                    )}
+
+                                    {hasChanges && (
+                                        <button
+                                            onClick={handleSave}
+                                            disabled={isSaving}
+                                            className={`w-full py-1.5 rounded-lg text-[11px] font-bold text-black transition-all ${isSaving ? 'bg-gray-600' : 'bg-[#cba153] hover:bg-[#b8860b]'}`}
+                                        >
+                                            {isSaving ? 'Saving...' : 'Save Changes'}
+                                        </button>
+                                    )}
+                                </div>
+                            </motion.div>
                         )}
+                    </AnimatePresence>
+                )}
+
+                {/* Toggle Button at the bottom right */}
+                {!showDeleteConfirm && (
+                    <div className="flex justify-end -mt-1 -mr-1">
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setIsExpanded(!isExpanded);
+                            }}
+                            className={`p-1.5 rounded-lg transition-all duration-300 ${isExpanded ? 'bg-[#cba153]/10 text-[#cba153] rotate-180' : 'text-gray-400 hover:text-gray-300'}`}
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="m6 9 6 6 6-6" />
+                            </svg>
+                        </button>
                     </div>
                 )}
 
