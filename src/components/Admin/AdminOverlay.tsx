@@ -1051,7 +1051,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
             if (error) throw error;
             return data as { category: string; gender: string }[];
         },
-        staleTime: 5 * 60 * 1000,
+        staleTime: 1000, // Frequent refresh or manual invalidation
     });
 
     // Merge defaults with database categories
@@ -1076,6 +1076,13 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
         }
         return merged;
     }, [dbCategories]);
+
+    // Helper to refresh all related data
+    const invalidateAppQueries = useCallback(() => {
+        queryClient.invalidateQueries({ queryKey: ['products'] });
+        queryClient.invalidateQueries({ queryKey: ['availableCategories'] });
+        queryClient.invalidateQueries({ queryKey: ['categoryItems'] });
+    }, [queryClient]);
 
     useEffect(() => {
         if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
@@ -1325,8 +1332,8 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                 throw new Error('Update failed: You might not have permission to edit this product.');
             }
 
-            // Aggressively reset React Query cache to sync storefront immediately
-            queryClient.resetQueries({ queryKey: ['products'] });
+            // Refresh all related queries
+            invalidateAppQueries();
 
             setExistingProducts((prev) => prev.map((p) => (p.id === id ? { ...p, ...updates } : p)));
             setUploadStatus('✅ Product updated successfully!');
@@ -1355,8 +1362,8 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                 throw new Error('Delete failed: You might not have permission to delete this product.');
             }
 
-            // Aggressively reset React Query cache to sync storefront immediately
-            queryClient.resetQueries({ queryKey: ['products'] });
+            // Refresh all related queries
+            invalidateAppQueries();
 
             // Optional: Delete from storage if you want to keep bucket clean
             if (imageUrl) {
@@ -1474,13 +1481,12 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
             const updatedImages = images.filter((_, i) => i !== index);
             setImages(updatedImages);
 
-            // ✅ If all items published, clear draft immediately
             if (updatedImages.length === 0) {
                 localStorage.removeItem(DRAFT_KEY);
                 hasRestoredRef.current = false;
             }
 
-            queryClient.resetQueries({ queryKey: ['products'] });
+            invalidateAppQueries();
             setUploadStatus('✅ PRODUCT PUBLISHED: ' + item.title);
 
             if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
@@ -1609,8 +1615,8 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
             const { error: insertError } = await supabase.from('products').insert(results);
             if (insertError) throw insertError;
 
-            // Aggressively reset React Query cache to sync storefront immediately
-            queryClient.resetQueries({ queryKey: ['products'] });
+            // Refresh all related queries
+            invalidateAppQueries();
 
             // ✅ Clear draft on success
             localStorage.removeItem(DRAFT_KEY);
@@ -1639,7 +1645,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                     if (error) throw error;
 
                     setUploadStatus('SUCCESS: ALL PRODUCTS DELETED');
-                    queryClient.resetQueries({ queryKey: ['products'] });
+                    invalidateAppQueries();
                     fetchProducts();
                 } catch (err: any) {
                     setUploadStatus('ERROR: ' + err.message);
@@ -1668,10 +1674,10 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                     const { error } = await supabase.from('products').delete().in('id', ids);
                     if (error) throw error;
 
-                    setUploadStatus(`SUCCESS: ${ids.length} PRODUCTS DELETED`);
+                    setUploadStatus(`SUCCESS: ${ids.length} PRODUCT(S) DELETED`);
                     setIsSelectMode(false);
                     setSelectedProductIds(new Set());
-                    queryClient.resetQueries({ queryKey: ['products'] });
+                    invalidateAppQueries(); // Replaced queryClient.resetQueries
                     fetchProducts();
                 } catch (err: any) {
                     setUploadStatus('ERROR: ' + err.message);
