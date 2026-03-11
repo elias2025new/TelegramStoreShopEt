@@ -162,6 +162,7 @@ type Product = {
     stock: Record<string, number> | null;
     created_at: string;
     additional_images?: string[] | null;
+    sub_subcategory?: string | null;
 };
 
 type Announcement = {
@@ -202,6 +203,7 @@ function ProductManageItem({
     const [localPrice, setLocalPrice] = useState(product.price.toString());
     const [localCategory, setLocalCategory] = useState(product.category || '');
     const [localGender, setLocalGender] = useState(product.gender || '');
+    const [localSubSubCategory, setLocalSubSubCategory] = useState(product.sub_subcategory || '');
     const [localDescription, setLocalDescription] = useState(product.description || '');
     const [localSizes, setLocalSizes] = useState<string[]>(product.sizes || []);
     const [localStock, setLocalStock] = useState<Record<string, string>>(() => {
@@ -240,6 +242,7 @@ function ProductManageItem({
         localPrice !== product.price.toString() ||
         localCategory !== (product.category || '') ||
         localGender !== (product.gender || '') ||
+        localSubSubCategory !== (product.sub_subcategory || '') ||
         localDescription !== (product.description || '') ||
         JSON.stringify(currentCleanStock) !== JSON.stringify(product.stock || {}) ||
         JSON.stringify([...localSizes].sort()) !== JSON.stringify([...(product.sizes || [])].sort()) ||
@@ -251,6 +254,7 @@ function ProductManageItem({
         setLocalPrice(product.price.toString());
         setLocalCategory(product.category || '');
         setLocalGender(product.gender || '');
+        setLocalSubSubCategory(product.sub_subcategory || '');
         setLocalDescription(product.description || '');
         setLocalSizes(product.sizes || []);
         const initialStock: Record<string, string> = {};
@@ -277,6 +281,7 @@ function ProductManageItem({
                 price: priceNum,
                 category: localCategory.trim(),
                 gender: localGender,
+                sub_subcategory: localSubSubCategory.trim() || null,
                 description: localDescription.trim() || null,
                 sizes: localSizes,
                 stock: Object.keys(currentCleanStock).length > 0 ? currentCleanStock : null,
@@ -533,6 +538,7 @@ function ProductManageItem({
                             onChange={(val) => {
                                 setLocalGender(val);
                                 setLocalCategory('');
+                                setLocalSubSubCategory('');
                                 setLocalSizes([]);
                             }}
                         />
@@ -559,6 +565,7 @@ function ProductManageItem({
                                     selected={localCategory}
                                     onChange={(val) => {
                                         setLocalCategory(val);
+                                        setLocalSubSubCategory('');
                                         setLocalSizes([]);
                                     }}
                                     onAddNew={() => setIsCustomCategory(true)}
@@ -567,6 +574,24 @@ function ProductManageItem({
                                     onDeleteOption={(opt) => onDeleteCategory(opt, localGender)}
                                 />
                             )
+                        )}
+
+                        {localCategory && (
+                            <div className="flex flex-col gap-3">
+                                <ChoiceChipGroup
+                                    label="Sub-Sub Category"
+                                    options={categories[`${localGender}:${localCategory}`] || []}
+                                    selected={localSubSubCategory}
+                                    onChange={(val) => setLocalSubSubCategory(val)}
+                                    onAddNew={() => {
+                                        const newSubSub = prompt('Enter new sub-sub category:');
+                                        if (newSubSub) setLocalSubSubCategory(newSubSub);
+                                    }}
+                                    isDeleteMode={isCategoryDeleteMode}
+                                    onToggleDeleteMode={onToggleCategoryDeleteMode}
+                                    onDeleteOption={(opt) => onDeleteCategory(opt, `${localGender}:${localCategory}`)}
+                                />
+                            </div>
                         )}
 
                         {localCategory && localGender !== 'Accessories' && (
@@ -642,6 +667,7 @@ interface ImageItem {
     stock: Record<string, string>;
     fileName: string;
     additionalImages: string[];
+    subSubCategory: string;
 }
 
 interface SerializedItem {
@@ -655,12 +681,13 @@ interface SerializedItem {
     stock: Record<string, string>;
     fileName: string;
     additionalImages: string[];
+    subSubCategory: string;
 }
 
 interface UploadItemRowProps {
     item: ImageItem;
     index: number;
-    updateItem: (index: number, field: 'title' | 'price' | 'category' | 'gender' | 'description' | 'sizes' | 'stock' | 'additionalImages', value: any) => void;
+    updateItem: (index: number, field: 'title' | 'price' | 'category' | 'gender' | 'description' | 'sizes' | 'stock' | 'additionalImages' | 'subSubCategory', value: any) => void;
     removeItem: (index: number) => void;
     onPublish: (index: number) => Promise<void>;
     categories: Record<string, string[]>;
@@ -674,6 +701,7 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish, categor
     const [localPrice, setLocalPrice] = useState(item.price);
     const [localCategory, setLocalCategory] = useState(item.category);
     const [localGender, setLocalGender] = useState(item.gender);
+    const [localSubSubCategory, setLocalSubSubCategory] = useState(item.subSubCategory || '');
     const [localDescription, setLocalDescription] = useState(item.description);
     const [localSizes, setLocalSizes] = useState<string[]>(item.sizes || []);
     const [localStock, setLocalStock] = useState<Record<string, string>>(item.stock || {});
@@ -691,6 +719,7 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish, categor
         setLocalPrice(item.price);
         setLocalCategory(item.category);
         setLocalGender(item.gender);
+        setLocalSubSubCategory(item.subSubCategory || '');
         setLocalDescription(item.description);
         setLocalSizes(item.sizes || []);
         setLocalStock(item.stock || {});
@@ -945,9 +974,11 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish, categor
                         onChange={(val) => {
                             setLocalGender(val);
                             updateItem(index, 'gender', val);
-                            // Reset subcategory and sizes
+                            // Reset subcategory, sub-sub and sizes
                             setLocalCategory('');
                             updateItem(index, 'category', '');
+                            setLocalSubSubCategory('');
+                            updateItem(index, 'subSubCategory', '');
                             setLocalSizes([]);
                             updateItem(index, 'sizes', []);
                         }}
@@ -984,7 +1015,9 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish, categor
                                 onChange={(val) => {
                                     setLocalCategory(val);
                                     updateItem(index, 'category', val);
-                                    // Reset sizes
+                                    // Reset sub-sub and sizes
+                                    setLocalSubSubCategory('');
+                                    updateItem(index, 'subSubCategory', '');
                                     setLocalSizes([]);
                                     updateItem(index, 'sizes', []);
                                 }}
@@ -994,6 +1027,30 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish, categor
                                 onDeleteOption={(opt) => onDeleteCategory(opt, localGender)}
                             />
                         )
+                    )}
+
+                    {localCategory && (
+                        <div className="flex flex-col gap-3">
+                            <ChoiceChipGroup
+                                label="Sub-Sub Category"
+                                options={categories[`${localGender}:${localCategory}`] || []}
+                                selected={localSubSubCategory}
+                                onChange={(val) => {
+                                    setLocalSubSubCategory(val);
+                                    updateItem(index, 'subSubCategory', val);
+                                }}
+                                onAddNew={() => {
+                                    const newSubSub = prompt('Enter new sub-sub category:');
+                                    if (newSubSub) {
+                                        setLocalSubSubCategory(newSubSub);
+                                        updateItem(index, 'subSubCategory', newSubSub);
+                                    }
+                                }}
+                                isDeleteMode={isCategoryDeleteMode}
+                                onToggleDeleteMode={onToggleCategoryDeleteMode}
+                                onDeleteOption={(opt) => onDeleteCategory(opt, `${localGender}:${localCategory}`)}
+                            />
+                        </div>
                     )}
 
                     {localCategory && localGender !== 'Accessories' && (
@@ -1091,9 +1148,9 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
         queryFn: async () => {
             const { data, error } = await supabase
                 .from('products')
-                .select('category, gender');
+                .select('category, gender, sub_subcategory');
             if (error) throw error;
-            return data as { category: string; gender: string }[];
+            return data as { category: string; gender: string; sub_subcategory: string | null }[];
         },
         staleTime: 1000, // Frequent refresh or manual invalidation
     });
@@ -1102,18 +1159,20 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
     const CATEGORY_SUBCATEGORIES = React.useMemo(() => {
         const merged = { ...INITIAL_CATEGORY_SUBCATEGORIES };
         if (dbCategories) {
-            dbCategories.forEach(item => {
-                const gender = item.gender || 'Unisex';
-                const cat = item.category;
-                if (cat && merged[gender]) {
-                    if (!merged[gender].includes(cat)) {
-                        merged[gender] = [...merged[gender], cat];
+            dbCategories.forEach((bc) => {
+                if (bc.gender && bc.category) {
+                    if (!merged[bc.gender]) merged[bc.gender] = [];
+                    if (!merged[bc.gender].includes(bc.category)) {
+                        merged[bc.gender].push(bc.category);
                     }
-                } else if (cat) {
-                    // Handle case where gender might be new or Accessories
-                    if (!merged[gender]) merged[gender] = [];
-                    if (!merged[gender].includes(cat)) {
-                        merged[gender].push(cat);
+
+                    // Add sub-subcategory to hierarchy
+                    if (bc.sub_subcategory) {
+                        const key = `${bc.gender}:${bc.category}`;
+                        if (!merged[key]) merged[key] = [];
+                        if (!merged[key].includes(bc.sub_subcategory)) {
+                            merged[key].push(bc.sub_subcategory);
+                        }
                     }
                 }
             });
@@ -1138,11 +1197,26 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
             onConfirm: async () => {
                 setUploadStatus(`Removing category "${category}"...`);
                 try {
-                    const { error } = await supabase
-                        .from('products')
-                        .update({ category: null })
-                        .eq('category', category)
-                        .eq('gender', gender);
+                    const isSubSub = gender.includes(':');
+                    const [realGender, realCategory] = isSubSub ? gender.split(':') : [gender, ''];
+
+                    let query;
+                    if (isSubSub) {
+                        query = supabase
+                            .from('products')
+                            .update({ sub_subcategory: null })
+                            .eq('gender', realGender)
+                            .eq('category', realCategory)
+                            .eq('sub_subcategory', category);
+                    } else {
+                        query = supabase
+                            .from('products')
+                            .update({ category: null })
+                            .eq('category', category)
+                            .eq('gender', gender);
+                    }
+
+                    const { error } = await query;
 
                     if (error) throw error;
 
@@ -1246,6 +1320,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                 stock: s.stock || {},
                 fileName: s.fileName,
                 additionalImages: s.additionalImages || [],
+                subSubCategory: s.subSubCategory || '',
             }));
 
             setImages(restored);
@@ -1272,6 +1347,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
             stock: item.stock,
             fileName: item.fileName,
             additionalImages: item.additionalImages || [],
+            subSubCategory: item.subSubCategory,
         }));
         try {
             localStorage.setItem(DRAFT_KEY, JSON.stringify(serialized));
@@ -1302,6 +1378,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                     stock: {},
                     fileName: file.name,
                     additionalImages: [],
+                    subSubCategory: '',
                 };
             })
         );
@@ -1310,7 +1387,11 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
         e.target.value = '';
     }, []);
 
-    const updateItem = (index: number, field: 'title' | 'price' | 'category' | 'gender' | 'description' | 'sizes' | 'stock' | 'additionalImages', value: any) => {
+    const updateItem = (
+        index: number,
+        field: 'title' | 'price' | 'category' | 'gender' | 'description' | 'sizes' | 'stock' | 'additionalImages' | 'subSubCategory',
+        value: any
+    ) => {
         setImages((prev) => prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)));
     };
 
@@ -1517,6 +1598,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                 price: parseFloat(item.price),
                 category: item.category?.trim() || null,
                 gender: item.gender,
+                sub_subcategory: item.subSubCategory?.trim() || null,
                 description: item.description || null,
                 sizes: item.sizes || [],
                 stock: (() => {

@@ -18,7 +18,7 @@ async function fetchCategoryItems(): Promise<CatItem[]> {
     // Fetch products to use their images
     const { data: products } = await supabase
         .from('products')
-        .select('image_url, category, gender')
+        .select('image_url, category, gender, sub_subcategory')
         .order('created_at', { ascending: false });
 
     if (!products) return [];
@@ -29,20 +29,25 @@ async function fetchCategoryItems(): Promise<CatItem[]> {
     const uniquePairs = new Set<string>();
     products.forEach(p => {
         if (p.gender && p.category) {
-            uniquePairs.add(`${p.gender}:${p.category}`);
+            const subSub = p.sub_subcategory || '';
+            uniquePairs.add(`${p.gender}:${p.category}:${subSub}`);
         }
     });
 
     // Generate items for each unique pair found
     uniquePairs.forEach(pair => {
-        const [gender, sub] = pair.split(':');
+        const [gender, sub, subSub] = pair.split(':');
 
-        // Find the best image (already have products sorted by created_at)
-        const product = products.find(p => p.gender === gender && p.category === sub);
+        // Find the best image
+        const product = products.find(p =>
+            p.gender === gender &&
+            p.category === sub &&
+            (p.sub_subcategory || '') === subSub
+        );
 
         items.push({
-            name: sub,
-            parentCategory: gender,
+            name: subSub || sub,
+            parentCategory: subSub ? `${gender} ${sub}` : gender,
             image: product?.image_url || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=200&auto=format&fit=crop'
         });
     });

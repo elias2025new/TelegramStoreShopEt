@@ -84,7 +84,11 @@ export default function ProductGrid({ selectedCategory = 'All', selectedSubcateg
 
             // Subcategory Filter (if any)
             if (selectedSubcategory) {
-                return p.category?.toLowerCase() === selectedSubcategory.toLowerCase();
+                const sub = selectedSubcategory.toLowerCase();
+                const matchesSub = p.category?.toLowerCase() === sub;
+                // @ts-ignore
+                const matchesSubSub = p.sub_subcategory?.toLowerCase() === sub;
+                return matchesSub || matchesSubSub;
             }
 
             return true;
