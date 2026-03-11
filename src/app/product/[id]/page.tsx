@@ -119,7 +119,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
 
     const handleAddToCart = () => {
-        if (!selectedSize && SIZES.length > 0) {
+        if (!selectedSize && SIZES.length > 0 && product.gender !== 'Accessories') {
             // Shake the size section
             setShakeSizeBtn(true);
             setTimeout(() => setShakeSizeBtn(false), 600);
@@ -278,7 +278,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                             </div>
 
                             {/* Horizontal Size Selector - Moved higher for better access */}
-                            {SIZES.length > 0 && (
+                            {SIZES.length > 0 && product.gender !== 'Accessories' && (
                                 <div className="space-y-2 mb-4">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
@@ -421,8 +421,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                                         </>
                                     ) : (
                                         <>
-                                            <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${(!selectedSize && SIZES.length > 0) ? 'text-white/60' : ''}`}>
-                                                {(!selectedSize && SIZES.length > 0) ? 'Pick a Size First' : 'Reserve Item'}
+                                            <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${(!selectedSize && SIZES.length > 0 && product.gender !== 'Accessories') ? 'text-white/60' : ''}`}>
+                                                {(!selectedSize && SIZES.length > 0 && product.gender !== 'Accessories') ? 'Pick a Size First' : 'Reserve Item'}
                                             </span>
                                         </>
                                     )}
