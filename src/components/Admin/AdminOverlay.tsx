@@ -21,32 +21,60 @@ const INITIAL_CATEGORY_SUBCATEGORIES: Record<string, string[]> = DEFAULT_SUBCATE
 const CLOTHING_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 const SHOE_SIZES = ['36', '37', '38', '39', '40', '41', '42', '43', '44', '45'];
 const PRODUCT_SIZES = [...CLOTHING_SIZES, ...SHOE_SIZES];
-
 interface ChoiceChipGroupProps {
     options: string[];
     selected: string;
     onChange: (value: string) => void;
     label?: string;
     onAddNew?: () => void;
+    isDeleteMode?: boolean;
+    onToggleDeleteMode?: () => void;
+    onDeleteOption?: (option: string) => void;
 }
 
-function ChoiceChipGroup({ options, selected, onChange, label, onAddNew }: ChoiceChipGroupProps) {
+function ChoiceChipGroup({ options, selected, onChange, label, onAddNew, isDeleteMode, onToggleDeleteMode, onDeleteOption }: ChoiceChipGroupProps) {
     return (
         <div className="flex flex-col gap-1">
-            {label && <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{label}</span>}
+            <div className="flex items-center gap-1.5">
+                {label && <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{label}</span>}
+                {onToggleDeleteMode && options.length > 0 && (
+                    <button
+                        type="button"
+                        onClick={onToggleDeleteMode}
+                        className={`p-1 rounded-md transition-colors ${isDeleteMode ? 'text-red-500 bg-red-500/10' : 'text-gray-500 hover:text-gray-300'}`}
+                        title={isDeleteMode ? "Exit Delete Mode" : "Remove Categories"}
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                        </svg>
+                    </button>
+                )}
+            </div>
             <div className="flex flex-wrap gap-1.5">
                 {options.map((opt) => (
-                    <button
-                        key={opt}
-                        type="button"
-                        onClick={() => onChange(opt)}
-                        className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all duration-200 ${selected === opt
-                            ? 'bg-yellow-500 text-black border-yellow-500 shadow-sm'
-                            : 'bg-gray-800 text-gray-400 border-gray-700 hover:border-gray-500'
-                            }`}
-                    >
-                        {opt}
-                    </button>
+                    <div key={opt} className="relative group">
+                        <button
+                            type="button"
+                            onClick={() => !isDeleteMode && onChange(opt)}
+                            className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all duration-200 ${selected === opt
+                                ? 'bg-yellow-500 text-black border-yellow-500 shadow-sm'
+                                : 'bg-gray-800 text-gray-400 border-gray-700 hover:border-gray-500'
+                                } ${isDeleteMode ? 'opacity-50 cursor-default' : ''}`}
+                        >
+                            {opt}
+                        </button>
+                        {isDeleteMode && onDeleteOption && (
+                            <button
+                                type="button"
+                                onClick={() => onDeleteOption(opt)}
+                                className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform z-10"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M18 6 6 18" /><path d="m6 6 12 12" />
+                                </svg>
+                            </button>
+                        )}
+                    </div>
                 ))}
                 {onAddNew && (
                     <button
@@ -152,6 +180,9 @@ interface ProductManageItemProps {
     isSelected?: boolean;
     onToggleSelect?: (id: string) => void;
     categories: Record<string, string[]>;
+    onDeleteCategory: (category: string, gender: string) => void;
+    isCategoryDeleteMode: boolean;
+    onToggleCategoryDeleteMode: () => void;
 }
 
 function ProductManageItem({
@@ -162,7 +193,10 @@ function ProductManageItem({
     isSelectMode = false,
     isSelected = false,
     onToggleSelect,
-    categories
+    categories,
+    onDeleteCategory,
+    isCategoryDeleteMode,
+    onToggleCategoryDeleteMode
 }: ProductManageItemProps) {
     const [localName, setLocalName] = useState(product.name);
     const [localPrice, setLocalPrice] = useState(product.price.toString());
@@ -528,6 +562,9 @@ function ProductManageItem({
                                         setLocalSizes([]);
                                     }}
                                     onAddNew={() => setIsCustomCategory(true)}
+                                    isDeleteMode={isCategoryDeleteMode}
+                                    onToggleDeleteMode={onToggleCategoryDeleteMode}
+                                    onDeleteOption={(opt) => onDeleteCategory(opt, localGender)}
                                 />
                             )
                         )}
@@ -627,9 +664,12 @@ interface UploadItemRowProps {
     removeItem: (index: number) => void;
     onPublish: (index: number) => Promise<void>;
     categories: Record<string, string[]>;
+    onDeleteCategory: (category: string, gender: string) => void;
+    isCategoryDeleteMode: boolean;
+    onToggleCategoryDeleteMode: () => void;
 }
 
-function UploadItemRow({ item, index, updateItem, removeItem, onPublish, categories }: UploadItemRowProps) {
+function UploadItemRow({ item, index, updateItem, removeItem, onPublish, categories, onDeleteCategory, isCategoryDeleteMode, onToggleCategoryDeleteMode }: UploadItemRowProps) {
     const [localTitle, setLocalTitle] = useState(item.title);
     const [localPrice, setLocalPrice] = useState(item.price);
     const [localCategory, setLocalCategory] = useState(item.category);
@@ -949,6 +989,9 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish, categor
                                     updateItem(index, 'sizes', []);
                                 }}
                                 onAddNew={() => setIsCustomCategory(true)}
+                                isDeleteMode={isCategoryDeleteMode}
+                                onToggleDeleteMode={onToggleCategoryDeleteMode}
+                                onDeleteOption={(opt) => onDeleteCategory(opt, localGender)}
                             />
                         )
                     )}
@@ -1040,6 +1083,7 @@ function compressImage(base64: string, maxWidth = 1000, quality = 0.8): Promise<
 export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
     const { storeId, isOwner } = useAdmin();
     const queryClient = useQueryClient();
+    const [isCategoryDeleteMode, setIsCategoryDeleteMode] = useState(false);
 
     // Fetch unique categories from database to make "+" button additions persistent
     const { data: dbCategories } = useQuery({
@@ -1083,6 +1127,36 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
         queryClient.invalidateQueries({ queryKey: ['availableCategories'] });
         queryClient.invalidateQueries({ queryKey: ['categoryItems'] });
     }, [queryClient]);
+
+    const handleDeleteCategory = async (category: string, gender: string) => {
+        setConfirmModal({
+            isOpen: true,
+            title: 'Remove Category?',
+            description: `This will un-categorize all products currently in "${category}" for ${gender}. No products will be deleted.`,
+            confirmText: 'Yes, Remove Category',
+            variant: 'danger',
+            onConfirm: async () => {
+                setUploadStatus(`Removing category "${category}"...`);
+                try {
+                    const { error } = await supabase
+                        .from('products')
+                        .update({ category: null })
+                        .eq('category', category)
+                        .eq('gender', gender);
+
+                    if (error) throw error;
+
+                    setUploadStatus(`✅ Category "${category}" removed.`);
+                    invalidateAppQueries();
+                    setIsCategoryDeleteMode(false);
+                } catch (err: any) {
+                    setUploadStatus(`❌ Error: ${err.message}`);
+                } finally {
+                    setTimeout(() => setUploadStatus(''), 4000);
+                }
+            }
+        });
+    };
 
     useEffect(() => {
         if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
@@ -1914,6 +1988,9 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                                         removeItem={removeItem}
                                         onPublish={handleIndividualPublish}
                                         categories={CATEGORY_SUBCATEGORIES}
+                                        onDeleteCategory={handleDeleteCategory}
+                                        isCategoryDeleteMode={isCategoryDeleteMode}
+                                        onToggleCategoryDeleteMode={() => setIsCategoryDeleteMode(!isCategoryDeleteMode)}
                                     />
                                 ))}
                             </div>
@@ -2025,6 +2102,9 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                                             setSelectedProductIds(next);
                                         }}
                                         categories={CATEGORY_SUBCATEGORIES}
+                                        onDeleteCategory={handleDeleteCategory}
+                                        isCategoryDeleteMode={isCategoryDeleteMode}
+                                        onToggleCategoryDeleteMode={() => setIsCategoryDeleteMode(!isCategoryDeleteMode)}
                                     />
                                 ))}
                             </div>
