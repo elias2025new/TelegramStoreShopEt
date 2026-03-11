@@ -534,10 +534,14 @@ function ProductManageItem({
                     <AnimatePresence initial={false}>
                         {isExpanded && (
                             <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: 'auto', opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
+                                initial={{ height: 0, opacity: 0, y: -10, scale: 0.98 }}
+                                animate={{ height: 'auto', opacity: 1, y: 0, scale: 1 }}
+                                exit={{ height: 0, opacity: 0, y: -10, scale: 0.98 }}
+                                transition={{
+                                    duration: 0.4,
+                                    ease: [0.22, 1, 0.36, 1],
+                                    opacity: { duration: 0.3 }
+                                }}
                                 className="overflow-hidden"
                             >
                                 <div className="flex flex-col gap-3 mt-1 pt-2 border-t border-gray-100 dark:border-[#2a2a2a]">
@@ -651,7 +655,7 @@ function ProductManageItem({
                                 e.stopPropagation();
                                 setIsExpanded(!isExpanded);
                             }}
-                            className={`p-1.5 rounded-lg transition-all duration-300 ${isExpanded ? 'bg-[#cba153]/10 text-[#cba153] rotate-180' : 'text-gray-400 hover:text-gray-300'}`}
+                            className={`p-1.5 rounded-lg transition-all duration-400 ease-[0.22,1,0.36,1] ${isExpanded ? 'bg-[#cba153]/10 text-[#cba153] rotate-180' : 'text-gray-400 hover:text-gray-300'}`}
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="m6 9 6 6 6-6" />
