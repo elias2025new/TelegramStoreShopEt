@@ -10,7 +10,8 @@ import { useQuery } from '@tanstack/react-query';
 
 interface CatItem {
     name: string;
-    parentCategory: string; // Men, Women, Accessories
+    parentCategory: string; // Display label (e.g. "Men Shoes" or "Men")
+    gender: string; // Raw gender for URL (e.g. "Men")
     image: string;
 }
 
@@ -48,6 +49,7 @@ async function fetchCategoryItems(): Promise<CatItem[]> {
         items.push({
             name: subSub || sub,
             parentCategory: subSub ? `${gender} ${sub}` : gender,
+            gender: gender,
             image: product?.image_url || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=200&auto=format&fit=crop'
         });
     });
@@ -112,7 +114,7 @@ export default function CategoriesPage() {
                             ) : (
                                 catItems.map((item, idx) => (
                                     <motion.div
-                                        key={`${item.parentCategory}-${item.name}`}
+                                        key={`${item.gender}-${item.parentCategory}-${item.name}`}
                                         initial={{ opacity: 0, scale: 0.9 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         transition={{
@@ -122,7 +124,7 @@ export default function CategoriesPage() {
                                         }}
                                     >
                                         <Link
-                                            href={`/category/${item.parentCategory}/${item.name}`}
+                                            href={`/category/${item.gender}/${item.name}`}
                                             className="flex flex-col items-center gap-3 transition-transform active:scale-95 group"
                                         >
                                             <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-2 border-transparent group-hover:border-[#cba153]/50 transition-colors shadow-lg shadow-black/5 dark:shadow-none">

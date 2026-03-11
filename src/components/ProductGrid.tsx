@@ -102,8 +102,10 @@ export default function ProductGrid({ selectedCategory = 'All', selectedSubcateg
         const query = searchQuery.toLowerCase().trim();
         const nameMatch = p.name.toLowerCase().includes(query);
         const descMatch = p.description?.toLowerCase().includes(query);
+        // @ts-ignore
+        const subSubMatch = p.sub_subcategory?.toLowerCase().includes(query);
 
-        return nameMatch || descMatch;
+        return nameMatch || descMatch || subSubMatch;
     });
 
     if (filtered.length === 0) {
