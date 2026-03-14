@@ -23,6 +23,7 @@ export interface Database {
                     sizes: string[] | null
                     stock: Json | null
                     additional_images: string[] | null
+                    quantity: number
                 }
                 Insert: {
                     id?: string
@@ -36,6 +37,7 @@ export interface Database {
                     sizes?: string[] | null
                     stock?: Json | null
                     additional_images?: string[] | null
+                    quantity?: number
                 }
                 Update: {
                     id?: string
@@ -49,6 +51,7 @@ export interface Database {
                     sizes?: string[] | null
                     stock?: Json | null
                     additional_images?: string[] | null
+                    quantity?: number
                 }
                 Relationships: []
             }

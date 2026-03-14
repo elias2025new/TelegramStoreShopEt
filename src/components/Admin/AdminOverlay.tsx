@@ -139,8 +139,11 @@ function MultiChoiceChipGroup({ options, selected, onChange, stockValues, onStoc
                                         }
                                     }}
                                     onFocus={onFocus}
-                                    className="w-10 h-6 bg-gray-900 border border-gray-700 rounded text-[10px] text-white text-center focus:outline-none focus:border-yellow-500"
+                                    className={`w-10 h-6 bg-gray-900 border ${stockValues?.[opt] === '0' ? 'border-red-500/50' : 'border-gray-700'} rounded text-[10px] text-white text-center focus:outline-none focus:border-yellow-500`}
                                 />
+                            )}
+                            {isSelected && stockValues?.[opt] === '0' && (
+                                <span className="text-[9px] font-bold text-red-500 animate-pulse">(out of stock)</span>
                             )}
                         </div>
                     );
@@ -160,6 +163,7 @@ type Product = {
     sizes: string[] | null;
     image_url: string | null;
     stock: Record<string, number> | null;
+    quantity: number;
     created_at: string;
     additional_images?: string[] | null;
     sub_subcategory?: string | null;
@@ -215,6 +219,7 @@ function ProductManageItem({
         }
         return initialStock;
     });
+    const [localQuantity, setLocalQuantity] = useState<number>(product.quantity || 1);
     const [isSaving, setIsSaving] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [isCustomCategory, setIsCustomCategory] = useState(false);
@@ -246,6 +251,7 @@ function ProductManageItem({
         localSubSubCategory !== (product.sub_subcategory || '') ||
         localDescription !== (product.description || '') ||
         JSON.stringify(currentCleanStock) !== JSON.stringify(product.stock || {}) ||
+        localQuantity !== (product.quantity || 1) ||
         JSON.stringify([...localSizes].sort()) !== JSON.stringify([...(product.sizes || [])].sort()) ||
         JSON.stringify(localAdditionalImages) !== JSON.stringify(product.additional_images || []);
 
@@ -265,6 +271,7 @@ function ProductManageItem({
             });
         }
         setLocalStock(initialStock);
+        setLocalQuantity(product.quantity || 1);
         setLocalAdditionalImages(product.additional_images || []);
     }, [product]);
 
@@ -286,6 +293,7 @@ function ProductManageItem({
                 description: localDescription.trim() || null,
                 sizes: localSizes,
                 stock: Object.keys(currentCleanStock).length > 0 ? currentCleanStock : null,
+                quantity: localQuantity,
                 additional_images: localAdditionalImages,
             });
         } finally {
@@ -507,6 +515,21 @@ function ProductManageItem({
                         </div>
                     </div>
 
+                    {/* Stock Status Badge */}
+                    {(() => {
+                        const totalStock = Object.keys(currentCleanStock).length > 0
+                            ? Object.values(currentCleanStock).reduce((a, b) => a + b, 0)
+                            : localQuantity;
+                        if (totalStock === 0) {
+                            return (
+                                <span className="text-[9px] font-black text-white bg-red-500 px-1.5 py-0.5 rounded animate-pulse shadow-lg shadow-red-500/20">
+                                    OUT OF STOCK
+                                </span>
+                            );
+                        }
+                        return null;
+                    })()}
+
                     <div className="flex items-center gap-1">
                         <button
                             onClick={openDescModal}
@@ -632,6 +655,60 @@ function ProductManageItem({
                                         />
                                     )}
 
+                                    {/* Total Quantity Stepper */}
+                                    <div className="flex flex-col gap-1.5 pt-2 border-t border-gray-100 dark:border-[#2a2a2a]">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                                {localSizes.length > 0 ? "Total Stock (View Only)" : "Available Quantity"}
+                                            </span>
+                                            <span className={`text-xs font-black ${localQuantity === 0 ? 'text-red-500 animate-pulse' : 'text-[#cba153]'} tabular-nums`}>
+                                                {localSizes.length > 0 
+                                                    ? Object.values(currentCleanStock).reduce((a, b) => a + b, 0)
+                                                    : localQuantity
+                                                }
+                                            </span>
+                                        </div>
+                                        {localSizes.length === 0 && (
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex-1 flex items-center bg-gray-50 dark:bg-[#0a0a0a] rounded-lg border border-gray-100 dark:border-[#2a2a2a] h-9 px-1">
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setLocalQuantity(Math.max(0, localQuantity - 1));
+                                                        }}
+                                                        className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors"
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                                            <path d="M5 12h14" />
+                                                        </svg>
+                                                    </button>
+                                                    <input
+                                                        type="number"
+                                                        value={localQuantity}
+                                                        onChange={(e) => {
+                                                            e.stopPropagation();
+                                                            setLocalQuantity(parseInt(e.target.value) || 0);
+                                                        }}
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        onFocus={handleFocus}
+                                                        className="flex-1 min-w-0 bg-transparent border-none text-center text-xs font-bold text-gray-900 dark:text-white focus:ring-0 p-0"
+                                                    />
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setLocalQuantity(localQuantity + 1);
+                                                        }}
+                                                        className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-[#cba153] transition-colors"
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                                            <path d="M12 5v14M5 12h14" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
                                     {hasChanges && (
                                         <button
                                             onClick={handleSave}
@@ -699,6 +776,7 @@ interface ImageItem {
     description: string;
     sizes: string[];
     stock: Record<string, string>;
+    quantity: number;
     fileName: string;
     additionalImages: string[];
     subSubCategory: string;
@@ -713,6 +791,7 @@ interface SerializedItem {
     description: string;
     sizes: string[];
     stock: Record<string, string>;
+    quantity: number;
     fileName: string;
     additionalImages: string[];
     subSubCategory: string;
@@ -721,7 +800,7 @@ interface SerializedItem {
 interface UploadItemRowProps {
     item: ImageItem;
     index: number;
-    updateItem: (index: number, field: 'title' | 'price' | 'category' | 'gender' | 'description' | 'sizes' | 'stock' | 'additionalImages' | 'subSubCategory', value: any) => void;
+    updateItem: (index: number, field: 'title' | 'price' | 'category' | 'gender' | 'description' | 'sizes' | 'stock' | 'additionalImages' | 'subSubCategory' | 'quantity', value: any) => void;
     removeItem: (index: number) => void;
     onPublish: (index: number) => Promise<void>;
     categories: Record<string, string[]>;
@@ -739,6 +818,7 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish, categor
     const [localDescription, setLocalDescription] = useState(item.description);
     const [localSizes, setLocalSizes] = useState<string[]>(item.sizes || []);
     const [localStock, setLocalStock] = useState<Record<string, string>>(item.stock || {});
+    const [localQuantity, setLocalQuantity] = useState<number>(item.quantity || 1);
     const [localAdditionalImages, setLocalAdditionalImages] = useState<string[]>(item.additionalImages || []);
     const [isProcessingImages, setIsProcessingImages] = useState(false);
     const additionalImagesInputRef = useRef<HTMLInputElement>(null);
@@ -757,8 +837,9 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish, categor
         setLocalDescription(item.description);
         setLocalSizes(item.sizes || []);
         setLocalStock(item.stock || {});
+        setLocalQuantity(item.quantity || 1);
         setLocalAdditionalImages(item.additionalImages || []);
-    }, [item.title, item.price, item.category, item.gender, item.description, item.sizes, item.stock, item.additionalImages]);
+    }, [item.title, item.price, item.category, item.gender, item.description, item.sizes, item.stock, item.quantity, item.additionalImages]);
 
     const handleFocus = (e: React.FocusEvent<HTMLElement>) => {
         const target = e.target as HTMLElement;
@@ -1095,8 +1176,11 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish, categor
                             onChange={(val) => {
                                 setLocalSizes(val);
                                 updateItem(index, 'sizes', val);
-                                // Clean up stock values
+                                // Clean up stock values & default new sizes to 1
                                 const nextStock = { ...localStock };
+                                val.forEach(s => {
+                                    if (nextStock[s] === undefined) nextStock[s] = '1';
+                                });
                                 Object.keys(nextStock).forEach(k => {
                                     if (!val.includes(k)) delete nextStock[k];
                                 });
@@ -1112,6 +1196,55 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish, categor
                             onFocus={handleFocus}
                         />
                     )}
+
+                    {/* Total Quantity for Non-Size Products / Accessories */}
+                    <div className="flex flex-col gap-1.5 px-0.5 mt-2 pt-2 border-t border-gray-100 dark:border-[#2a2a2a]">
+                        <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                {localSizes.length > 0 ? "Initial Total Quantity Reference" : "Total Quantity"}
+                            </span>
+                            <span className="text-[11px] font-black text-[#cba153] tabular-nums">{localQuantity}</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="flex-1 flex items-center bg-gray-50 dark:bg-[#0a0a0a] rounded-lg border border-gray-100 dark:border-[#2a2a2a] h-9 px-1">
+                                <button
+                                    onClick={() => {
+                                        const next = Math.max(0, localQuantity - 1);
+                                        setLocalQuantity(next);
+                                        updateItem(index, 'quantity', next);
+                                    }}
+                                    className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M5 12h14" />
+                                    </svg>
+                                </button>
+                                <input
+                                    type="number"
+                                    value={localQuantity}
+                                    onChange={(e) => {
+                                        const next = parseInt(e.target.value) || 0;
+                                        setLocalQuantity(next);
+                                        updateItem(index, 'quantity', next);
+                                    }}
+                                    onFocus={handleFocus}
+                                    className="flex-1 min-w-0 bg-transparent border-none text-center text-xs font-bold text-gray-900 dark:text-white focus:ring-0 p-0"
+                                />
+                                <button
+                                    onClick={() => {
+                                        const next = localQuantity + 1;
+                                        setLocalQuantity(next);
+                                        updateItem(index, 'quantity', next);
+                                    }}
+                                    className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-[#cba153] transition-colors"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M12 5v14M5 12h14" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </>
@@ -1352,6 +1485,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                 description: s.description || '',
                 sizes: s.sizes || [],
                 stock: s.stock || {},
+                quantity: s.quantity ?? 1,
                 fileName: s.fileName,
                 additionalImages: s.additionalImages || [],
                 subSubCategory: s.subSubCategory || '',
@@ -1379,6 +1513,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
             description: item.description,
             sizes: item.sizes,
             stock: item.stock,
+            quantity: item.quantity ?? 1,
             fileName: item.fileName,
             additionalImages: item.additionalImages || [],
             subSubCategory: item.subSubCategory,
@@ -1410,6 +1545,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                     description: '',
                     sizes: [],
                     stock: {},
+                    quantity: 1,
                     fileName: file.name,
                     additionalImages: [],
                     subSubCategory: '',
@@ -1423,7 +1559,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
 
     const updateItem = (
         index: number,
-        field: 'title' | 'price' | 'category' | 'gender' | 'description' | 'sizes' | 'stock' | 'additionalImages' | 'subSubCategory',
+        field: 'title' | 'price' | 'category' | 'gender' | 'description' | 'sizes' | 'stock' | 'additionalImages' | 'subSubCategory' | 'quantity',
         value: any
     ) => {
         setImages((prev) => prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)));
@@ -1663,6 +1799,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                     }
                     return extraUrls;
                 })(),
+                quantity: item.quantity,
             };
 
             const { error: insertError } = await supabase.from('products').insert([productData]);

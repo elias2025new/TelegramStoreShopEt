@@ -5,6 +5,7 @@ import { Database } from '@/types/supabase';
 import { useFavorites } from '@/context/FavoritesContext';
 import { useRouter } from 'next/navigation';
 import { useTelegram } from '@/hooks/useTelegram';
+import { isOutOfStock } from '@/utils/stock';
 
 type Product = Database['public']['Tables']['products']['Row'];
 
@@ -23,9 +24,18 @@ export default function ProductCard({ product }: ProductCardProps) {
     // Generate a visual rating placeholder
     const rating = product.id ? (4 + (product.id.length % 10) / 10).toFixed(1) : "4.5";
 
+    const stockProduct = {
+        sizes: product.sizes,
+        stock: product.stock as Record<string, number> | null,
+        quantity: (product as any).quantity ?? 1,
+        gender: product.gender,
+    };
+    const outOfStock = isOutOfStock(stockProduct);
+
     const handleQuickAdd = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
+        if (outOfStock) return;
         // Navigate to product detail so user can select size before adding to cart
         hapticFeedback('light');
         router.push(`/product/${product.id}`);
@@ -73,6 +83,15 @@ export default function ProductCard({ product }: ProductCardProps) {
                             No Image
                         </div>
                     )}
+
+                    {/* Out of Stock Overlay */}
+                    {outOfStock && (
+                        <div className="absolute inset-0 z-20 bg-black/55 backdrop-blur-[2px] flex items-center justify-center">
+                            <span className="px-3 py-1 bg-black/80 border border-white/20 text-white text-[10px] font-black uppercase tracking-widest rounded-full">
+                                Out of Stock
+                            </span>
+                        </div>
+                    )}
                 </div>
 
                 {/* Content Section */}
@@ -100,10 +119,14 @@ export default function ProductCard({ product }: ProductCardProps) {
                         </div>
 
                         <button
-                            className="text-[10px] text-[#cba153] font-bold px-2 py-1 bg-[#cba153]/10 border border-[#cba153]/20 rounded-md hover:bg-[#cba153]/20 transform-gpu active:scale-90 transition-all duration-200"
+                            className={`text-[10px] font-bold px-2 py-1 rounded-md transform-gpu active:scale-90 transition-all duration-200 ${outOfStock
+                                ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed border border-gray-200 dark:border-gray-700'
+                                : 'text-[#cba153] bg-[#cba153]/10 border border-[#cba153]/20 hover:bg-[#cba153]/20'
+                                }`}
                             onClick={handleQuickAdd}
+                            disabled={outOfStock}
                         >
-                            + Add
+                            {outOfStock ? 'Sold Out' : '+ Add'}
                         </button>
                     </div>
                 </div>

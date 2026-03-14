@@ -223,6 +223,48 @@ export default function CheckoutPage() {
                 .insert(orderItems);
 
             if (itemsError) throw itemsError;
+            
+            // 3. Update Stock Levels Immediately
+            try {
+                const stockUpdates = items.map(async (item) => {
+                    // Fetch latest stock to avoid over-decrementing or stale state
+                    const { data: currentProduct } = await supabase
+                        .from('products')
+                        .select('stock, quantity')
+                        .eq('id', item.product.id)
+                        .single();
+
+                    if (!currentProduct) return;
+
+                    const updates: any = {};
+                    
+                    if (item.selectedSize && currentProduct.stock) {
+                        const newStock = { ...currentProduct.stock };
+                        const currentSizeQty = Number(newStock[item.selectedSize]) || 0;
+                        newStock[item.selectedSize] = Math.max(0, currentSizeQty - item.quantity);
+                        updates.stock = newStock;
+                    }
+
+                    // Decrement total quantity reference if it exists
+                    if (currentProduct.quantity !== null && currentProduct.quantity !== undefined) {
+                        updates.quantity = Math.max(0, currentProduct.quantity - item.quantity);
+                    }
+
+                    if (Object.keys(updates).length > 0) {
+                        await supabase
+                            .from('products')
+                            .update(updates)
+                            .eq('id', item.product.id);
+                    }
+                });
+
+                // Run updates in parallel
+                await Promise.all(stockUpdates);
+            } catch (stockErr) {
+                console.error('Error updating stock:', stockErr);
+                // We don't throw here to avoid failing the order if only stock update fails
+                // But in a production app, you'd want more robust handling
+            }
 
             // Success
             setOrderId(orderData.id.split('-')[0].toUpperCase()); // Short version for display

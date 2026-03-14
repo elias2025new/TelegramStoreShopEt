@@ -13,6 +13,7 @@ import PageTransition from '@/components/PageTransition';
 import CartIcon from '@/components/CartIcon';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShieldCheck, Ruler, Truck, Star } from 'lucide-react';
+import { isOutOfStock, getAvailableSizes, getSizeStock } from '@/utils/stock';
 
 type Product = Database['public']['Tables']['products']['Row'];
 
@@ -115,7 +116,19 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         );
     }
 
+    const stockProduct = {
+        sizes: product.sizes,
+        stock: product.stock as Record<string, number> | null,
+        quantity: (product as any).quantity ?? 1,
+        gender: product.gender,
+    };
+
     const SIZES = product.sizes && product.sizes.length > 0 ? product.sizes : [];
+    // Only show sizes with stock > 0 to customers
+    const AVAILABLE_SIZES = getAvailableSizes(stockProduct);
+    const outOfStock = isOutOfStock(stockProduct);
+    // Use available sizes for display — hides sold-out sizes from customers
+    const DISPLAY_SIZES = AVAILABLE_SIZES;
     
     // Check if item is already in cart
     const cartItemId = selectedSize ? `${product.id}-${selectedSize}` : product.id;
@@ -123,12 +136,13 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
 
     const handleAddToCart = () => {
+        if (outOfStock) return;
         if (isInCart) {
             router.push('/cart');
             return;
         }
 
-        if (!selectedSize && SIZES.length > 0 && product.gender !== 'Accessories') {
+        if (!selectedSize && DISPLAY_SIZES.length > 0 && product.gender !== 'Accessories') {
             // Shake the size section
             setShakeSizeBtn(true);
             setTimeout(() => setShakeSizeBtn(false), 600);
@@ -286,7 +300,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                                 </p>
                             </div>
 
-                            {/* Horizontal Size Selector - Moved higher for better access */}
+                            {/* Horizontal Size Selector */}
                             {SIZES.length > 0 && product.gender !== 'Accessories' && (
                                 <div className="space-y-2 mb-4">
                                     <div className="flex items-center justify-between">
@@ -304,18 +318,30 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                                         transition={{ duration: 0.5 }}
                                         className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-2 px-2"
                                     >
-                                        {SIZES.map((size) => (
-                                            <button
-                                                key={size}
-                                                onClick={() => setSelectedSize(selectedSize === size ? null : size)}
-                                                className={`shrink-0 min-w-[40px] h-8 flex items-center justify-center rounded-lg border text-[11px] font-black uppercase tracking-wide transition-all duration-200 active:scale-90 ${selectedSize === size
-                                                    ? 'bg-[#cba153] border-[#cba153] text-white shadow-lg shadow-[#cba153]/25 scale-105'
-                                                    : 'bg-gray-50 dark:bg-white/[0.04] border-gray-100 dark:border-white/[0.08] text-gray-500 dark:text-white/50'
-                                                    }`}
-                                            >
-                                                {size}
-                                            </button>
-                                        ))}
+                                        {DISPLAY_SIZES.length === 0 ? (
+                                            <span className="text-xs text-gray-400 italic">All sizes sold out</span>
+                                        ) : (
+                                            DISPLAY_SIZES.map((size) => {
+                                                const sizeStock = getSizeStock(stockProduct, size);
+                                                const isLow = sizeStock > 0 && sizeStock <= 3;
+                                                return (
+                                                    <div key={size} className="flex flex-col items-center gap-0.5">
+                                                        <button
+                                                            onClick={() => setSelectedSize(selectedSize === size ? null : size)}
+                                                            className={`shrink-0 min-w-[40px] h-8 flex items-center justify-center rounded-lg border text-[11px] font-black uppercase tracking-wide transition-all duration-200 active:scale-90 ${selectedSize === size
+                                                                ? 'bg-[#cba153] border-[#cba153] text-white shadow-lg shadow-[#cba153]/25 scale-105'
+                                                                : 'bg-gray-50 dark:bg-white/[0.04] border-gray-100 dark:border-white/[0.08] text-gray-500 dark:text-white/50'
+                                                                }`}
+                                                        >
+                                                            {size}
+                                                        </button>
+                                                        {isLow && (
+                                                            <span className="text-[8px] text-red-500 font-bold">{sizeStock} left</span>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })
+                                        )}
                                     </motion.div>
                                 </div>
                             )}
@@ -405,23 +431,27 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                         {/* Primary Action */}
                         <button
                             onClick={handleAddToCart}
-                            disabled={isAdded}
-                            className={`flex-1 h-14 rounded-2xl relative overflow-hidden group transition-all duration-500 active:scale-[0.97] ${isAdded
-                                ? 'bg-green-500 text-white'
-                                : 'bg-[#cba153] hover:bg-[#b8860b] text-white shadow-lg shadow-[#cba153]/20'
+                            disabled={isAdded || outOfStock}
+                            className={`flex-1 h-14 rounded-2xl relative overflow-hidden group transition-all duration-500 active:scale-[0.97] ${outOfStock
+                                ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                                : isAdded
+                                    ? 'bg-green-500 text-white'
+                                    : 'bg-[#cba153] hover:bg-[#b8860b] text-white shadow-lg shadow-[#cba153]/20'
                                 }`}
                         >
                             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" />
 
                             <AnimatePresence mode="wait">
                                 <motion.div
-                                    key={isAdded ? "added" : "not-added"}
+                                    key={outOfStock ? 'oos' : isAdded ? "added" : "not-added"}
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -10 }}
                                     className="relative z-10 flex items-center justify-center gap-3"
                                 >
-                                    {isAdded ? (
+                                    {outOfStock ? (
+                                        <span className="text-[10px] font-black uppercase tracking-[0.2em]">Out of Stock</span>
+                                    ) : isAdded ? (
                                         <>
                                             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                 <path d="M16.6666 5L7.49992 14.1667L3.33325 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
@@ -438,8 +468,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                                         </>
                                     ) : (
                                         <>
-                                            <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${(!selectedSize && SIZES.length > 0 && product.gender !== 'Accessories') ? 'text-white/60' : ''}`}>
-                                                {(!selectedSize && SIZES.length > 0 && product.gender !== 'Accessories') ? 'Pick a Size First' : 'Add to Cart'}
+                                            <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${(!selectedSize && DISPLAY_SIZES.length > 0 && product.gender !== 'Accessories') ? 'text-white/60' : ''}`}>
+                                                {(!selectedSize && DISPLAY_SIZES.length > 0 && product.gender !== 'Accessories') ? 'Pick a Size First' : 'Add to Cart'}
                                             </span>
                                         </>
                                     )}
