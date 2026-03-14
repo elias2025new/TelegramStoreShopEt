@@ -16,9 +16,9 @@ export interface CartItem {
 
 interface CartContextType {
     items: CartItem[];
-    addToCart: (product: Product, quantity: number, selectedSize?: string) => void;
+    addToCart: (product: Product, quantity: number, selectedSize?: string) => boolean;
     removeFromCart: (cartItemId: string) => void;
-    updateQuantity: (cartItemId: string, newQuantity: number) => void;
+    updateQuantity: (cartItemId: string, newQuantity: number) => boolean;
     clearCart: () => void;
     totalItems: number;
     totalPrice: number;
@@ -54,7 +54,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setToast(prev => ({ ...prev, isVisible: false }));
     }, []);
 
-    const addToCart = (product: Product, quantity: number, selectedSize?: string) => {
+    const addToCart = (product: Product, quantity: number, selectedSize?: string): boolean => {
         const cartItemId = selectedSize ? `${product.id}-${selectedSize}` : product.id;
 
         // Get available stock for this specific choice
@@ -64,18 +64,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             availableStock = stockObj[selectedSize] ?? 0;
         }
 
+        let success = false;
         setItems((prev) => {
             const existing = prev.find((item) => item.id === cartItemId);
             if (existing) {
                 const newTotalQuantity = existing.quantity + quantity;
                 if (newTotalQuantity > availableStock) {
-                    showToast(`Only ${availableStock} left in stock`);
                     if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
                         window.Telegram.WebApp.HapticFeedback.notificationOccurred('error');
                     }
                     return prev;
                 }
-                showToast(`Updated quantity in cart`);
+                success = true;
                 return prev.map((item) =>
                     item.id === cartItemId
                         ? { ...item, quantity: newTotalQuantity }
@@ -84,18 +84,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             }
 
             if (quantity > availableStock) {
-                showToast(`Only ${availableStock} left in stock`);
                 return prev;
             }
 
-            showToast(`Added to cart${selectedSize ? ` (${selectedSize})` : ''}`);
+            success = true;
             return [...prev, { id: cartItemId, product, quantity, selectedSize }];
         });
+
+        if (success) {
+            showToast(`Added to cart${selectedSize ? ` (${selectedSize})` : ''}`);
+        }
+        return success;
     };
 
-    const updateQuantity = (cartItemId: string, newQuantity: number) => {
-        if (newQuantity < 1) return;
+    const updateQuantity = (cartItemId: string, newQuantity: number): boolean => {
+        if (newQuantity < 1) return false;
 
+        let success = false;
         setItems((prev) => {
             const item = prev.find(i => i.id === cartItemId);
             if (!item) return prev;
@@ -108,15 +113,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             }
 
             if (newQuantity > availableStock) {
-                showToast(`Only ${availableStock} left in stock`);
                 if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
                     window.Telegram.WebApp.HapticFeedback.notificationOccurred('error');
                 }
                 return prev;
             }
 
+            success = true;
             return prev.map(i => i.id === cartItemId ? { ...i, quantity: newQuantity } : i);
         });
+
+        return success;
     };
 
     const removeFromCart = (cartItemId: string) => {

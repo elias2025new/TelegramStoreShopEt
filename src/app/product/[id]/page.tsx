@@ -63,9 +63,10 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         }
     }, [product]);
 
-    // Reset stock low warning when size changes
+    // Reset stock low warning and quantity when size changes
     useEffect(() => {
         setShowStockLow(false);
+        setQuantity(1);
     }, [selectedSize]);
 
     // Telegram Back Button Integration
@@ -167,13 +168,16 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             return;
         }
 
-        addToCart(product, quantity, selectedSize ?? undefined);
-        setIsAdded(true);
-        setShowStockLow(true);
-        setTimeout(() => setIsAdded(false), 2000);
+        const success = addToCart(product, quantity, selectedSize ?? undefined);
+        if (success) {
+            setIsAdded(true);
+            setTimeout(() => setIsAdded(false), 2000);
+        } else {
+            setShowStockLow(true);
+        }
 
         if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-            window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+            window.Telegram.WebApp.HapticFeedback.notificationOccurred(success ? 'success' : 'error');
         }
     };
 
