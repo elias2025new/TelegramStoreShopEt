@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { supabase } from '@/utils/supabase/client';
@@ -31,11 +31,34 @@ function HomeContent() {
   const [searchInput, setSearchInput] = useState('');
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(searchParams.get('subcategory'));
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const HOME_SCROLL_KEY = 'home_scroll_y';
 
   const handleSearch = () => {
     setSearchQuery(searchInput);
     searchInputRef.current?.blur();
   };
+
+  // Save scroll position before leaving
+  const saveScrollPosition = useCallback(() => {
+    sessionStorage.setItem(HOME_SCROLL_KEY, String(window.scrollY));
+  }, [HOME_SCROLL_KEY]);
+
+  // Restore scroll position on mount
+  useEffect(() => {
+    const savedY = sessionStorage.getItem(HOME_SCROLL_KEY);
+    if (savedY !== null) {
+      const y = parseInt(savedY, 10);
+      // Use requestAnimationFrame to wait for the DOM to be painted
+      const restore = () => window.scrollTo({ top: y, behavior: 'instant' as ScrollBehavior });
+      requestAnimationFrame(() => requestAnimationFrame(restore));
+    }
+    // Save scroll on unload / navigation away
+    window.addEventListener('beforeunload', saveScrollPosition);
+    return () => {
+      saveScrollPosition();
+      window.removeEventListener('beforeunload', saveScrollPosition);
+    };
+  }, [saveScrollPosition]);
 
   const isKeyboardOpen = useRef(false);
 
