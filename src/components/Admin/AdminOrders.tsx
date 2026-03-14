@@ -43,7 +43,8 @@ export default function AdminOrders() {
     const [isDeleteAllModalOpen, setIsDeleteAllModalOpen] = useState(false);
     const [isDeleteSelectedModalOpen, setIsDeleteSelectedModalOpen] = useState(false);
 
-    const DELETE_AFTER_MS = 5 * 60 * 1000; // 5 minutes
+    const DELETE_AFTER_MS = 5 * 60 * 1000; // 5 minutes for delivered
+    const CANCELLED_DELETE_AFTER_MS = 24 * 60 * 60 * 1000; // 24 hours for cancelled
 
     const deleteOrder = async (orderId: string) => {
         try {
@@ -64,9 +65,9 @@ export default function AdminOrders() {
         }
     };
 
-    const startDeletionTimer = (orderId: string, deliveredAt: string) => {
-        const timeElapsed = Date.now() - new Date(deliveredAt).getTime();
-        const timeLeft = Math.max(0, DELETE_AFTER_MS - timeElapsed);
+    const startDeletionTimer = (orderId: string, timestamp: string, duration: number) => {
+        const timeElapsed = Date.now() - new Date(timestamp).getTime();
+        const timeLeft = Math.max(0, duration - timeElapsed);
 
         // Clear existing timer if any
         if (timers[orderId]) clearTimeout(timers[orderId]);
@@ -100,15 +101,28 @@ export default function AdminOrders() {
             const validOrders: Order[] = [];
 
             for (const order of fetchedOrders) {
+                // Check delivered cleanup
                 if (order.status === 'delivered' && order.delivered_at) {
                     const deliveredTime = new Date(order.delivered_at).getTime();
                     if (now - deliveredTime >= DELETE_AFTER_MS) {
                         expiredIds.push(order.id);
                         continue;
                     } else {
-                        startDeletionTimer(order.id, order.delivered_at);
+                        startDeletionTimer(order.id, order.delivered_at, DELETE_AFTER_MS);
                     }
                 }
+                
+                // Check cancelled cleanup (24h)
+                if (order.status === 'cancelled') {
+                    const createdTime = new Date(order.created_at).getTime();
+                    if (now - createdTime >= CANCELLED_DELETE_AFTER_MS) {
+                        expiredIds.push(order.id);
+                        continue;
+                    } else {
+                        startDeletionTimer(order.id, order.created_at, CANCELLED_DELETE_AFTER_MS);
+                    }
+                }
+
                 validOrders.push(order);
             }
 
@@ -143,6 +157,7 @@ export default function AdminOrders() {
 
             if (error) throw error;
             setOrderDetails(prev => ({ ...prev, [orderId]: data as OrderItem[] }));
+            return data as OrderItem[];
         } catch (err) {
             console.error('Error fetching order items:', err);
         }
@@ -151,9 +166,22 @@ export default function AdminOrders() {
     const updateOrderStatus = async (orderId: string, newStatus: string) => {
         setIsUpdating(orderId);
         try {
+            const currentOrder = orders.find(o => o.id === orderId);
+            if (!currentOrder) return;
+
+            // Restricted transitions: Only from pending to paid/cancelled
+            if (currentOrder.status !== 'pending' && (newStatus === 'paid' || newStatus === 'cancelled')) {
+                // Technically the UI should prevent this, but we double check here
+                if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+                    window.Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+                }
+                return;
+            }
+
             const deliveredAt = newStatus === 'delivered' ? new Date().toISOString() : null;
 
-            const { error } = await supabase
+            // 1. Update order status in DB
+            const { error: updateError } = await supabase
                 .from('orders')
                 .update({
                     status: newStatus,
@@ -161,14 +189,52 @@ export default function AdminOrders() {
                 })
                 .eq('id', orderId);
 
-            if (error) throw error;
+            if (updateError) throw updateError;
+
+            // 2. Handle Stock Deduction if status becomes 'paid'
+            if (newStatus === 'paid' && currentOrder.status !== 'paid') {
+                const items = await fetchOrderItems(orderId) || [];
+                
+                const stockUpdates = items.map(async (item) => {
+                    const { data: currentProduct } = await supabase
+                        .from('products')
+                        .select('stock, quantity')
+                        .eq('id', item.product.id)
+                        .single();
+
+                    if (!currentProduct) return;
+
+                    const updates: any = {};
+                    
+                    if (item.selected_size && currentProduct.stock) {
+                        const newStock = { ...currentProduct.stock } as Record<string, any>;
+                        const currentSizeQty = Number(newStock[item.selected_size]) || 0;
+                        newStock[item.selected_size] = Math.max(0, currentSizeQty - item.quantity);
+                        updates.stock = newStock;
+                    }
+
+                    if (currentProduct.quantity !== null && currentProduct.quantity !== undefined) {
+                        updates.quantity = Math.max(0, currentProduct.quantity - item.quantity);
+                    }
+
+                    if (Object.keys(updates).length > 0) {
+                        await supabase
+                            .from('products')
+                            .update(updates)
+                            .eq('id', item.product.id);
+                    }
+                });
+
+                await Promise.all(stockUpdates);
+            }
 
             setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus, delivered_at: deliveredAt } : o));
 
             if (newStatus === 'delivered' && deliveredAt) {
-                startDeletionTimer(orderId, deliveredAt);
-            } else if (timers[orderId]) {
-                // If status changed from delivered to something else, cancel timer
+                startDeletionTimer(orderId, deliveredAt, DELETE_AFTER_MS);
+            } else if (newStatus === 'cancelled') {
+                startDeletionTimer(orderId, new Date().toISOString(), CANCELLED_DELETE_AFTER_MS);
+            } else if (timers[orderId] && newStatus !== 'delivered' && newStatus !== 'cancelled') {
                 clearTimeout(timers[orderId]);
                 setTimers(prev => {
                     const next = { ...prev };
@@ -423,12 +489,30 @@ export default function AdminOrders() {
                                             {/* Actions */}
                                             <div className="space-y-3 pt-2 relative z-20">
                                                 <h5 className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Update Order Status</h5>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {['pending', 'paid', 'shipped', 'delivered', 'cancelled'].map((status) => (
+                                            <div className="flex flex-wrap gap-2">
+                                                {['pending', 'paid', 'shipped', 'delivered', 'cancelled'].map((status) => {
+                                                    // User rule: only pending orders can be moved to paid or cancelled
+                                                    const isPending = order.status === 'pending';
+                                                    const isCurrent = order.status === status;
+                                                    
+                                                    // Logic for enabling buttons:
+                                                    // 1. Current status is always shown but functionally does nothing new
+                                                    // 2. If pending: can move to paid or cancelled
+                                                    // 3. If paid: can move to shipped
+                                                    // 4. If shipped: can move to delivered
+                                                    let isAllowed = false;
+                                                    if (isCurrent) isAllowed = true;
+                                                    else if (isPending && (status === 'paid' || status === 'cancelled')) isAllowed = true;
+                                                    else if (order.status === 'paid' && status === 'shipped') isAllowed = true;
+                                                    else if (order.status === 'shipped' && status === 'delivered') isAllowed = true;
+
+                                                    if (!isAllowed) return null;
+
+                                                    return (
                                                         <button
                                                             key={status}
                                                             type="button"
-                                                            disabled={isUpdating === order.id}
+                                                            disabled={isUpdating === order.id || isCurrent}
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 updateOrderStatus(order.id, status);
@@ -440,8 +524,9 @@ export default function AdminOrders() {
                                                         >
                                                             {status}
                                                         </button>
-                                                    ))}
-                                                </div>
+                                                    );
+                                                })}
+                                            </div>
                                             </div>
                                         </div>
                                     </motion.div>
