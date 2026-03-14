@@ -34,7 +34,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     // Unwrap params using React.use() or await in async component
     // Since we are 'use client', we use 'use(params)'
     const { id } = use(params);
-    const { addToCart } = useCart();
+    const { addToCart, items } = useCart();
     const router = useRouter();
 
     const handleBack = useCallback(() => {
@@ -116,9 +116,18 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     }
 
     const SIZES = product.sizes && product.sizes.length > 0 ? product.sizes : [];
+    
+    // Check if item is already in cart
+    const cartItemId = selectedSize ? `${product.id}-${selectedSize}` : product.id;
+    const isInCart = items.some(item => item.id === cartItemId);
 
 
     const handleAddToCart = () => {
+        if (isInCart) {
+            router.push('/cart');
+            return;
+        }
+
         if (!selectedSize && SIZES.length > 0 && product.gender !== 'Accessories') {
             // Shake the size section
             setShakeSizeBtn(true);
@@ -419,10 +428,18 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                                             </svg>
                                             <span className="text-[10px] font-black uppercase tracking-[0.2em]">Bagged!</span>
                                         </>
+                                    ) : isInCart ? (
+                                        <>
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                <circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" />
+                                                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+                                            </svg>
+                                            <span className="text-[10px] font-black uppercase tracking-[0.2em]">View Cart</span>
+                                        </>
                                     ) : (
                                         <>
                                             <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${(!selectedSize && SIZES.length > 0 && product.gender !== 'Accessories') ? 'text-white/60' : ''}`}>
-                                                {(!selectedSize && SIZES.length > 0 && product.gender !== 'Accessories') ? 'Pick a Size First' : 'Reserve Item'}
+                                                {(!selectedSize && SIZES.length > 0 && product.gender !== 'Accessories') ? 'Pick a Size First' : 'Add to Cart'}
                                             </span>
                                         </>
                                     )}
