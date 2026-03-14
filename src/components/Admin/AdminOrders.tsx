@@ -42,6 +42,7 @@ export default function AdminOrders() {
     const [isDeletingBulk, setIsDeletingBulk] = useState(false);
     const [isDeleteAllModalOpen, setIsDeleteAllModalOpen] = useState(false);
     const [isDeleteSelectedModalOpen, setIsDeleteSelectedModalOpen] = useState(false);
+    const [updateErrorMsg, setUpdateErrorMsg] = useState<string | null>(null);
 
     const DELETE_AFTER_MS = 5 * 60 * 1000; // 5 minutes for delivered
     const CANCELLED_DELETE_AFTER_MS = 24 * 60 * 60 * 1000; // 24 hours for cancelled
@@ -166,6 +167,7 @@ export default function AdminOrders() {
     };
 
     const updateOrderStatus = async (orderId: string, newStatus: string) => {
+        setUpdateErrorMsg(null);
         console.log(`Updating order ${orderId} to status ${newStatus}`);
         setIsUpdating(orderId);
         try {
@@ -264,8 +266,9 @@ export default function AdminOrders() {
             if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
                 window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error updating status:', err);
+            setUpdateErrorMsg(err.message || 'Failed to update status. This might be a database permission (RLS) issue.');
         } finally {
             setIsUpdating(null);
         }
@@ -335,6 +338,23 @@ export default function AdminOrders() {
 
     return (
         <div className="pb-28 px-4 pt-2">
+            {/* Error Message */}
+            <AnimatePresence>
+                {updateErrorMsg && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center justify-between"
+                    >
+                        <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest">{updateErrorMsg}</p>
+                        <button onClick={() => setUpdateErrorMsg(null)} className="text-red-500 hover:text-red-400">
+                            <XCircle size={14} />
+                        </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* Header with delete controls */}
             <div className="flex items-center justify-between mb-4 relative">
                 <h3 className="font-semibold text-gray-900 dark:text-white uppercase text-[11px] tracking-wider">
