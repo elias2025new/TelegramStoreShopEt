@@ -103,7 +103,10 @@ export default function NotificationCenter({ isOpen, onClose, onUnreadChange }: 
                         animate={{ x: 0 }}
                         exit={{ x: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                        className="fixed right-0 top-0 bottom-0 z-[110] w-full max-w-[360px] bg-white dark:bg-[#0a0a0a] shadow-2xl flex flex-col pt-safe"
+                        className="fixed right-0 top-0 bottom-0 z-[110] w-full max-w-[360px] bg-white dark:bg-[#0a0a0a] shadow-2xl flex flex-col"
+                        style={{
+                            paddingTop: 'calc(var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px) + 24px)'
+                        }}
                     >
                         {/* Header */}
                         <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-white/5">
