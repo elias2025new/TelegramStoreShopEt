@@ -177,8 +177,12 @@ export default function AdminOrders() {
                 return;
             }
 
-            // Restricted transitions: Only from pending to paid/cancelled
-            if (currentOrder.status !== 'pending' && (newStatus === 'paid' || newStatus === 'cancelled')) {
+            // Restricted transitions: Only from pending/cancelled to paid/cancelled
+            const isFromCancelled = currentOrder.status === 'cancelled';
+            const isToPaid = newStatus === 'paid';
+            const isToCancelled = newStatus === 'cancelled';
+
+            if (currentOrder.status !== 'pending' && !isFromCancelled && (isToPaid || isToCancelled)) {
                 console.warn(`Restricted transition from ${currentOrder.status} to ${newStatus}`);
                 if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
                     window.Telegram.WebApp.HapticFeedback.notificationOccurred('error');
@@ -203,8 +207,9 @@ export default function AdminOrders() {
             }
 
             // 2. Handle Stock Deduction if status becomes 'paid'
+            // Now allows deduction if moving from 'pending' OR 'cancelled' to 'paid'
             if (newStatus === 'paid' && currentOrder.status !== 'paid') {
-                console.log('Deducting stock for paid order...');
+                console.log('Deducting stock for activation/payment...');
                 const items = await fetchOrderItems(orderId) || [];
                 console.log(`Found ${items.length} items to update stock for.`);
                 
@@ -254,7 +259,8 @@ export default function AdminOrders() {
                 startDeletionTimer(orderId, deliveredAt, DELETE_AFTER_MS);
             } else if (newStatus === 'cancelled') {
                 startDeletionTimer(orderId, new Date().toISOString(), CANCELLED_DELETE_AFTER_MS);
-            } else if (timers[orderId] && newStatus !== 'delivered' && newStatus !== 'cancelled') {
+            } else if (timers[orderId]) {
+                // Clear any existing deletion timers (from delivered or cancelled) if status moves to something else
                 clearTimeout(timers[orderId]);
                 setTimers(prev => {
                     const next = { ...prev };
@@ -541,6 +547,7 @@ export default function AdminOrders() {
                                                     let isAllowed = false;
                                                     if (isCurrent) isAllowed = true;
                                                     else if (isPending && (status === 'paid' || status === 'cancelled')) isAllowed = true;
+                                                    else if (order.status === 'cancelled' && status === 'paid') isAllowed = true;
                                                     else if (order.status === 'paid' && status === 'shipped') isAllowed = true;
                                                     else if (order.status === 'shipped' && status === 'delivered') isAllowed = true;
 
