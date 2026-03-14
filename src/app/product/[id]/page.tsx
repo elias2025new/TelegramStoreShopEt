@@ -322,8 +322,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                                             <span className="text-xs text-gray-400 italic">All sizes sold out</span>
                                         ) : (
                                             DISPLAY_SIZES.map((size) => {
-                                                const sizeStock = getSizeStock(stockProduct, size);
-                                                const isLow = sizeStock > 0 && sizeStock <= 3;
                                                 return (
                                                     <div key={size} className="flex flex-col items-center gap-0.5">
                                                         <button
@@ -335,9 +333,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                                                         >
                                                             {size}
                                                         </button>
-                                                        {isLow && (
-                                                            <span className="text-[8px] text-red-500 font-bold">{sizeStock} left</span>
-                                                        )}
                                                     </div>
                                                 );
                                             })
