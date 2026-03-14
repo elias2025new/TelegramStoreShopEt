@@ -132,7 +132,16 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     
     // Check if item is already in cart
     const cartItemId = selectedSize ? `${product.id}-${selectedSize}` : product.id;
-    const isInCart = items.some(item => item.id === cartItemId);
+    const existingCartItem = items.find(item => item.id === cartItemId);
+    const isInCart = !!existingCartItem;
+
+    // Real-time stock for selection
+    const availableStock = selectedSize 
+        ? getSizeStock(stockProduct, selectedSize)
+        : stockProduct.quantity;
+    
+    // Remaining available (available - quantity already in cart)
+    const remainingAvailable = availableStock - (existingCartItem?.quantity || 0);
 
 
     const handleAddToCart = () => {
@@ -338,6 +347,32 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                                             })
                                         )}
                                     </motion.div>
+                                    {/* Stock Availability Indicator */}
+                                    <AnimatePresence>
+                                        {remainingAvailable > 0 && remainingAvailable < 10 && (
+                                            <motion.div
+                                                initial={{ opacity: 0, height: 0 }}
+                                                animate={{ opacity: 1, height: 'auto' }}
+                                                exit={{ opacity: 0, height: 0 }}
+                                                className="flex items-center gap-1.5 mt-2 overflow-hidden"
+                                            >
+                                                <div className="w-1 h-1 rounded-full bg-orange-500 animate-pulse" />
+                                                <span className="text-[10px] font-bold text-orange-500 uppercase tracking-wider">
+                                                    Only {remainingAvailable} left in this {product.gender === 'Accessories' ? 'item' : 'size'}
+                                                </span>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                            )}
+
+                            {/* Stock Indicator for Accessories */}
+                            {product.gender === 'Accessories' && remainingAvailable > 0 && remainingAvailable < 10 && (
+                                <div className="flex items-center gap-1.5 mb-4">
+                                    <div className="w-1 h-1 rounded-full bg-orange-500 animate-pulse" />
+                                    <span className="text-[10px] font-bold text-orange-500 uppercase tracking-wider">
+                                        Only {remainingAvailable} left
+                                    </span>
                                 </div>
                             )}
 
@@ -414,8 +449,16 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                             </button>
                             <span className="w-6 text-center text-sm font-black tabular-nums">{quantity}</span>
                             <button
-                                onClick={() => setQuantity(quantity + 1)}
-                                className="w-10 h-10 flex items-center justify-center text-gray-300 dark:text-white/30 hover:text-black dark:hover:text-white transition-colors"
+                                onClick={() => {
+                                    if (quantity < remainingAvailable) {
+                                        setQuantity(quantity + 1);
+                                    } else {
+                                        if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+                                            window.Telegram.WebApp.HapticFeedback.notificationOccurred('warning');
+                                        }
+                                    }
+                                }}
+                                className={`w-10 h-10 flex items-center justify-center transition-colors ${quantity >= remainingAvailable ? 'text-gray-200 dark:text-white/10' : 'text-gray-300 dark:text-white/30 hover:text-black dark:hover:text-white'}`}
                             >
                                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M6 1V11M1 6H11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />

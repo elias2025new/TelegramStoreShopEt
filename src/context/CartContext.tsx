@@ -18,6 +18,7 @@ interface CartContextType {
     items: CartItem[];
     addToCart: (product: Product, quantity: number, selectedSize?: string) => void;
     removeFromCart: (cartItemId: string) => void;
+    updateQuantity: (cartItemId: string, newQuantity: number) => void;
     clearCart: () => void;
     totalItems: number;
     totalPrice: number;
@@ -56,18 +57,66 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const addToCart = (product: Product, quantity: number, selectedSize?: string) => {
         const cartItemId = selectedSize ? `${product.id}-${selectedSize}` : product.id;
 
+        // Get available stock for this specific choice
+        let availableStock = (product as any).quantity ?? 0;
+        if (selectedSize && product.stock) {
+            const stockObj = product.stock as Record<string, number>;
+            availableStock = stockObj[selectedSize] ?? 0;
+        }
+
         setItems((prev) => {
             const existing = prev.find((item) => item.id === cartItemId);
             if (existing) {
+                const newTotalQuantity = existing.quantity + quantity;
+                if (newTotalQuantity > availableStock) {
+                    showToast(`Only ${availableStock} left in stock`);
+                    if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+                        window.Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+                    }
+                    return prev;
+                }
+                showToast(`Updated quantity in cart`);
                 return prev.map((item) =>
                     item.id === cartItemId
-                        ? { ...item, quantity: item.quantity + quantity }
+                        ? { ...item, quantity: newTotalQuantity }
                         : item
                 );
             }
+
+            if (quantity > availableStock) {
+                showToast(`Only ${availableStock} left in stock`);
+                return prev;
+            }
+
+            showToast(`Added to cart${selectedSize ? ` (${selectedSize})` : ''}`);
             return [...prev, { id: cartItemId, product, quantity, selectedSize }];
         });
-        showToast(`Added to cart${selectedSize ? ` (${selectedSize})` : ''}`);
+    };
+
+    const updateQuantity = (cartItemId: string, newQuantity: number) => {
+        if (newQuantity < 1) return;
+
+        setItems((prev) => {
+            const item = prev.find(i => i.id === cartItemId);
+            if (!item) return prev;
+
+            // Check stock again
+            let availableStock = (item.product as any).quantity ?? 0;
+            if (item.selectedSize && item.product.stock) {
+                const stockObj = item.product.stock as Record<string, number>;
+                availableStock = stockObj[item.selectedSize] ?? 0;
+            }
+
+            if (newQuantity > availableStock) {
+                showToast(`Only ${availableStock} left in stock`);
+                if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+                    window.Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+                }
+                return prev;
+            }
+
+            return prev.map(i => i.id === cartItemId ? { ...i, quantity: newQuantity } : i);
+        });
     };
 
     const removeFromCart = (cartItemId: string) => {
@@ -83,7 +132,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const totalPrice = items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
 
     return (
-        <CartContext.Provider value={{ items, addToCart, removeFromCart, clearCart, totalItems, totalPrice, showToast }}>
+        <CartContext.Provider value={{ items, addToCart, removeFromCart, updateQuantity, clearCart, totalItems, totalPrice, showToast }}>
             {children}
             <Toast
                 message={toast.message}

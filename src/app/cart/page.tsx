@@ -8,9 +8,17 @@ import { useRouter } from 'next/navigation';
 import PageTransition from '@/components/PageTransition';
 import AdminConfirmModal from '@/components/Admin/AdminConfirmModal';
 import { useState } from 'react';
+import { CartItem } from '@/context/CartContext';
+
+const getAvailableStock = (item: CartItem) => {
+    if (item.selectedSize && item.product.stock) {
+        return (item.product.stock as Record<string, number>)[item.selectedSize] ?? 0;
+    }
+    return (item.product as any).quantity ?? 0;
+};
 
 export default function CartPage() {
-    const { items, removeFromCart, totalPrice, clearCart } = useCart();
+    const { items, removeFromCart, updateQuantity, totalPrice, clearCart } = useCart();
     const router = useRouter();
 
     const [isConfirmingClear, setIsConfirmingClear] = useState(false);
@@ -136,35 +144,55 @@ export default function CartPage() {
                                     <div className="flex items-center justify-center h-full text-xs text-gray-400">No Img</div>
                                 )}
                             </div>
-                            <div className="flex-1 flex flex-col justify-between">
-                                <div>
-                                    <h3 className="font-medium text-gray-900 dark:text-white line-clamp-1">{item.product.name}</h3>
-                                    <div className="flex items-center gap-2 mt-0.5">
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">{item.quantity} x {new Intl.NumberFormat('en-ET', { style: 'currency', currency: 'ETB', maximumFractionDigits: 0 }).format(item.product.price)}</p>
-                                        {item.selectedSize && (
-                                            <>
-                                                <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700"></span>
-                                                <span className="text-[10px] font-bold text-[#cba153] uppercase tracking-wider bg-[#cba153]/10 px-1.5 py-0.5 rounded-md">Size: {item.selectedSize}</span>
-                                            </>
-                                        )}
+                                <div className="flex-1 flex flex-col justify-between">
+                                    <div className="flex justify-between items-start gap-2">
+                                        <div>
+                                            <h3 className="font-medium text-gray-900 dark:text-white line-clamp-1">{item.product.name}</h3>
+                                            {item.selectedSize && (
+                                                <p className="text-[10px] font-bold text-[#cba153] uppercase tracking-wider bg-[#cba153]/10 px-1.5 py-0.5 rounded-md inline-block mt-1">Size: {item.selectedSize}</p>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between mt-3">
+                                        <div className="flex items-center bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-lg p-0.5">
+                                            <button
+                                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                                className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                                            >
+                                                <svg width="10" height="2" viewBox="0 0 10 2" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M9 1L1 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                                                </svg>
+                                            </button>
+                                            <span className="w-6 text-center text-xs font-bold tabular-nums">{item.quantity}</span>
+                                            <button
+                                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                                disabled={item.quantity >= getAvailableStock(item)}
+                                                className={`w-7 h-7 flex items-center justify-center transition-colors ${item.quantity >= getAvailableStock(item) ? 'text-gray-200 dark:text-white/10 cursor-not-allowed' : 'text-[#cba153] hover:text-[#b8860b]'}`}
+                                            >
+                                                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M5 1V9M1 5H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                                                </svg>
+                                            </button>
+                                        </div>
+
+                                        <div className="flex items-center gap-3">
+                                            <span className="font-bold text-gray-900 dark:text-white text-sm">
+                                                {new Intl.NumberFormat('en-ET', { style: 'currency', currency: 'ETB', maximumFractionDigits: 0 }).format(item.product.price * item.quantity)}
+                                            </span>
+                                            <button
+                                                onClick={() => handleDeleteItem(item.id)}
+                                                className="text-red-500 hover:text-red-600 p-1 active:scale-90 transition-transform"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                    <path d="M3 6h18" />
+                                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                                </svg>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="flex items-center justify-between mt-2">
-                                    <span className="font-bold text-gray-900 dark:text-white">
-                                        {new Intl.NumberFormat('en-ET', { style: 'currency', currency: 'ETB', maximumFractionDigits: 0 }).format(item.product.price * item.quantity)}
-                                    </span>
-                                    <button
-                                        onClick={() => handleDeleteItem(item.id)}
-                                        className="text-red-500 hover:text-red-600 p-1 active:scale-90 transition-transform"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <path d="M3 6h18" />
-                                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
                         </div>
                     ))}
                 </div>
