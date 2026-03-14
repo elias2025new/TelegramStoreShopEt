@@ -663,7 +663,7 @@ function ProductManageItem({
                                                 {localSizes.length > 0 ? "Total Stock (View Only)" : "Available Quantity"}
                                             </span>
                                             <span className={`text-xs font-black ${localQuantity === 0 ? 'text-red-500 animate-pulse' : 'text-[#cba153]'} tabular-nums`}>
-                                                {localSizes.length > 0 
+                                                {localSizes.length > 0
                                                     ? Object.values(currentCleanStock).reduce((a, b) => a + b, 0)
                                                     : localQuantity
                                                 }
@@ -1434,6 +1434,9 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
     const [announceError, setAnnounceError] = useState<string | null>(null);
     const [isPushChecked, setIsPushChecked] = useState(false);
     const [broadcastProgress, setBroadcastProgress] = useState<{ sent: number; total: number } | null>(null);
+    const [manageAnnounceModalOpen, setManageAnnounceModalOpen] = useState(false);
+    const [manageAnnounceData, setManageAnnounceData] = useState<any[]>([]);
+    const [isManageLoading, setIsManageLoading] = useState(false);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const editFileInputRef = useRef<HTMLInputElement>(null);
@@ -1835,6 +1838,37 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
         }
     };
 
+    const fetchManageAnnouncements = async () => {
+        setIsManageLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from('announcements')
+                .select('*')
+                .order('created_at', { ascending: false });
+            if (error) throw error;
+            setManageAnnounceData(data || []);
+        } catch (err: any) {
+            console.error('Error fetching announcements:', err);
+        } finally {
+            setIsManageLoading(false);
+        }
+    };
+
+    const handleDeleteAnnouncement = async (id: string) => {
+        if (!confirm('Are you sure you want to delete this announcement? This will remove it from all customer feeds.')) return;
+        
+        try {
+            const { error } = await supabase.from('announcements').delete().eq('id', id);
+            if (error) throw error;
+            setManageAnnounceData(prev => prev.filter(a => a.id !== id));
+            if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+                window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+            }
+        } catch (err: any) {
+            alert('Delete failed: ' + err.message);
+        }
+    };
+
     const handleSaveAnnouncement = async () => {
         setAnnounceError(null);
         if (!announceForm.title.trim() || !announceForm.content.trim()) {
@@ -2083,6 +2117,18 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                 </div>
 
                 <div className="flex items-center gap-2 flex-shrink-0">
+                    <button
+                        onClick={() => {
+                            setManageAnnounceModalOpen(true);
+                            fetchManageAnnouncements();
+                        }}
+                        className="p-2 rounded-xl bg-gray-100 dark:bg-[#1c1c1e] text-gray-400 hover:text-[#cba153] transition-all border border-transparent hover:border-[#cba153]/30"
+                        title="Manage Announcements"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /><path d="M12 11h4" /><path d="M12 16h4" /><path d="M8 11h.01" /><path d="M8 16h.01" /><circle cx="12" cy="4" r="2" />
+                        </svg>
+                    </button>
                     <button
                         onClick={() => setAnnounceModalOpen(true)}
                         className="p-2 rounded-xl bg-gray-100 dark:bg-[#1c1c1e] text-[#cba153] hover:bg-[#cba153]/10 transition-all border border-transparent hover:border-[#cba153]/30"
@@ -2545,6 +2591,73 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                             >
                                 {isUploading ? 'BROADCASTING...' : 'SEND ANNOUNCEMENT'}
                             </button>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Manage Announcements Modal */}
+            <AnimatePresence>
+                {manageAnnounceModalOpen && (
+                    <div
+                        className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+                        onClick={() => setManageAnnounceModalOpen(false)}
+                    >
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="w-full max-w-lg bg-white dark:bg-[#1c1c1e] rounded-2xl p-6 border border-gray-200 dark:border-[#3a3a3a] flex flex-col gap-4 shadow-2xl max-h-[80vh]"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3">
+                                <h3 className="text-lg font-bold text-[#cba153] flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /><path d="M12 11h4" /><path d="M12 16h4" /><path d="M8 11h.01" /><path d="M8 16h.01" /><circle cx="12" cy="4" r="2" />
+                                    </svg>
+                                    Manage Broadcasts
+                                </h3>
+                                <button onClick={() => setManageAnnounceModalOpen(false)} className="text-gray-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M18 6 6 18" /><path d="m6 6 12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <div className="overflow-y-auto flex-1 space-y-3 pr-1 min-h-0">
+                                {isManageLoading ? (
+                                    <div className="flex justify-center py-10">
+                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#cba153]"></div>
+                                    </div>
+                                ) : manageAnnounceData.length === 0 ? (
+                                    <div className="text-center py-10 text-gray-500 text-sm font-bold uppercase tracking-widest">No broadcasts found.</div>
+                                ) : (
+                                    manageAnnounceData.map((a) => (
+                                        <div key={a.id} className="p-4 rounded-xl bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 flex items-start justify-between gap-4">
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <span className={`text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md border ${a.type === 'vlog' ? 'text-purple-500 border-purple-500/20 bg-purple-500/5' : a.type === 'news' ? 'text-blue-500 border-blue-500/20 bg-blue-500/5' : 'text-amber-500 border-amber-500/20 bg-amber-500/5'}`}>
+                                                        {a.type}
+                                                    </span>
+                                                    <span className="text-[9px] font-bold text-gray-400">
+                                                        {new Date(a.created_at).toLocaleDateString()}
+                                                    </span>
+                                                </div>
+                                                <h4 className="text-sm font-black text-gray-900 dark:text-white truncate">{a.title}</h4>
+                                                <p className="text-[11px] text-gray-500 line-clamp-2 mt-0.5 font-bold">{a.content}</p>
+                                            </div>
+                                            <button
+                                                onClick={() => handleDeleteAnnouncement(a.id)}
+                                                className="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 transition-all hover:text-white shrink-0 active:scale-90"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                    <path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
                         </motion.div>
                     </div>
                 )}
