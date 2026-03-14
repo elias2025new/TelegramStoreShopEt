@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { CATEGORY_SUBCATEGORIES as DEFAULT_SUBCATEGORIES } from '@/constants/categories';
 import AdminConfirmModal from './AdminConfirmModal';
 import AdminOrders from './AdminOrders';
+import { broadcastTelegramMessage } from '@/utils/telegram';
 
 
 const DRAFT_KEY = 'admin_product_draft';
@@ -893,23 +894,17 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish, categor
         updateItem(index, 'additionalImages', updated);
     };
 
-    const handlePush = async () => {
-        if (!localTitle.trim()) {
-            setLocalError('Title required');
-            setTimeout(() => setLocalError(null), 3000);
-            return;
-        }
-        if (!localPrice || parseFloat(localPrice) <= 0) {
-            setLocalError('Price required');
-            setTimeout(() => setLocalError(null), 3000);
-            return;
-        }
-        if (!localGender) {
-            setLocalError('Select Category');
-            setTimeout(() => setLocalError(null), 3000);
-            return;
-        }
+    const isAccessories = localGender === 'Accessories';
+    const hasNoSizes = localSizes.length === 0;
+    const canPublish = localTitle.trim() && localPrice && parseFloat(localPrice) > 0 && localGender && (isAccessories || !hasNoSizes);
 
+    const handlePush = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!canPublish) {
+            setLocalError('Missing: Title/Price/Gender/Sizes');
+            setTimeout(() => setLocalError(''), 3000);
+            return;
+        }
         setIsPushing(true);
         try {
             await onPublish(index);
@@ -1059,7 +1054,7 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish, categor
                         </button>
                         <button
                             onClick={handlePush}
-                            disabled={isPushing}
+                            disabled={isPushing || !canPublish}
                             className="relative px-3 py-1.5 bg-[#cba153] text-black text-[11px] font-bold rounded-lg hover:bg-[#b8860b] active:scale-95 transition-all shadow-sm"
                         >
                             {isPushing ? '...' : 'Push'}
@@ -1437,6 +1432,8 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
         media_url: '',
     });
     const [announceError, setAnnounceError] = useState<string | null>(null);
+    const [isPushChecked, setIsPushChecked] = useState(false);
+    const [broadcastProgress, setBroadcastProgress] = useState<{ sent: number; total: number } | null>(null);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const editFileInputRef = useRef<HTMLInputElement>(null);
@@ -1745,6 +1742,15 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
         const item = images[index];
         if (!item) return;
 
+        const isAccessories = item.gender === 'Accessories';
+        const hasNoSizes = !item.sizes || item.sizes.length === 0;
+
+        if (!item.price || parseFloat(item.price) <= 0 || !item.title.trim() || !item.gender || (!isAccessories && hasNoSizes)) {
+            setUploadStatus('ERROR: Title, price, category, AND sizes are required (except Accessories).');
+            setTimeout(() => setUploadStatus(''), 4000);
+            return;
+        }
+
         setIsUploading(true);
         try {
             const fileExt = item.fileName.split('.').pop();
@@ -1837,12 +1843,13 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
         }
 
         setIsUploading(true);
-        setUploadStatus('Broadcasting announcement...');
+        setUploadStatus('Saving announcement...');
 
         try {
             // Check if storeId exists
             if (!storeId) throw new Error('Store ID not found. Are you an admin?');
 
+            // 1. Save to database
             const { error } = await supabase.from('announcements').insert([{
                 title: announceForm.title.trim(),
                 content: announceForm.content.trim(),
@@ -1853,9 +1860,36 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
 
             if (error) throw error;
 
+            // 2. Optional: Broadcast to Telegram
+            if (isPushChecked) {
+                setUploadStatus('Fetching customers for broadcast...');
+                const { data: visits, error: fetchError } = await supabase
+                    .from('store_visits')
+                    .select('telegram_user_id');
+                
+                if (fetchError) throw fetchError;
+
+                const uniqueIds = Array.from(new Set(visits?.map(v => v.telegram_user_id).filter(Boolean)));
+                
+                if (uniqueIds.length > 0) {
+                    setUploadStatus(`Broadcasting to ${uniqueIds.length} customers...`);
+                    const messageBody = `<b>${announceForm.title.toUpperCase()}</b>\n\n${announceForm.content}\n\n${announceForm.media_url ? `<a href="${announceForm.media_url}">View Link</a>` : ''}`.trim();
+                    
+                    await broadcastTelegramMessage(
+                        uniqueIds, 
+                        messageBody, 
+                        announceForm.media_url?.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? announceForm.media_url : null,
+                        (sent, total) => {
+                            setUploadStatus(`Broadcasting: ${sent}/${total} sent...`);
+                        }
+                    );
+                }
+            }
+
             setAnnounceModalOpen(false);
+            setIsPushChecked(false);
             setAnnounceForm({ title: '', content: '', type: 'announcement', media_url: '' });
-            setUploadStatus('SUCCESS: ANNOUNCEMENT BROADCAST SUCCESSFUL!');
+            setUploadStatus('SUCCESS: BROADCAST SUCCESSFUL!');
             if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
                 window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
             }
@@ -1871,9 +1905,15 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
 
     const handlePublish = async () => {
         if (isUploading || images.length === 0) return;
-        const invalid = images.find((img) => !img.price || parseFloat(img.price) <= 0 || !img.title.trim() || !img.gender);
+        
+        const invalid = images.find((img) => {
+            const isAccessories = img.gender === 'Accessories';
+            const hasNoSizes = !img.sizes || img.sizes.length === 0;
+            return !img.price || parseFloat(img.price) <= 0 || !img.title.trim() || !img.gender || (!isAccessories && hasNoSizes);
+        });
+
         if (invalid) {
-            setUploadStatus('ERROR: Title, price, and primary category are required.');
+            setUploadStatus('ERROR: Title, price, category, AND sizes are required (except Accessories).');
             setTimeout(() => setUploadStatus(''), 4000);
             return;
         }
@@ -2472,6 +2512,23 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                                         className="w-full bg-gray-50 dark:bg-[#2a2a2a] border border-gray-100 dark:border-gray-800 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#cba153] text-gray-800 dark:text-white"
                                         placeholder="https://..."
                                     />
+                                </div>
+
+                                <div 
+                                    className="flex items-center gap-3 p-3 bg-blue-500/5 border border-blue-500/10 rounded-xl cursor-pointer"
+                                    onClick={() => setIsPushChecked(!isPushChecked)}
+                                >
+                                    <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${isPushChecked ? 'bg-blue-500 border-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.3)]' : 'border-gray-300 dark:border-gray-600'}`}>
+                                        {isPushChecked && (
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M20 6 9 17l-5-5" />
+                                            </svg>
+                                        )}
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs font-black text-blue-500 uppercase tracking-widest">Push to all customers</p>
+                                        <p className="text-[10px] text-gray-500 font-bold">Sends a direct Telegram message to every customer.</p>
+                                    </div>
                                 </div>
                             </div>
 

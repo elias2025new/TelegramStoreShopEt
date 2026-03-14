@@ -17,6 +17,7 @@ import Toast from '@/components/Toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import PageTransition from '@/components/PageTransition';
 import CartIcon from '@/components/CartIcon';
+import NotificationCenter from '@/components/NotificationCenter';
 import { CATEGORIES, CATEGORY_SUBCATEGORIES } from '@/constants/categories';
 
 function HomeContent() {
@@ -24,6 +25,8 @@ function HomeContent() {
   const { isOwner, storeId, adminOpen, setAdminOpen } = useAdmin();
   const { theme } = useTheme();
   const { locationName, locationEnabled } = useLocation();
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const router = useRouter();
   const searchParams = useSearchParams();
   const selectedCategory = searchParams.get('category') || 'All';
@@ -244,7 +247,24 @@ function HomeContent() {
               )}
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <button
+                onClick={() => setIsNotificationsOpen(true)}
+                className="p-2 rounded-xl bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 transition-all active:scale-90"
+              >
+                <img
+                  src={`https://img.icons8.com/ios-filled/50/${theme === 'dark' ? 'cba153' : '333333'}/alarm.png`}
+                  alt="notifications"
+                  className="w-5 h-5 mx-auto"
+                />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-black text-white shadow-sm ring-2 ring-white dark:ring-black">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+            </div>
             <CartIcon />
           </div>
         </header>
@@ -480,7 +500,12 @@ function HomeContent() {
         />
       </PageTransition>
 
-      {/* Admin Overlay */}
+      <NotificationCenter
+        isOpen={isNotificationsOpen}
+        onClose={() => setIsNotificationsOpen(false)}
+        onUnreadChange={setUnreadCount}
+      />
+
       <AdminOverlay
         isOpen={adminOpen}
         onClose={() => {

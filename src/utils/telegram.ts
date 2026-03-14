@@ -106,3 +106,59 @@ export function getDirectMessageLink(orderData: OrderData, items: CartItem[], to
     const plainText = text.replace(/<[^>]*>/g, '');
     return `https://t.me/${OWNER_USERNAME}?text=${encodeURIComponent(plainText)}`;
 }
+
+export async function broadcastTelegramMessage(
+    chatIds: string[],
+    message: string,
+    imageUrl: string | null = null,
+    onProgress?: (sent: number, total: number) => void
+) {
+    if (!BOT_TOKEN) {
+        console.error('Telegram Bot Token is missing');
+        return;
+    }
+
+    let sentCount = 0;
+    const total = chatIds.length;
+
+    for (const chatId of chatIds) {
+        try {
+            const body: any = {
+                chat_id: chatId,
+                parse_mode: 'HTML',
+            };
+
+            let endpoint = 'sendMessage';
+            if (imageUrl) {
+                endpoint = 'sendPhoto';
+                body.photo = imageUrl;
+                body.caption = message;
+            } else {
+                body.text = message;
+            }
+
+            const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/${endpoint}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+
+            const result = await response.json();
+            if (result.ok) {
+                sentCount++;
+                if (onProgress) onProgress(sentCount, total);
+            } else {
+                console.warn(`Failed to send broadcast to ${chatId}:`, result.description);
+                // If the user blocked the bot, we just continue
+            }
+
+            // Simple rate limiting: 50ms delay between messages
+            // Telegram allows 30 msg/sec, so 50ms = 20 msg/sec is safe
+            await new Promise(resolve => setTimeout(resolve, 50));
+        } catch (error) {
+            console.error(`Error broadcasting to ${chatId}:`, error);
+        }
+    }
+
+    return sentCount;
+}
