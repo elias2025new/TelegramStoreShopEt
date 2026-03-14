@@ -53,6 +53,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     const [shakeSizeBtn, setShakeSizeBtn] = useState(false);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [isImageLoading, setIsImageLoading] = useState(true);
+    const [showStockLow, setShowStockLow] = useState(false);
 
     // Update selectedImage when product data arrives
     useEffect(() => {
@@ -61,6 +62,11 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             setIsImageLoading(true);
         }
     }, [product]);
+
+    // Reset stock low warning when size changes
+    useEffect(() => {
+        setShowStockLow(false);
+    }, [selectedSize]);
 
     // Telegram Back Button Integration
     useEffect(() => {
@@ -163,6 +169,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
         addToCart(product, quantity, selectedSize ?? undefined);
         setIsAdded(true);
+        setShowStockLow(true);
         setTimeout(() => setIsAdded(false), 2000);
 
         if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
@@ -349,7 +356,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                                     </motion.div>
                                     {/* Stock Availability Indicator */}
                                     <AnimatePresence>
-                                        {remainingAvailable > 0 && remainingAvailable < 10 && (
+                                        {showStockLow && remainingAvailable > 0 && remainingAvailable < 10 && (
                                             <motion.div
                                                 initial={{ opacity: 0, height: 0 }}
                                                 animate={{ opacity: 1, height: 'auto' }}
@@ -367,7 +374,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                             )}
 
                             {/* Stock Indicator for Accessories */}
-                            {product.gender === 'Accessories' && remainingAvailable > 0 && remainingAvailable < 10 && (
+                            {showStockLow && product.gender === 'Accessories' && remainingAvailable > 0 && remainingAvailable < 10 && (
                                 <div className="flex items-center gap-1.5 mb-4">
                                     <div className="w-1 h-1 rounded-full bg-orange-500 animate-pulse" />
                                     <span className="text-[10px] font-bold text-orange-500 uppercase tracking-wider">
