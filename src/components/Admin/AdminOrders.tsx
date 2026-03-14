@@ -147,7 +147,7 @@ export default function AdminOrders() {
     }, []);
 
     const fetchOrderItems = async (orderId: string) => {
-        if (orderDetails[orderId]) return;
+        if (orderDetails[orderId]) return orderDetails[orderId];
 
         try {
             const { data, error } = await supabase
@@ -156,22 +156,28 @@ export default function AdminOrders() {
                 .eq('order_id', orderId);
 
             if (error) throw error;
-            setOrderDetails(prev => ({ ...prev, [orderId]: data as OrderItem[] }));
-            return data as OrderItem[];
+            const items = data as OrderItem[];
+            setOrderDetails(prev => ({ ...prev, [orderId]: items }));
+            return items;
         } catch (err) {
             console.error('Error fetching order items:', err);
+            return [];
         }
     };
 
     const updateOrderStatus = async (orderId: string, newStatus: string) => {
+        console.log(`Updating order ${orderId} to status ${newStatus}`);
         setIsUpdating(orderId);
         try {
             const currentOrder = orders.find(o => o.id === orderId);
-            if (!currentOrder) return;
+            if (!currentOrder) {
+                console.error('Order not found in state:', orderId);
+                return;
+            }
 
             // Restricted transitions: Only from pending to paid/cancelled
             if (currentOrder.status !== 'pending' && (newStatus === 'paid' || newStatus === 'cancelled')) {
-                // Technically the UI should prevent this, but we double check here
+                console.warn(`Restricted transition from ${currentOrder.status} to ${newStatus}`);
                 if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
                     window.Telegram.WebApp.HapticFeedback.notificationOccurred('error');
                 }
@@ -189,20 +195,28 @@ export default function AdminOrders() {
                 })
                 .eq('id', orderId);
 
-            if (updateError) throw updateError;
+            if (updateError) {
+                console.error('Failed to update status in DB:', updateError);
+                throw updateError;
+            }
 
             // 2. Handle Stock Deduction if status becomes 'paid'
             if (newStatus === 'paid' && currentOrder.status !== 'paid') {
+                console.log('Deducting stock for paid order...');
                 const items = await fetchOrderItems(orderId) || [];
+                console.log(`Found ${items.length} items to update stock for.`);
                 
                 const stockUpdates = items.map(async (item) => {
-                    const { data: currentProduct } = await supabase
+                    const { data: currentProduct, error: prodErr } = await supabase
                         .from('products')
                         .select('stock, quantity')
                         .eq('id', item.product.id)
                         .single();
 
-                    if (!currentProduct) return;
+                    if (prodErr || !currentProduct) {
+                        console.error(`Could not fetch product ${item.product.id}:`, prodErr);
+                        return;
+                    }
 
                     const updates: any = {};
                     
@@ -218,17 +232,21 @@ export default function AdminOrders() {
                     }
 
                     if (Object.keys(updates).length > 0) {
-                        await supabase
+                        const { error: stockErr } = await supabase
                             .from('products')
                             .update(updates)
                             .eq('id', item.product.id);
+                        
+                        if (stockErr) console.error(`Failed to update stock for product ${item.product.id}:`, stockErr);
                     }
                 });
 
                 await Promise.all(stockUpdates);
+                console.log('Stock deduction completed.');
             }
 
             setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus, delivered_at: deliveredAt } : o));
+            console.log('Order state updated successfully.');
 
             if (newStatus === 'delivered' && deliveredAt) {
                 startDeletionTimer(orderId, deliveredAt, DELETE_AFTER_MS);
