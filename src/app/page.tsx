@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, Suspense } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { supabase } from '@/utils/supabase/client';
@@ -54,16 +54,12 @@ function HomeContent() {
     return () => window.removeEventListener('scroll', onScroll);
   }, [HOME_SCROLL_KEY]);
 
-  // Restore scroll position on mount (after content settles)
-  useEffect(() => {
+  // Restore scroll BEFORE first paint (products are in react-query cache = page is full height)
+  useLayoutEffect(() => {
+    if (typeof window === 'undefined') return;
     const savedY = sessionStorage.getItem(HOME_SCROLL_KEY);
-    if (savedY !== null && parseInt(savedY, 10) > 50) {
-      const y = parseInt(savedY, 10);
-      // Wait 600ms for product grid (from cache) to fully render before restoring
-      const timer = setTimeout(() => {
-        window.scrollTo({ top: y, behavior: 'instant' as ScrollBehavior });
-      }, 600);
-      return () => clearTimeout(timer);
+    if (savedY && parseInt(savedY, 10) > 50) {
+      window.scrollTo({ top: parseInt(savedY, 10), behavior: 'instant' as ScrollBehavior });
     }
   }, [HOME_SCROLL_KEY]);
 
