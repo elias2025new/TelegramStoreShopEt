@@ -13,8 +13,11 @@ export default function PageTransition({ children }: PageTransitionProps) {
     const pathname = usePathname();
 
     useEffect(() => {
-        // Reset scroll position to top on pathname changes
+        // Reset scroll position to top on pathname changes,
+        // but skip if we're returning to Home with a saved scroll position
         if (typeof window !== 'undefined') {
+            const hasSavedHomeScroll = sessionStorage.getItem('home_scroll_y') !== null;
+            if (pathname === '/' && hasSavedHomeScroll) return;
             window.scrollTo({ top: 0, behavior: 'instant' });
         }
     }, [pathname]);

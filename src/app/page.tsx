@@ -48,9 +48,21 @@ function HomeContent() {
     const savedY = sessionStorage.getItem(HOME_SCROLL_KEY);
     if (savedY !== null) {
       const y = parseInt(savedY, 10);
-      // Use requestAnimationFrame to wait for the DOM to be painted
-      const restore = () => window.scrollTo({ top: y, behavior: 'instant' as ScrollBehavior });
-      requestAnimationFrame(() => requestAnimationFrame(restore));
+      let attempts = 0;
+      const maxAttempts = 20; // 20 × 100ms = 2 seconds max
+
+      const tryRestore = () => {
+        const pageHeight = document.documentElement.scrollHeight;
+        // Only scroll once page is tall enough to reach the target
+        if (pageHeight >= y + window.innerHeight || attempts >= maxAttempts) {
+          window.scrollTo({ top: y, behavior: 'instant' as ScrollBehavior });
+        } else {
+          attempts++;
+          setTimeout(tryRestore, 100);
+        }
+      };
+      // Small initial delay for the DOM to paint
+      requestAnimationFrame(() => tryRestore());
     }
     // Save scroll on unload / navigation away
     window.addEventListener('beforeunload', saveScrollPosition);
