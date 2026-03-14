@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, Suspense, useCallback } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { supabase } from '@/utils/supabase/client';
@@ -38,39 +38,34 @@ function HomeContent() {
     searchInputRef.current?.blur();
   };
 
-  // Save scroll position before leaving
-  const saveScrollPosition = useCallback(() => {
-    sessionStorage.setItem(HOME_SCROLL_KEY, String(window.scrollY));
+  // Save scroll position on every scroll (throttled)
+  useEffect(() => {
+    let ticking = false;
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(() => {
+          sessionStorage.setItem(HOME_SCROLL_KEY, String(window.scrollY));
+          ticking = false;
+        });
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, [HOME_SCROLL_KEY]);
 
-  // Restore scroll position on mount
+  // Restore scroll position on mount (after content settles)
   useEffect(() => {
     const savedY = sessionStorage.getItem(HOME_SCROLL_KEY);
-    if (savedY !== null) {
+    if (savedY !== null && parseInt(savedY, 10) > 50) {
       const y = parseInt(savedY, 10);
-      let attempts = 0;
-      const maxAttempts = 20; // 20 × 100ms = 2 seconds max
-
-      const tryRestore = () => {
-        const pageHeight = document.documentElement.scrollHeight;
-        // Only scroll once page is tall enough to reach the target
-        if (pageHeight >= y + window.innerHeight || attempts >= maxAttempts) {
-          window.scrollTo({ top: y, behavior: 'instant' as ScrollBehavior });
-        } else {
-          attempts++;
-          setTimeout(tryRestore, 100);
-        }
-      };
-      // Small initial delay for the DOM to paint
-      requestAnimationFrame(() => tryRestore());
+      // Wait 600ms for product grid (from cache) to fully render before restoring
+      const timer = setTimeout(() => {
+        window.scrollTo({ top: y, behavior: 'instant' as ScrollBehavior });
+      }, 600);
+      return () => clearTimeout(timer);
     }
-    // Save scroll on unload / navigation away
-    window.addEventListener('beforeunload', saveScrollPosition);
-    return () => {
-      saveScrollPosition();
-      window.removeEventListener('beforeunload', saveScrollPosition);
-    };
-  }, [saveScrollPosition]);
+  }, [HOME_SCROLL_KEY]);
 
   const isKeyboardOpen = useRef(false);
 
