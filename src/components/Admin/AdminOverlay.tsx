@@ -1955,9 +1955,18 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
         setIsUploading(true);
         setUploadStatus('Pushing all products...');
 
+        let successfulCount = 0;
+        let finalError = null;
+
         try {
-            const results = await Promise.all(
-                images.map(async (item) => {
+            // Process images one by one instead of Promise.all to handle partial successes correctly
+            const remainingImages = [...images];
+            
+            for (let i = 0; i < images.length; i++) {
+                const item = images[i];
+                try {
+                    setUploadStatus(`Pushing ${i + 1}/${images.length}...`);
+                    
                     const fileExt = item.fileName.split('.').pop();
                     const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
                     const filePath = `products/${fileName}`;
@@ -1974,7 +1983,21 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
 
                     const { data: urlData } = supabase.storage.from('products').getPublicUrl(filePath);
 
-                    return {
+                    const extraUrls: string[] = [];
+                    if (item.additionalImages && item.additionalImages.length > 0) {
+                        for (let j = 0; j < item.additionalImages.length; j++) {
+                            const b64 = item.additionalImages[j];
+                            const file = base64ToFile(b64, `extra-${j}.jpg`);
+                            const extraPath = `products/${Date.now()}-extra-${j}-${Math.random().toString(36).slice(2)}.jpg`;
+                            const { error: err } = await supabase.storage.from('products').upload(extraPath, file);
+                            if (!err) {
+                                const { data } = supabase.storage.from('products').getPublicUrl(extraPath);
+                                extraUrls.push(data.publicUrl);
+                            }
+                        }
+                    }
+
+                    const productData = {
                         name: item.title.trim(),
                         price: parseFloat(item.price),
                         category: item.category?.trim() || null,
@@ -1993,40 +2016,45 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                             return Object.keys(cleanedStock).length > 0 ? cleanedStock : null;
                         })(),
                         image_url: urlData.publicUrl,
-                        additional_images: await (async () => {
-                            const extraUrls: string[] = [];
-                            if (item.additionalImages && item.additionalImages.length > 0) {
-                                for (let i = 0; i < item.additionalImages.length; i++) {
-                                    const b64 = item.additionalImages[i];
-                                    const file = base64ToFile(b64, `extra-${i}.jpg`);
-                                    const extraPath = `products/${Date.now()}-extra-${i}-${Math.random().toString(36).slice(2)}.jpg`;
-                                    const { error: err } = await supabase.storage.from('products').upload(extraPath, file);
-                                    if (!err) {
-                                        const { data } = supabase.storage.from('products').getPublicUrl(extraPath);
-                                        extraUrls.push(data.publicUrl);
-                                    }
-                                }
-                            }
-                            return extraUrls;
-                        })(),
+                        additional_images: extraUrls,
+                        quantity: item.quantity ?? 1,
                     };
-                })
-            );
 
-            const { error: insertError } = await supabase.from('products').insert(results);
-            if (insertError) throw insertError;
+                    const { error: insertError } = await supabase.from('products').insert([productData]);
+                    if (insertError) throw insertError;
+                    
+                    // Mark as successful by removing from remaining
+                    remainingImages.shift();
+                    successfulCount++;
+                    
+                    // Update state as we go in case of crash
+                    setImages([...remainingImages]);
+                    
+                } catch (err: any) {
+                    finalError = err;
+                    break; // Stop on first error
+                }
+            }
 
             // Refresh all related queries
             invalidateAppQueries();
 
-            // ✅ Clear draft on success
-            localStorage.removeItem(DRAFT_KEY);
-            hasRestoredRef.current = false; // allow fresh restore next time
-            setImages([]);
-            setUploadStatus(`✅ ${results.length} product(s) published!`);
-            if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-                window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+            if (remainingImages.length === 0) {
+                // All succeeded
+                localStorage.removeItem(DRAFT_KEY);
+                hasRestoredRef.current = false; // allow fresh restore next time
+                setImages([]);
+                setUploadStatus(`✅ ${successfulCount} product(s) published!`);
+                if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+                    window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+                }
+                setTimeout(() => setUploadStatus(''), 3000);
+            } else {
+                // Partial success
+                setImages(remainingImages);
+                setUploadStatus(`⚠️ Partially succeeded: ${successfulCount} published. Error: ${finalError?.message || 'Unknown error'}`);
             }
+
         } finally {
             setIsUploading(false);
         }

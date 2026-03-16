@@ -2,6 +2,8 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Database } from '@/types/supabase';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/utils/supabase/client';
 
 type Product = Database['public']['Tables']['products']['Row'];
 
@@ -25,14 +27,40 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
         }
     });
 
+    // Fetch all active products to sync favorites
+    const { data: products } = useQuery({
+        queryKey: ['products'],
+        queryFn: async () => {
+            const { data, error } = await supabase
+                .from('products')
+                .select('*')
+                .order('created_at', { ascending: false });
+            if (error) throw new Error(error.message);
+            return data as Product[];
+        },
+        staleTime: 5 * 60 * 1000,
+        gcTime: 10 * 60 * 1000,
+    });
+
+    // Clean up favorites if a product was deleted
+    useEffect(() => {
+        if (products) {
+            setFavorites((prev) => {
+                const validFavorites = prev.filter((fav) => 
+                    products.some((p) => p.id === fav.id)
+                );
+                // Only update state if there's a difference to avoid unnecessary renders
+                if (validFavorites.length !== prev.length) {
+                    return validFavorites;
+                }
+                return prev;
+            });
+        }
+    }, [products]);
+
     // Sync state with localStorage whenever favorites change
     useEffect(() => {
-        if (favorites.length > 0) {
-            localStorage.setItem('favorites', JSON.stringify(favorites));
-        } else {
-            // If it's empty, we might actually want to clear it
-            // but we need to distinguish between initial empty and manual clear
-            // For simplicity, we just save whenever it changes.
+        if (typeof window !== 'undefined') {
             localStorage.setItem('favorites', JSON.stringify(favorites));
         }
     }, [favorites]);
