@@ -383,51 +383,49 @@ function ProductManageItem({
             {/* Description Modal */}
             {descModalOpen && (
                 <div
-                    className="fixed inset-0 z-[200] flex items-end justify-center bg-black/70 backdrop-blur-sm p-4"
+                    className="fixed top-0 left-0 right-0 z-[200] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm"
+                    style={{ height: 'var(--tg-viewport-height, 100vh)' }}
                     onClick={() => setDescModalOpen(false)}
                 >
                     <div
-                        className="w-full max-w-lg bg-white dark:bg-[#1c1c1e] rounded-2xl border-t border-gray-200 dark:border-[#3a3a3a] flex flex-col max-h-[90vh]"
+                        className="w-full max-w-lg bg-white dark:bg-[#1c1c1e] rounded-t-2xl sm:rounded-2xl flex flex-col"
+                        style={{ maxHeight: '100%' }}
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Modal Header */}
-                        <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-[#2a2a2a]">
+                        <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-[#2a2a2a] shrink-0">
                             <span className="text-sm font-semibold text-gray-900 dark:text-white">Edit Description</span>
-                            <button onClick={() => setDescModalOpen(false)} className="text-gray-500 hover:text-white transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <button onClick={() => setDescModalOpen(false)} className="text-gray-500 hover:text-white transition-colors p-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M18 6 6 18" /><path d="m6 6 12 12" />
                                 </svg>
                             </button>
                         </div>
 
                         {/* Modal Content */}
-                        <div className="flex-1 overflow-y-auto p-5 pb-8 flex flex-col gap-3">
-                            <textarea
-                                autoFocus
-                                value={modalDraft}
-                                onChange={(e) => setModalDraft(e.target.value)}
-                                placeholder="Enter a product description..."
-                                rows={5}
-                                className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-[#3a3a3a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none placeholder-gray-400 dark:placeholder-gray-600 resize-none"
-                            />
-                            <button
-                                onClick={saveDesc}
-                                disabled={isSaving}
-                                className={`w-full py-2.5 rounded-xl font-bold text-sm text-black transition-all active:scale-95 ${isSaving ? 'bg-gray-600' : 'bg-[#cba153] hover:bg-[#b8860b]'}`}
-                            >
-                                {isSaving ? 'Saving Changes...' : 'Save Description & Images'}
-                            </button>
+                        <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-5 min-h-0">
+                            <div className="flex flex-col flex-shrink-0">
+                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Description</label>
+                                <textarea
+                                    autoFocus
+                                    value={modalDraft}
+                                    onChange={(e) => setModalDraft(e.target.value)}
+                                    placeholder="Enter a product description..."
+                                    rows={4}
+                                    className="w-full px-3 py-3 text-sm border border-gray-200 dark:border-[#3a3a3a] rounded-xl bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none placeholder-gray-400 dark:placeholder-gray-600 resize-none"
+                                />
+                            </div>
 
-                            <div className="mt-4 pt-4 border-t border-gray-100 dark:border-[#2a2a2a]">
+                            <div className="flex flex-col flex-shrink-0">
                                 <div className="flex items-center justify-between mb-3">
                                     <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Additional Images ({localAdditionalImages.length}/5)</span>
                                     {localAdditionalImages.length < 5 && (
                                         <button
                                             onClick={() => additionalImagesInputRef.current?.click()}
                                             disabled={isUploadingAdditional}
-                                            className="text-[10px] font-black text-[#cba153] uppercase border border-[#cba153]/30 px-2 py-1 rounded-lg hover:bg-[#cba153]/10 transition-colors"
+                                            className="text-[10px] font-black text-[#cba153] uppercase border border-[#cba153]/30 px-3 py-1.5 rounded-lg hover:bg-[#cba153]/10 transition-colors active:scale-95"
                                         >
-                                            {isUploadingAdditional ? 'Uploading...' : '+ Add'}
+                                            {isUploadingAdditional ? 'Uploading...' : '+ Add Image'}
                                         </button>
                                     )}
                                 </div>
@@ -443,25 +441,40 @@ function ProductManageItem({
 
                                 <div className="grid grid-cols-5 gap-2">
                                     {localAdditionalImages.map((url, i) => (
-                                        <div key={i} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-black group">
+                                        <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-black group border border-gray-200 dark:border-[#2a2a2a]">
                                             <img src={url} alt={`extra-${i}`} className="w-full h-full object-cover" />
                                             <button
                                                 onClick={() => removeAdditionalImage(url)}
-                                                className="absolute top-0.5 right-0.5 p-1 bg-red-600/80 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                                className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full shadow-lg active:scale-90"
                                             >
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                                                     <path d="M18 6 6 18" /><path d="m6 6 12 12" />
                                                 </svg>
                                             </button>
                                         </div>
                                     ))}
                                     {Array.from({ length: Math.max(0, 5 - localAdditionalImages.length) }).map((_, i) => (
-                                        <div key={`empty-${i}`} className="aspect-square rounded-lg border-2 border-dashed border-gray-200 dark:border-[#2a2a2a] flex items-center justify-center">
-                                            <span className="text-xs text-gray-400">+</span>
+                                        <div key={`empty-${i}`} className="aspect-square rounded-xl border-2 border-dashed border-gray-200 dark:border-[#2a2a2a] flex items-center justify-center bg-gray-50 dark:bg-white/[0.02]">
+                                            <span className="text-gray-300 dark:text-gray-600">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                    <path d="M5 12h14" /><path d="M12 5v14" />
+                                                </svg>
+                                            </span>
                                         </div>
                                     ))}
                                 </div>
                             </div>
+                        </div>
+                        
+                        {/* Modal Footer */}
+                        <div className="p-4 border-t border-gray-100 dark:border-[#2a2a2a] bg-white dark:bg-[#1c1c1e] shrink-0 pb-safe">
+                            <button
+                                onClick={saveDesc}
+                                disabled={isSaving}
+                                className={`w-full py-3 rounded-xl font-bold text-sm text-black transition-all active:scale-[0.98] ${isSaving ? 'bg-gray-600 text-gray-300' : 'bg-[#cba153] hover:bg-[#b8860b] shadow-[0_4px_14px_rgba(203,161,83,0.3)]'}`}
+                            >
+                                {isSaving ? 'Saving Changes...' : 'Save Details & Close'}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -923,50 +936,49 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish, categor
             {/* Description Modal */}
             {descModalOpen && (
                 <div
-                    className="fixed inset-0 z-[200] flex items-end justify-center bg-black/70 backdrop-blur-sm p-4"
+                    className="fixed top-0 left-0 right-0 z-[200] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm"
+                    style={{ height: 'var(--tg-viewport-height, 100vh)' }}
                     onClick={() => setDescModalOpen(false)}
                 >
                     <div
-                        className="w-full max-w-lg bg-white dark:bg-[#1c1c1e] rounded-2xl border-t border-gray-200 dark:border-[#3a3a3a] flex flex-col max-h-[90vh]"
+                        className="w-full max-w-lg bg-white dark:bg-[#1c1c1e] rounded-t-2xl sm:rounded-2xl flex flex-col"
+                        style={{ maxHeight: '100%' }}
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Modal Header */}
-                        <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-[#2a2a2a]">
-                            <span className="text-sm font-semibold text-gray-900 dark:text-white">Description</span>
-                            <button onClick={() => setDescModalOpen(false)} className="text-gray-500 hover:text-white transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-[#2a2a2a] shrink-0">
+                            <span className="text-sm font-semibold text-gray-900 dark:text-white">Edit Description</span>
+                            <button onClick={() => setDescModalOpen(false)} className="text-gray-500 hover:text-white transition-colors p-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M18 6 6 18" /><path d="m6 6 12 12" />
                                 </svg>
                             </button>
                         </div>
 
                         {/* Modal Content */}
-                        <div className="flex-1 overflow-y-auto p-5 pb-8 flex flex-col gap-3">
-                            <textarea
-                                autoFocus
-                                value={modalDraft}
-                                onChange={(e) => setModalDraft(e.target.value)}
-                                placeholder="Enter a product description..."
-                                rows={5}
-                                className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-[#3a3a3a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none placeholder-gray-400 dark:placeholder-gray-600 resize-none"
-                            />
-                            <button
-                                onClick={saveDesc}
-                                className="w-full py-2.5 rounded-xl font-bold text-sm text-black bg-[#cba153] hover:bg-[#b8860b] active:scale-95 transition-all"
-                            >
-                                Save Description
-                            </button>
+                        <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-5 min-h-0">
+                            <div className="flex flex-col flex-shrink-0">
+                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Description</label>
+                                <textarea
+                                    autoFocus
+                                    value={modalDraft}
+                                    onChange={(e) => setModalDraft(e.target.value)}
+                                    placeholder="Enter a product description..."
+                                    rows={4}
+                                    className="w-full px-3 py-3 text-sm border border-gray-200 dark:border-[#3a3a3a] rounded-xl bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white focus:ring-1 focus:ring-[#cba153] focus:border-[#cba153] focus:outline-none placeholder-gray-400 dark:placeholder-gray-600 resize-none"
+                                />
+                            </div>
 
-                            <div className="mt-4 pt-4 border-t border-gray-100 dark:border-[#2a2a2a]">
+                            <div className="flex flex-col flex-shrink-0">
                                 <div className="flex items-center justify-between mb-3">
                                     <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Additional Images ({localAdditionalImages.length}/5)</span>
                                     {localAdditionalImages.length < 5 && (
                                         <button
                                             onClick={() => additionalImagesInputRef.current?.click()}
                                             disabled={isProcessingImages}
-                                            className="text-[10px] font-black text-[#cba153] uppercase border border-[#cba153]/30 px-2 py-1 rounded-lg hover:bg-[#cba153]/10 transition-colors"
+                                            className="text-[10px] font-black text-[#cba153] uppercase border border-[#cba153]/30 px-3 py-1.5 rounded-lg hover:bg-[#cba153]/10 transition-colors active:scale-95"
                                         >
-                                            {isProcessingImages ? 'Processing...' : '+ Add'}
+                                            {isProcessingImages ? 'Processing...' : '+ Add Image'}
                                         </button>
                                     )}
                                 </div>
@@ -982,25 +994,40 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish, categor
 
                                 <div className="grid grid-cols-5 gap-2">
                                     {localAdditionalImages.map((base64, i) => (
-                                        <div key={i} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-black group">
+                                        <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-black group border border-gray-200 dark:border-[#2a2a2a]">
                                             <img src={base64} alt={`extra-${i}`} className="w-full h-full object-cover" />
                                             <button
                                                 onClick={() => removeAdditionalImage(base64)}
-                                                className="absolute top-0.5 right-0.5 p-1 bg-red-600/80 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                                className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full shadow-lg active:scale-90"
                                             >
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                                                     <path d="M18 6 6 18" /><path d="m6 6 12 12" />
                                                 </svg>
                                             </button>
                                         </div>
                                     ))}
                                     {Array.from({ length: Math.max(0, 5 - localAdditionalImages.length) }).map((_, i) => (
-                                        <div key={`empty-${i}`} className="aspect-square rounded-lg border-2 border-dashed border-gray-200 dark:border-[#2a2a2a] flex items-center justify-center">
-                                            <span className="text-xs text-gray-400">+</span>
+                                        <div key={`empty-${i}`} className="aspect-square rounded-xl border-2 border-dashed border-gray-200 dark:border-[#2a2a2a] flex items-center justify-center bg-gray-50 dark:bg-white/[0.02]">
+                                            <span className="text-gray-300 dark:text-gray-600">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                    <path d="M5 12h14" /><path d="M12 5v14" />
+                                                </svg>
+                                            </span>
                                         </div>
                                     ))}
                                 </div>
                             </div>
+                        </div>
+                        
+                        {/* Modal Footer */}
+                        <div className="p-4 border-t border-gray-100 dark:border-[#2a2a2a] bg-white dark:bg-[#1c1c1e] shrink-0 pb-safe">
+                            <button
+                                onClick={saveDesc}
+                                disabled={isProcessingImages}
+                                className={`w-full py-3 rounded-xl font-bold text-sm text-black transition-all active:scale-[0.98] ${isProcessingImages ? 'bg-gray-600 text-gray-300' : 'bg-[#cba153] hover:bg-[#b8860b] shadow-[0_4px_14px_rgba(203,161,83,0.3)]'}`}
+                            >
+                                {isProcessingImages ? 'Processing...' : 'Save Details & Close'}
+                            </button>
                         </div>
                     </div>
                 </div>
