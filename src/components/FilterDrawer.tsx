@@ -3,7 +3,10 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useFilters, SortOption } from '@/context/FilterContext';
-import { Search, X } from 'lucide-react';
+import { Search, X, ChevronRight } from 'lucide-react';
+import { CATEGORIES, CATEGORY_SUBCATEGORIES } from '@/constants/categories';
+import { supabase } from '@/utils/supabase/client';
+import { useQuery } from '@tanstack/react-query';
 
 const CLOTHING_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 const SHOE_SIZES = ['36', '37', '38', '39', '40', '41', '42', '43', '44', '45'];
@@ -18,6 +21,30 @@ const SORT_OPTIONS: { label: string; value: SortOption }[] = [
 
 export default function FilterDrawer() {
     const { isDrawerOpen, setDrawerOpen, tempFilters, setTempFilters, applyFilters, resetFilters } = useFilters();
+    const trackRef = React.useRef<HTMLDivElement>(null);
+
+    // Fetch unique category/subcategory combinations for deep filtering
+    const { data: categoryStructure } = useQuery({
+        queryKey: ['filterCategoryStructure'],
+        queryFn: async () => {
+            const { data, error } = await supabase
+                .from('products')
+                .select('gender, category, sub_subcategory');
+            if (error) throw error;
+            
+            // Build a tree: Gender -> Category -> Sub-Subcategories
+            const tree: Record<string, Record<string, Set<string>>> = {};
+            data.forEach(p => {
+                if (!p.gender) return;
+                if (!tree[p.gender]) tree[p.gender] = {};
+                if (!p.category) return;
+                if (!tree[p.gender][p.category]) tree[p.gender][p.category] = new Set();
+                if (p.sub_subcategory) tree[p.gender][p.category].add(p.sub_subcategory);
+            });
+            return tree;
+        },
+        enabled: isDrawerOpen
+    });
 
     if (!isDrawerOpen) return null;
 
@@ -92,36 +119,153 @@ export default function FilterDrawer() {
                                         {tempFilters.minPrice} - {tempFilters.maxPrice} ETB
                                     </span>
                                 </div>
-                                <div className="px-2">
-                                    <input
-                                        type="range"
-                                        min="0"
-                                        max="50000"
-                                        step="100"
-                                        value={tempFilters.maxPrice}
-                                        onChange={(e) => setTempFilters(prev => ({ ...prev, maxPrice: parseInt(e.target.value) }))}
-                                        className="w-full h-1.5 bg-gray-200 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#cba153]"
-                                    />
-                                    <div className="flex justify-between mt-2 text-[10px] text-gray-400 font-bold uppercase tracking-tighter">
+                                <div className="px-5 relative pt-4 pb-6">
+                                    <div 
+                                        ref={trackRef}
+                                        className="h-1.5 w-full bg-gray-100 dark:bg-white/5 rounded-full relative"
+                                    >
+                                        {/* Filled Track */}
+                                        <div 
+                                            className="absolute left-0 top-0 h-full bg-[#cba153] rounded-full"
+                                            style={{ width: `${(tempFilters.maxPrice / 10000) * 100}%` }}
+                                        />
+                                        
+                                        {/* Drag Handle */}
+                                        <motion.div
+                                            drag="x"
+                                            dragConstraints={trackRef}
+                                            dragElastic={0}
+                                            dragMomentum={false}
+                                            onDrag={(e, info) => {
+                                                if (!trackRef.current) return;
+                                                const rect = trackRef.current.getBoundingClientRect();
+                                                const trackWidth = rect.width;
+                                                const offsetX = info.point.x - rect.left;
+                                                const newPercent = Math.min(Math.max(0, offsetX), trackWidth) / trackWidth;
+                                                const newValue = Math.round((newPercent * 10000) / 100) * 100;
+                                                setTempFilters(prev => ({ ...prev, maxPrice: newValue }));
+                                            }}
+                                            animate={{ x: `${(tempFilters.maxPrice / 10000) * 100}%` }}
+                                            style={{ left: 0, x: '-50%' }}
+                                            className="absolute top-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-xl border-2 border-[#cba153] cursor-grab active:cursor-grabbing z-10 flex items-center justify-center p-0"
+                                        >
+                                            <div className="flex gap-0.5">
+                                                <div className="w-0.5 h-3 bg-[#cba153]/30 rounded-full" />
+                                                <div className="w-0.5 h-3 bg-[#cba153]/30 rounded-full" />
+                                                <div className="w-0.5 h-3 bg-[#cba153]/30 rounded-full" />
+                                            </div>
+                                        </motion.div>
+                                    </div>
+                                    <div className="flex justify-between mt-8 text-[10px] text-gray-400 font-bold uppercase tracking-tighter">
                                         <span>0 ETB</span>
-                                        <span>50,000+ ETB</span>
+                                        <span>10,000+ ETB</span>
                                     </div>
                                 </div>
                             </section>
 
-                            {/* Brand Filtering */}
-                            <section>
-                                <h3 className="text-xs font-black text-[#cba153] uppercase tracking-widest mb-4">Brand Filter</h3>
-                                <div className="relative group">
-                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#cba153] transition-colors" size={16} />
-                                    <input
-                                        type="text"
-                                        placeholder="Search by brand name..."
-                                        value={tempFilters.brand}
-                                        onChange={(e) => setTempFilters(prev => ({ ...prev, brand: e.target.value }))}
-                                        className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl py-3 pl-10 pr-4 text-xs font-bold focus:ring-2 focus:ring-[#cba153]/20 focus:outline-none transition-all placeholder:text-gray-400"
-                                    />
+                            {/* Category Hierarchy */}
+                            <section className="space-y-6">
+                                <h3 className="text-xs font-black text-[#cba153] uppercase tracking-widest mb-4">Category Selection</h3>
+                                
+                                {/* Level 1: Gender */}
+                                <div className="space-y-3">
+                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1">Main Category</span>
+                                    <div className="flex flex-wrap gap-2">
+                                        {['Men', 'Women', 'Accessories', 'Unisex'].map((g) => (
+                                            <button
+                                                key={g}
+                                                onClick={() => setTempFilters(prev => ({ 
+                                                    ...prev, 
+                                                    gender: prev.gender === g ? '' : g,
+                                                    category: '',
+                                                    subSubCategory: ''
+                                                }))}
+                                                className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
+                                                    tempFilters.gender === g
+                                                        ? 'bg-[#cba153] border-[#cba153] text-black shadow-lg shadow-[#cba153]/20'
+                                                        : 'bg-transparent border-gray-200 dark:border-white/10 text-gray-500'
+                                                }`}
+                                            >
+                                                {g}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
+
+                                {/* Level 2: Category (Revealed if Gender selected) */}
+                                <AnimatePresence>
+                                    {tempFilters.gender && (
+                                        <motion.div 
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: 'auto' }}
+                                            exit={{ opacity: 0, height: 0 }}
+                                            className="space-y-3 overflow-hidden"
+                                        >
+                                            <div className="flex items-center gap-2 px-1">
+                                                <ChevronRight size={10} className="text-[#cba153]" />
+                                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Sub Category</span>
+                                            </div>
+                                            <div className="flex flex-wrap gap-2">
+                                                {Object.keys(categoryStructure?.[tempFilters.gender] || {}).map((cat) => (
+                                                    <button
+                                                        key={cat}
+                                                        onClick={() => setTempFilters(prev => ({ 
+                                                            ...prev, 
+                                                            category: prev.category === cat ? '' : cat,
+                                                            subSubCategory: ''
+                                                        }))}
+                                                        className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
+                                                            tempFilters.category === cat
+                                                                ? 'bg-[#cba153] border-[#cba153] text-black'
+                                                                : 'bg-transparent border-gray-200 dark:border-white/10 text-gray-500'
+                                                        }`}
+                                                    >
+                                                        {cat}
+                                                    </button>
+                                                ))}
+                                                {Object.keys(categoryStructure?.[tempFilters.gender] || {}).length === 0 && (
+                                                    <span className="text-[10px] text-gray-500 italic px-1">No sub-categories available</span>
+                                                )}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+
+                                {/* Level 3: Sub-Subcategory (Revealed if Category selected) */}
+                                <AnimatePresence>
+                                    {(tempFilters.gender && tempFilters.category && Array.from(categoryStructure?.[tempFilters.gender]?.[tempFilters.category] || []).length > 0) && (
+                                        <motion.div 
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: 'auto' }}
+                                            exit={{ opacity: 0, height: 0 }}
+                                            className="space-y-3 overflow-hidden"
+                                        >
+                                            <div className="flex items-center gap-2 px-1">
+                                                <ChevronRight size={10} className="text-[#cba153]" />
+                                                <ChevronRight size={10} className="-ms-1.5 text-[#cba153]" />
+                                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Type / Detail</span>
+                                            </div>
+                                            <div className="flex flex-wrap gap-2">
+                                                {Array.from(categoryStructure?.[tempFilters.gender]?.[tempFilters.category] || []).map((subSub) => (
+                                                    <button
+                                                        key={subSub}
+                                                        onClick={() => setTempFilters(prev => ({ 
+                                                            ...prev, 
+                                                            subSubCategory: prev.subSubCategory === subSub ? '' : subSub 
+                                                        }))}
+                                                        className={`px-4 py-2 rounded-xl text-[10px] font-medium border transition-all ${
+                                                            tempFilters.subSubCategory === subSub
+                                                                ? 'bg-[#cba153] border-[#cba153] text-black'
+                                                                : 'bg-transparent border-gray-200 dark:border-white/10 text-gray-400'
+                                                        }`}
+                                                    >
+                                                        {subSub}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </section>
 
                             {/* Sizes */}

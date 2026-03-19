@@ -79,40 +79,62 @@ export default function ProductGrid({ selectedCategory = 'All', selectedSubcateg
             if (!(nameMatch || descMatch || subSubMatch)) return false;
         }
 
-        // --- 2. Category/Gender Filter ---
+        // --- 2. Category/Gender Filter (Main Tabs) ---
         const categoryMatch = selectedCategory === 'All' || (() => {
             const cat = selectedCategory.toLowerCase();
-            const gender = p.gender?.toLowerCase();
+            const pGender = p.gender?.toLowerCase();
+            const pCat = p.category?.toLowerCase();
 
-            let matchesMain = false;
-            if (cat === 'men') matchesMain = gender === 'men' || gender === 'unisex';
-            else if (cat === 'women') matchesMain = gender === 'women' || gender === 'unisex';
-            else if (cat === 'accessories') matchesMain = gender === 'accessories';
-            else matchesMain = p.category?.toLowerCase() === cat;
-
-            if (!matchesMain) return false;
-
-            if (selectedSubcategory) {
-                const sub = selectedSubcategory.toLowerCase();
-                const matchesSub = p.category?.toLowerCase() === sub;
-                // @ts-ignore
-                const matchesSubSub = p.sub_subcategory?.toLowerCase() === sub;
-                return matchesSub || matchesSubSub;
+            // Handle Gender-based Main Categories
+            if (['men', 'women', 'accessories', 'unisex'].includes(cat)) {
+                if (cat === 'accessories') return pGender === 'accessories';
+                if (cat === 'unisex') return pGender === 'unisex';
+                return pGender === cat || pGender === 'unisex';
             }
-            return true;
+            
+            // Handle regular categories
+            return pCat === cat;
         })();
         if (!categoryMatch) return false;
 
+        // Skip category match if we have a selected subcategory (it will be matched next)
+        if (selectedSubcategory) {
+            const sub = selectedSubcategory.toLowerCase();
+            const matchesSub = p.category?.toLowerCase() === sub;
+            // @ts-ignore
+            const matchesSubSub = p.sub_subcategory?.toLowerCase() === sub;
+            if (!(matchesSub || matchesSubSub)) return false;
+        }
+
         // --- 3. Advanced Drawer Filters ---
         
+        // Gender Filter (from Drawer)
+        if (filters.gender) {
+            const pGender = p.gender?.toLowerCase();
+            if (!pGender) return false;
+            
+            if (filters.gender.toLowerCase() === 'unisex') {
+                if (pGender !== 'unisex') return false;
+            } else {
+                if (pGender !== filters.gender.toLowerCase() && pGender !== 'unisex') return false;
+            }
+        }
+
+        // Category Filter (from Drawer)
+        if (filters.category) {
+            const pCat = p.category?.toLowerCase();
+            if (!pCat || pCat !== filters.category.toLowerCase()) return false;
+        }
+
+        // Sub-Subcategory Filter (from Drawer)
+        if (filters.subSubCategory) {
+            // @ts-ignore
+            const pSubSub = p.sub_subcategory?.toLowerCase();
+            if (!pSubSub || pSubSub !== filters.subSubCategory.toLowerCase()) return false;
+        }
+
         // Price Filter
         if (p.price < filters.minPrice || p.price > filters.maxPrice) return false;
-
-        // Brand Filter
-        if (filters.brand.trim()) {
-            const bQuery = filters.brand.toLowerCase().trim();
-            if (!p.name.toLowerCase().includes(bQuery)) return false;
-        }
 
         // Stock Filter
         if (filters.hideOutOfStock && p.quantity <= 0) return false;
@@ -155,7 +177,7 @@ export default function ProductGrid({ selectedCategory = 'All', selectedSubcateg
     if (sorted.length === 0) {
         return (
             <div className="p-8 text-center text-gray-500">
-                {searchQuery || filters.brand || filters.selectedSizes.length > 0
+                {searchQuery || filters.gender || filters.category || filters.subSubCategory || filters.selectedSizes.length > 0
                     ? `No products match your current filters`
                     : `No products in "${selectedCategory}"`
                 }

@@ -8,7 +8,9 @@ interface FilterState {
     minPrice: number;
     maxPrice: number;
     selectedSizes: string[];
-    brand: string;
+    gender: string;
+    category: string;
+    subSubCategory: string;
     hideOutOfStock: boolean;
     onlyNewArrivals: boolean;
     sortBy: SortOption;
@@ -26,9 +28,11 @@ interface FilterContextType {
 
 const initialFilterState: FilterState = {
     minPrice: 0,
-    maxPrice: 20000,
+    maxPrice: 10000,
     selectedSizes: [],
-    brand: '',
+    gender: '',
+    category: '',
+    subSubCategory: '',
     hideOutOfStock: false,
     onlyNewArrivals: false,
     sortBy: 'newest',
