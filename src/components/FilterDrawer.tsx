@@ -143,11 +143,18 @@ export default function FilterDrawer() {
                                                 const offsetX = info.point.x - rect.left;
                                                 const newPercent = Math.min(Math.max(0, offsetX), trackWidth) / trackWidth;
                                                 const newValue = Math.round((newPercent * 10000) / 100) * 100;
-                                                setTempFilters(prev => ({ ...prev, maxPrice: newValue }));
+                                                if (newValue !== tempFilters.maxPrice) {
+                                                    setTempFilters(prev => ({ ...prev, maxPrice: newValue }));
+                                                }
                                             }}
-                                            animate={{ x: `${(tempFilters.maxPrice / 10000) * 100}%` }}
-                                            style={{ left: 0, x: '-50%' }}
-                                            className="absolute top-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-xl border-2 border-[#cba153] cursor-grab active:cursor-grabbing z-10 flex items-center justify-center p-0"
+                                            animate={{ 
+                                                // Calculate pixels for x instead of percentage to avoid sub-pixel flickering 
+                                                // when used with drag
+                                                x: trackRef.current ? (tempFilters.maxPrice / 10000) * trackRef.current.offsetWidth : 0
+                                            }}
+                                            transition={{ type: 'spring', damping: 30, stiffness: 200, restDelta: 0.001 }}
+                                            style={{ left: 0, x: 0 }}
+                                            className="absolute top-1/2 -translate-y-1/2 w-8 h-8 -ml-4 bg-white rounded-full shadow-xl border-2 border-[#cba153] cursor-grab active:cursor-grabbing z-10 flex items-center justify-center p-0"
                                         >
                                             <div className="flex gap-0.5">
                                                 <div className="w-0.5 h-3 bg-[#cba153]/30 rounded-full" />
@@ -269,24 +276,53 @@ export default function FilterDrawer() {
                             </section>
 
                             {/* Sizes */}
-                            <section>
-                                <h3 className="text-xs font-black text-[#cba153] uppercase tracking-widest mb-4">Fit & Size</h3>
-                                <div className="flex flex-wrap gap-2">
-                                    {ALL_SIZES.map((size) => (
-                                        <button
-                                            key={size}
-                                            onClick={() => toggleSize(size)}
-                                            className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
-                                                tempFilters.selectedSizes.includes(size)
-                                                    ? 'bg-[#cba153] border-[#cba153] text-black'
-                                                    : 'bg-transparent border-gray-200 dark:border-white/10 text-gray-500'
-                                            }`}
+                            <AnimatePresence>
+                                {(() => {
+                                    const cat = tempFilters.category?.toLowerCase() || '';
+                                    const gender = tempFilters.gender?.toLowerCase() || '';
+                                    
+                                    // Categories that should show shoe sizes
+                                    const isShoes = cat.includes('shoe') || cat.includes('footwear');
+                                    
+                                    // Accessories and similar categories that don't need size filtering
+                                    if (gender === 'accessories' || cat === 'jewelry' || cat === 'belts' || cat === 'sunglasses' || cat === 'watches') {
+                                        return null;
+                                    }
+                                    
+                                    // If no category selected, don't show sizes yet (to keep it clean as per user request)
+                                    if (!tempFilters.category && !tempFilters.gender) return null;
+
+                                    const visibleSizes = isShoes ? SHOE_SIZES : CLOTHING_SIZES;
+                                    const title = isShoes ? 'Shoe Size' : 'Clothing Size';
+
+                                    return (
+                                        <motion.section
+                                            key={title}
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: 'auto' }}
+                                            exit={{ opacity: 0, height: 0 }}
+                                            className="overflow-hidden"
                                         >
-                                            {size}
-                                        </button>
-                                    ))}
-                                </div>
-                            </section>
+                                            <h3 className="text-xs font-black text-[#cba153] uppercase tracking-widest mb-4">{title}</h3>
+                                            <div className="flex flex-wrap gap-2">
+                                                {visibleSizes.map((size) => (
+                                                    <button
+                                                        key={size}
+                                                        onClick={() => toggleSize(size)}
+                                                        className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
+                                                            tempFilters.selectedSizes.includes(size)
+                                                                ? 'bg-[#cba153] border-[#cba153] text-black shadow-lg shadow-[#cba153]/20'
+                                                                : 'bg-transparent border-gray-200 dark:border-white/10 text-gray-500 hover:border-[#cba153]/50'
+                                                        }`}
+                                                    >
+                                                        {size}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </motion.section>
+                                    );
+                                })()}
+                            </AnimatePresence>
 
                             {/* Options */}
                             <section className="space-y-4">
