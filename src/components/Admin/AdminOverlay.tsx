@@ -9,6 +9,7 @@ import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CATEGORY_SUBCATEGORIES as DEFAULT_SUBCATEGORIES } from '@/constants/categories';
 import AdminConfirmModal from './AdminConfirmModal';
+import AdminAlertModal from './AdminAlertModal';
 import AdminOrders from './AdminOrders';
 import { broadcastTelegramMessage } from '@/utils/telegram';
 
@@ -194,6 +195,7 @@ interface ProductManageItemProps {
     onDeleteCategory: (category: string, gender: string) => void;
     isCategoryDeleteMode: boolean;
     onToggleCategoryDeleteMode: () => void;
+    showAlert: (config: any) => void;
 }
 
 function ProductManageItem({
@@ -207,7 +209,8 @@ function ProductManageItem({
     categories,
     onDeleteCategory,
     isCategoryDeleteMode,
-    onToggleCategoryDeleteMode
+    onToggleCategoryDeleteMode,
+    showAlert
 }: ProductManageItemProps) {
     const [localName, setLocalName] = useState(product.name);
     const [localPrice, setLocalPrice] = useState(product.price.toString());
@@ -284,7 +287,12 @@ function ProductManageItem({
     const handleSave = async () => {
         const priceNum = parseFloat(localPrice);
         if (isNaN(priceNum)) {
-            alert('Please enter a valid price');
+            showAlert({ 
+                type: 'alert', 
+                title: 'Invalid Price', 
+                description: 'Please enter a valid price number.', 
+                variant: 'warning' 
+            });
             return;
         }
 
@@ -341,7 +349,12 @@ function ProductManageItem({
         if (files.length === 0) return;
 
         if (localAdditionalImages.length + files.length > 5) {
-            alert('Maximum 5 additional images allowed');
+            showAlert({
+                type: 'alert',
+                title: 'Limit Reached',
+                description: 'Maximum 5 additional images allowed',
+                variant: 'warning'
+            });
             return;
         }
 
@@ -370,7 +383,12 @@ function ProductManageItem({
             }
             setLocalAdditionalImages(prev => [...prev, ...newImages]);
         } catch (err: any) {
-            alert('Upload failed: ' + err.message);
+            showAlert({ 
+                type: 'alert', 
+                title: 'Upload Failed', 
+                description: err.message, 
+                variant: 'danger' 
+            });
         } finally {
             setIsUploadingAdditional(false);
             if (additionalImagesInputRef.current) additionalImagesInputRef.current.value = '';
@@ -610,12 +628,18 @@ function ProductManageItem({
                                                 setLocalSizes([]);
                                             }}
                                             onAddNew={() => {
-                                                const newCat = prompt('Enter new sub category:');
-                                                if (newCat) {
-                                                    setLocalCategory(newCat);
-                                                    setLocalSubSubCategory('');
-                                                    setLocalSizes([]);
-                                                }
+                                                showAlert({
+                                                    type: 'prompt',
+                                                    title: 'New Sub Category',
+                                                    placeholder: 'Enter category name...',
+                                                    onConfirm: (newCat?: string) => {
+                                                        if (newCat) {
+                                                            setLocalCategory(newCat);
+                                                            setLocalSubSubCategory('');
+                                                            setLocalSizes([]);
+                                                        }
+                                                    }
+                                                });
                                             }}
                                             isDeleteMode={isCategoryDeleteMode}
                                             onToggleDeleteMode={onToggleCategoryDeleteMode}
@@ -631,8 +655,14 @@ function ProductManageItem({
                                                 selected={localSubSubCategory}
                                                 onChange={(val) => setLocalSubSubCategory(val)}
                                                 onAddNew={() => {
-                                                    const newSubSub = prompt('Enter new sub-sub category:');
-                                                    if (newSubSub) setLocalSubSubCategory(newSubSub);
+                                                    showAlert({
+                                                        type: 'prompt',
+                                                        title: 'New Sub-Sub Category',
+                                                        placeholder: 'Enter sub-sub category name...',
+                                                        onConfirm: (newSubSub?: string) => {
+                                                            if (newSubSub) setLocalSubSubCategory(newSubSub);
+                                                        }
+                                                    });
                                                 }}
                                                 isDeleteMode={isCategoryDeleteMode}
                                                 onToggleDeleteMode={onToggleCategoryDeleteMode}
@@ -817,9 +847,10 @@ interface UploadItemRowProps {
     onDeleteCategory: (category: string, gender: string) => void;
     isCategoryDeleteMode: boolean;
     onToggleCategoryDeleteMode: () => void;
+    showAlert: (config: any) => void;
 }
 
-function UploadItemRow({ item, index, updateItem, removeItem, onPublish, categories, onDeleteCategory, isCategoryDeleteMode, onToggleCategoryDeleteMode }: UploadItemRowProps) {
+function UploadItemRow({ item, index, updateItem, removeItem, onPublish, categories, onDeleteCategory, isCategoryDeleteMode, onToggleCategoryDeleteMode, showAlert }: UploadItemRowProps) {
     const [localTitle, setLocalTitle] = useState(item.title);
     const [localPrice, setLocalPrice] = useState(item.price);
     const [localCategory, setLocalCategory] = useState(item.category);
@@ -874,7 +905,12 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish, categor
         if (files.length === 0) return;
 
         if (localAdditionalImages.length + files.length > 5) {
-            alert('Maximum 5 additional images allowed');
+            showAlert({
+                type: 'alert',
+                title: 'Limit Reached',
+                description: 'Maximum 5 additional images allowed',
+                variant: 'warning'
+            });
             return;
         }
 
@@ -890,7 +926,12 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish, categor
             setLocalAdditionalImages(updated);
             updateItem(index, 'additionalImages', updated);
         } catch (err: any) {
-            alert('Image processing failed: ' + err.message);
+            showAlert({ 
+                type: 'alert', 
+                title: 'Processing Failed', 
+                description: err.message, 
+                variant: 'danger' 
+            });
         } finally {
             setIsProcessingImages(false);
             if (additionalImagesInputRef.current) additionalImagesInputRef.current.value = '';
@@ -1132,16 +1173,22 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish, categor
                                 updateItem(index, 'sizes', []);
                             }}
                             onAddNew={() => {
-                                const newCat = prompt('Enter new sub category:');
-                                if (newCat) {
-                                    setLocalCategory(newCat);
-                                    updateItem(index, 'category', newCat);
-                                    // Reset sub-sub and sizes
-                                    setLocalSubSubCategory('');
-                                    updateItem(index, 'subSubCategory', '');
-                                    setLocalSizes([]);
-                                    updateItem(index, 'sizes', []);
-                                }
+                                showAlert({
+                                    type: 'prompt',
+                                    title: 'New Sub Category',
+                                    placeholder: 'Enter category name...',
+                                    onConfirm: (newCat?: string) => {
+                                        if (newCat) {
+                                            setLocalCategory(newCat);
+                                            updateItem(index, 'category', newCat);
+                                            // Reset sub-sub and sizes
+                                            setLocalSubSubCategory('');
+                                            updateItem(index, 'subSubCategory', '');
+                                            setLocalSizes([]);
+                                            updateItem(index, 'sizes', []);
+                                        }
+                                    }
+                                });
                             }}
                             isDeleteMode={isCategoryDeleteMode}
                             onToggleDeleteMode={onToggleCategoryDeleteMode}
@@ -1160,11 +1207,17 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish, categor
                                     updateItem(index, 'subSubCategory', val);
                                 }}
                                 onAddNew={() => {
-                                    const newSubSub = prompt('Enter new sub-sub category:');
-                                    if (newSubSub) {
-                                        setLocalSubSubCategory(newSubSub);
-                                        updateItem(index, 'subSubCategory', newSubSub);
-                                    }
+                                    showAlert({
+                                        type: 'prompt',
+                                        title: 'New Sub-Sub Category',
+                                        placeholder: 'Enter sub-sub category name...',
+                                        onConfirm: (newSubSub?: string) => {
+                                            if (newSubSub) {
+                                                setLocalSubSubCategory(newSubSub);
+                                                updateItem(index, 'subSubCategory', newSubSub);
+                                            }
+                                        }
+                                    });
                                 }}
                                 isDeleteMode={isCategoryDeleteMode}
                                 onToggleDeleteMode={onToggleCategoryDeleteMode}
@@ -1313,6 +1366,27 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
     const { storeId, isOwner } = useAdmin();
     const queryClient = useQueryClient();
     const [isCategoryDeleteMode, setIsCategoryDeleteMode] = useState(false);
+    const [alertModal, setAlertModal] = useState<{
+        isOpen: boolean;
+        type: 'alert' | 'confirm' | 'prompt';
+        title: string;
+        description?: string;
+        confirmText?: string;
+        cancelText?: string;
+        placeholder?: string;
+        initialValue?: string;
+        onConfirm: (val?: string) => void;
+        variant?: 'danger' | 'warning' | 'info' | 'success';
+    }>({
+        isOpen: false,
+        type: 'alert',
+        title: '',
+        onConfirm: () => { }
+    });
+
+    const showAlert = (config: any) => {
+        setAlertModal({ ...config, isOpen: true });
+    };
 
     // Fetch unique categories from database to make "+" button additions persistent
     const { data: dbCategories } = useQuery({
@@ -1865,18 +1939,30 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
     };
 
     const handleDeleteAnnouncement = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this announcement? This will remove it from all customer feeds.')) return;
-        
-        try {
-            const { error } = await supabase.from('announcements').delete().eq('id', id);
-            if (error) throw error;
-            setManageAnnounceData(prev => prev.filter(a => a.id !== id));
-            if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-                window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+        showAlert({
+            type: 'confirm',
+            title: 'Delete Announcement?',
+            description: 'Are you sure you want to delete this announcement? This will remove it from all customer feeds.',
+            confirmText: 'Yes, Delete',
+            variant: 'danger',
+            onConfirm: async () => {
+                try {
+                    const { error } = await supabase.from('announcements').delete().eq('id', id);
+                    if (error) throw error;
+                    setManageAnnounceData(prev => prev.filter(a => a.id !== id));
+                    if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+                        window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+                    }
+                } catch (err: any) {
+                    showAlert({
+                        type: 'alert',
+                        title: 'Delete Failed',
+                        description: err.message,
+                        variant: 'danger'
+                    });
+                }
             }
-        } catch (err: any) {
-            alert('Delete failed: ' + err.message);
-        }
+        });
     };
 
     const handleSaveAnnouncement = async () => {
@@ -2368,6 +2454,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                                         onDeleteCategory={handleDeleteCategory}
                                         isCategoryDeleteMode={isCategoryDeleteMode}
                                         onToggleCategoryDeleteMode={() => setIsCategoryDeleteMode(!isCategoryDeleteMode)}
+                                        showAlert={showAlert}
                                     />
                                 ))}
                             </div>
@@ -2482,6 +2569,7 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                                         onDeleteCategory={handleDeleteCategory}
                                         isCategoryDeleteMode={isCategoryDeleteMode}
                                         onToggleCategoryDeleteMode={() => setIsCategoryDeleteMode(!isCategoryDeleteMode)}
+                                        showAlert={showAlert}
                                     />
                                 ))}
                             </div>
@@ -2711,6 +2799,24 @@ export default function AdminOverlay({ isOpen, onClose }: AdminOverlayProps) {
                 onConfirm={confirmModal.onConfirm}
                 onCancel={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
             />
-        </div >
+
+            {/* Global Alert Modal */}
+            <AdminAlertModal
+                isOpen={alertModal.isOpen}
+                type={alertModal.type}
+                title={alertModal.title}
+                description={alertModal.description}
+                confirmText={alertModal.confirmText}
+                cancelText={alertModal.cancelText}
+                placeholder={alertModal.placeholder}
+                initialValue={alertModal.initialValue}
+                variant={alertModal.variant}
+                onConfirm={(val) => {
+                    alertModal.onConfirm(val);
+                    setAlertModal(prev => ({ ...prev, isOpen: false }));
+                }}
+                onCancel={() => setAlertModal(prev => ({ ...prev, isOpen: false }))}
+            />
+        </div>
     );
 }

@@ -1,10 +1,10 @@
-
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/utils/supabase/client';
 import ProductCard from './ProductCard';
 import { Database } from '@/types/supabase';
+import { useFilters } from '@/context/FilterContext';
 
 type Product = Database['public']['Tables']['products']['Row'];
 
@@ -28,6 +28,7 @@ async function fetchProducts() {
 }
 
 export default function ProductGrid({ selectedCategory = 'All', selectedSubcategory = null, searchQuery = '' }: ProductGridProps) {
+    const { filters } = useFilters();
     const { data: products, isLoading, error } = useQuery({
         queryKey: ['products'],
         queryFn: fetchProducts,
@@ -67,13 +68,22 @@ export default function ProductGrid({ selectedCategory = 'All', selectedSubcateg
         );
     }
 
-    const filtered = products.filter((p) => {
-        // 1. Category/Gender Filter
+    const filtered = products.filter((p: Product) => {
+        // --- 1. Base Global Search ---
+        if (searchQuery.trim()) {
+            const query = searchQuery.toLowerCase().trim();
+            const nameMatch = p.name.toLowerCase().includes(query);
+            const descMatch = p.description?.toLowerCase().includes(query);
+            // @ts-ignore
+            const subSubMatch = p.sub_subcategory?.toLowerCase().includes(query);
+            if (!(nameMatch || descMatch || subSubMatch)) return false;
+        }
+
+        // --- 2. Category/Gender Filter ---
         const categoryMatch = selectedCategory === 'All' || (() => {
             const cat = selectedCategory.toLowerCase();
             const gender = p.gender?.toLowerCase();
 
-            // Main Category Filter
             let matchesMain = false;
             if (cat === 'men') matchesMain = gender === 'men' || gender === 'unisex';
             else if (cat === 'women') matchesMain = gender === 'women' || gender === 'unisex';
@@ -82,7 +92,6 @@ export default function ProductGrid({ selectedCategory = 'All', selectedSubcateg
 
             if (!matchesMain) return false;
 
-            // Subcategory Filter (if any)
             if (selectedSubcategory) {
                 const sub = selectedSubcategory.toLowerCase();
                 const matchesSub = p.category?.toLowerCase() === sub;
@@ -90,29 +99,64 @@ export default function ProductGrid({ selectedCategory = 'All', selectedSubcateg
                 const matchesSubSub = p.sub_subcategory?.toLowerCase() === sub;
                 return matchesSub || matchesSubSub;
             }
-
             return true;
         })();
-
         if (!categoryMatch) return false;
 
-        // 2. Search Filter
-        if (!searchQuery.trim()) return true;
+        // --- 3. Advanced Drawer Filters ---
+        
+        // Price Filter
+        if (p.price < filters.minPrice || p.price > filters.maxPrice) return false;
 
-        const query = searchQuery.toLowerCase().trim();
-        const nameMatch = p.name.toLowerCase().includes(query);
-        const descMatch = p.description?.toLowerCase().includes(query);
-        // @ts-ignore
-        const subSubMatch = p.sub_subcategory?.toLowerCase().includes(query);
+        // Brand Filter
+        if (filters.brand.trim()) {
+            const bQuery = filters.brand.toLowerCase().trim();
+            if (!p.name.toLowerCase().includes(bQuery)) return false;
+        }
 
-        return nameMatch || descMatch || subSubMatch;
+        // Stock Filter
+        if (filters.hideOutOfStock && p.quantity <= 0) return false;
+
+        // Size Filter
+        if (filters.selectedSizes.length > 0) {
+            const productSizes = p.sizes || [];
+            const hasSizeMatch = filters.selectedSizes.some(s => productSizes.includes(s));
+            if (!hasSizeMatch) return false;
+        }
+
+        // New Arrivals (Last 14 days)
+        if (filters.onlyNewArrivals) {
+            const created = new Date(p.created_at).getTime();
+            const now = new Date().getTime();
+            const diffDays = (now - created) / (1000 * 60 * 60 * 24);
+            if (diffDays > 14) return false;
+        }
+
+        return true;
     });
 
-    if (filtered.length === 0) {
+    // --- 4. Sorting logic ---
+    const sorted = [...filtered].sort((a, b) => {
+        switch (filters.sortBy) {
+            case 'price-low':
+                return a.price - b.price;
+            case 'price-high':
+                return b.price - a.price;
+            case 'newest':
+                return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+            case 'popular':
+                // Popularity fallback to ID length or similar if no sales stats yet
+                return b.id.length - a.id.length;
+            default:
+                return 0;
+        }
+    });
+
+    if (sorted.length === 0) {
         return (
             <div className="p-8 text-center text-gray-500">
-                {searchQuery
-                    ? `No products matching "${searchQuery}"`
+                {searchQuery || filters.brand || filters.selectedSizes.length > 0
+                    ? `No products match your current filters`
                     : `No products in "${selectedCategory}"`
                 }
             </div>
@@ -121,7 +165,7 @@ export default function ProductGrid({ selectedCategory = 'All', selectedSubcateg
 
     return (
         <div className="grid grid-cols-2 gap-2 px-3 transform-gpu">
-            {filtered.map((product) => (
+            {sorted.map((product) => (
                 <ProductCard key={product.id} product={product} />
             ))}
         </div>

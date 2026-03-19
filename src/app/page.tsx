@@ -10,10 +10,11 @@ import { useCart } from '@/context/CartContext';
 import { useAdmin } from '@/context/AdminContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useLocation } from '@/context/LocationContext';
+import { FilterProvider, useFilters } from '@/context/FilterContext';
 import ProductGrid from '@/components/ProductGrid';
 import AdminOverlay from '@/components/Admin/AdminOverlay';
+import FilterDrawer from '@/components/FilterDrawer';
 import { User as UserIcon, Search, SlidersHorizontal } from 'lucide-react';
-import Toast from '@/components/Toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import PageTransition from '@/components/PageTransition';
 import CartIcon from '@/components/CartIcon';
@@ -25,6 +26,7 @@ function HomeContent() {
   const { isOwner, storeId, adminOpen, setAdminOpen } = useAdmin();
   const { theme } = useTheme();
   const { locationName, locationEnabled } = useLocation();
+  const { setDrawerOpen } = useFilters();
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const router = useRouter();
@@ -108,7 +110,6 @@ function HomeContent() {
   const queryClient = useQueryClient();
   const [userPhotoUrl, setUserPhotoUrl] = useState<string | null>(null);
   const [userName, setUserName] = useState<string>('Guest');
-  const [showFilterToast, setShowFilterToast] = useState(false);
   const productSectionRef = useRef<HTMLDivElement>(null);
 
   const scrollToProducts = () => {
@@ -400,7 +401,7 @@ function HomeContent() {
             </button>
 
             <button
-              onClick={() => setShowFilterToast(true)}
+              onClick={() => setDrawerOpen(true)}
               className="p-3 bg-gray-100 dark:bg-[#1a1a1a] hover:bg-gray-200 dark:hover:bg-[#252525] text-gray-600 dark:text-[#cba153] border border-gray-200 dark:border-gray-800 rounded-2xl transform-gpu active:scale-90 transition-all duration-200 flex items-center justify-center"
               aria-label="Filter"
             >
@@ -408,12 +409,6 @@ function HomeContent() {
             </button>
           </div>
         </section>
-
-        <Toast
-          message="Filter not available right now"
-          isVisible={showFilterToast}
-          onClose={() => setShowFilterToast(false)}
-        />
 
         {/* Circular Category Filter */}
         <section className="mt-6 mb-4">
@@ -500,6 +495,8 @@ function HomeContent() {
         />
       </PageTransition>
 
+      <FilterDrawer />
+
       <NotificationCenter
         isOpen={isNotificationsOpen}
         onClose={() => setIsNotificationsOpen(false)}
@@ -521,7 +518,9 @@ function HomeContent() {
 export default function Home() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-black" />}>
-      <HomeContent />
+      <FilterProvider>
+        <HomeContent />
+      </FilterProvider>
     </Suspense>
   );
 }
