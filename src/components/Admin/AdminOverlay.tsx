@@ -34,11 +34,16 @@ interface ChoiceChipGroupProps {
 }
 
 function ChoiceChipGroup({ options, selected, onChange, label, onAddNew, isDeleteMode, onToggleDeleteMode, onDeleteOption }: ChoiceChipGroupProps) {
+    const displayOptions = [...options];
+    if (selected && !displayOptions.includes(selected)) {
+        displayOptions.push(selected);
+    }
+
     return (
         <div className="flex flex-col gap-1">
             <div className="flex items-center gap-1.5">
                 {label && <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{label}</span>}
-                {onToggleDeleteMode && options.length > 0 && (
+                {onToggleDeleteMode && displayOptions.length > 0 && (
                     <button
                         type="button"
                         onClick={onToggleDeleteMode}
@@ -52,7 +57,7 @@ function ChoiceChipGroup({ options, selected, onChange, label, onAddNew, isDelet
                 )}
             </div>
             <div className="flex flex-wrap gap-1.5">
-                {options.map((opt) => (
+                {displayOptions.map((opt) => (
                     <div key={opt} className="relative group">
                         <button
                             type="button"
@@ -595,36 +600,27 @@ function ProductManageItem({
                                     />
 
                                     {localGender && (
-                                        isCustomCategory ? (
-                                            <div className="flex flex-col gap-1.5">
-                                                <div className="flex justify-between items-center">
-                                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Sub Category</span>
-                                                    <button onClick={() => setIsCustomCategory(false)} className="text-[10px] text-yellow-500 font-bold">Back</button>
-                                                </div>
-                                                <input
-                                                    type="text"
-                                                    value={localCategory}
-                                                    onChange={(e) => setLocalCategory(e.target.value)}
-                                                    placeholder="Type category..."
-                                                    className="w-full px-2 py-1 text-xs border border-gray-200 dark:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-white focus:ring-1 focus:ring-yellow-500 focus:outline-none"
-                                                />
-                                            </div>
-                                        ) : (
-                                            <ChoiceChipGroup
-                                                label="Sub Category"
-                                                options={categories[localGender] || []}
-                                                selected={localCategory}
-                                                onChange={(val) => {
-                                                    setLocalCategory(val);
+                                        <ChoiceChipGroup
+                                            label="Sub Category"
+                                            options={categories[localGender] || []}
+                                            selected={localCategory}
+                                            onChange={(val) => {
+                                                setLocalCategory(val);
+                                                setLocalSubSubCategory('');
+                                                setLocalSizes([]);
+                                            }}
+                                            onAddNew={() => {
+                                                const newCat = prompt('Enter new sub category:');
+                                                if (newCat) {
+                                                    setLocalCategory(newCat);
                                                     setLocalSubSubCategory('');
                                                     setLocalSizes([]);
-                                                }}
-                                                onAddNew={() => setIsCustomCategory(true)}
-                                                isDeleteMode={isCategoryDeleteMode}
-                                                onToggleDeleteMode={onToggleCategoryDeleteMode}
-                                                onDeleteOption={(opt) => onDeleteCategory(opt, localGender)}
-                                            />
-                                        )
+                                                }
+                                            }}
+                                            isDeleteMode={isCategoryDeleteMode}
+                                            onToggleDeleteMode={onToggleCategoryDeleteMode}
+                                            onDeleteOption={(opt) => onDeleteCategory(opt, localGender)}
+                                        />
                                     )}
 
                                     {localCategory && (
@@ -1122,48 +1118,35 @@ function UploadItemRow({ item, index, updateItem, removeItem, onPublish, categor
                     />
 
                     {localGender && (
-                        isCustomCategory ? (
-                            <div className="flex flex-col gap-1.5">
-                                <div className="flex justify-between items-center">
-                                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Sub Category</span>
-                                    <button
-                                        onClick={() => setIsCustomCategory(false)}
-                                        className="text-[10px] text-yellow-500 font-bold"
-                                    >
-                                        Back
-                                    </button>
-                                </div>
-                                <input
-                                    type="text"
-                                    value={localCategory}
-                                    onChange={(e) => {
-                                        setLocalCategory(e.target.value);
-                                        updateItem(index, 'category', e.target.value);
-                                    }}
-                                    placeholder="Type category..."
-                                    className="w-full px-2 py-1 text-xs border border-gray-200 dark:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-[#0a0a0a] text-white focus:ring-1 focus:ring-yellow-500 focus:outline-none"
-                                />
-                            </div>
-                        ) : (
-                            <ChoiceChipGroup
-                                label="What is it?"
-                                options={categories[localGender] || []}
-                                selected={localCategory}
-                                onChange={(val) => {
-                                    setLocalCategory(val);
-                                    updateItem(index, 'category', val);
+                        <ChoiceChipGroup
+                            label="What is it?"
+                            options={categories[localGender] || []}
+                            selected={localCategory}
+                            onChange={(val) => {
+                                setLocalCategory(val);
+                                updateItem(index, 'category', val);
+                                // Reset sub-sub and sizes
+                                setLocalSubSubCategory('');
+                                updateItem(index, 'subSubCategory', '');
+                                setLocalSizes([]);
+                                updateItem(index, 'sizes', []);
+                            }}
+                            onAddNew={() => {
+                                const newCat = prompt('Enter new sub category:');
+                                if (newCat) {
+                                    setLocalCategory(newCat);
+                                    updateItem(index, 'category', newCat);
                                     // Reset sub-sub and sizes
                                     setLocalSubSubCategory('');
                                     updateItem(index, 'subSubCategory', '');
                                     setLocalSizes([]);
                                     updateItem(index, 'sizes', []);
-                                }}
-                                onAddNew={() => setIsCustomCategory(true)}
-                                isDeleteMode={isCategoryDeleteMode}
-                                onToggleDeleteMode={onToggleCategoryDeleteMode}
-                                onDeleteOption={(opt) => onDeleteCategory(opt, localGender)}
-                            />
-                        )
+                                }
+                            }}
+                            isDeleteMode={isCategoryDeleteMode}
+                            onToggleDeleteMode={onToggleCategoryDeleteMode}
+                            onDeleteOption={(opt) => onDeleteCategory(opt, localGender)}
+                        />
                     )}
 
                     {localCategory && (
