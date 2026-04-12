@@ -103,8 +103,8 @@ export const HowToPay: React.FC = () => {
                         style={{ top: '56.5%', height: 70 }}
                     />
                     
-                    <div className="absolute top-[35.5%] left-[58%] -translate-x-1/2 -translate-y-1/2 w-[60%] h-12 flex items-center px-4">
-                        <span className="text-gray-900 font-black text-4xl tracking-tighter">
+                    <div className="absolute top-[43%] left-[58%] -translate-x-1/2 -translate-y-1/2 w-[60%] h-16 flex items-center px-4">
+                        <span className="text-gray-900 font-black text-5xl tracking-widest">
                             {frame > 150 ? '0963138123' : ''}
                         </span>
                     </div>
