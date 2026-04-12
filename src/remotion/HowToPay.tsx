@@ -66,15 +66,15 @@ export const HowToPay: React.FC = () => {
             <Sequence from={60} durationInFrames={70}>
                 <AbsoluteFill className="bg-[#f8f9fa] flex items-center justify-center">
                     <div 
-                        className="w-full max-w-md bg-white rounded-[40px] shadow-2xl overflow-hidden border border-gray-100 flex flex-col items-center p-12 space-y-6"
+                        className="w-[90%] bg-white rounded-[50px] shadow-2xl overflow-hidden border border-gray-100 flex flex-col items-center p-16 space-y-10"
                         style={{ transform: `scale(${interpolate(frame, [60, 75], [0.8, 1], { extrapolateRight: 'clamp' })})` }}
                     >
-                        <div className="text-sm font-black text-[#cba153] tracking-[0.2em]">STEP 1: COPY NUMBER</div>
-                        <div className="w-full h-20 bg-gray-50 rounded-2xl border-2 border-gray-100 flex items-center justify-between px-6 shadow-inner">
-                            <span className="font-mono font-black text-3xl text-gray-900 tracking-tight">09 63 13 81 23</span>
+                        <div className="text-xl font-black text-[#cba153] tracking-[0.3em] uppercase">STEP 1: COPY NUMBER</div>
+                        <div className="w-full h-32 bg-gray-50 rounded-3xl border-2 border-gray-100 flex items-center justify-between px-10 shadow-inner">
+                            <span className="font-mono font-black text-5xl text-gray-900 tracking-tighter">09 63 13 81 23</span>
                             <div 
-                                className={`text-sm font-black px-4 py-2 rounded-xl transition-colors duration-200 ${frame > 95 ? 'bg-green-500 text-white' : 'bg-[#cba153] text-black'}`}
-                                style={{ transform: `scale(${frame > 95 && frame < 105 ? 1.1 : 1})` }}
+                                className={`text-xl font-black px-6 py-4 rounded-2xl transition-colors duration-200 ${frame > 95 ? 'bg-green-500 text-white' : 'bg-[#cba153] text-black'}`}
+                                style={{ transform: `scale(${frame > 95 && frame < 105 ? 1.2 : 1})` }}
                             >
                                 {frame > 95 ? 'COPIED!' : 'COPY'}
                             </div>
