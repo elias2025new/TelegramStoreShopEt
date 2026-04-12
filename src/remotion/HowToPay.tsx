@@ -169,25 +169,46 @@ export const HowToPay: React.FC = () => {
             </Sequence>
 
             {/* Scene 5: Paste in store & Finish */}
-            <Sequence from={250} durationInFrames={50}>
-                <AbsoluteFill className="bg-[#f8f9fa] flex flex-col items-center justify-center p-8 space-y-10">
-                    <div className="w-[90%] bg-white rounded-[50px] shadow-2xl p-12 space-y-8 border border-gray-100">
-                        <div className="text-xl font-black text-[#cba153] tracking-[0.3em] uppercase">STEP 2: PASTE SMS</div>
-                        <div className="w-full h-32 bg-gray-50 rounded-3xl p-6 text-xl text-gray-500 font-mono overflow-hidden shadow-inner flex items-center">
+            <Sequence from={250} durationInFrames={250}>
+                <AbsoluteFill className="bg-[#f8f9fa] flex flex-col items-center justify-center p-8 space-y-12">
+                    <div className="w-[95%] bg-white rounded-[60px] shadow-2xl p-16 space-y-10 border border-gray-100">
+                        <div className="text-2xl font-black text-[#cba153] tracking-[0.4em] uppercase">STEP 2: PASTE SMS</div>
+                        <div className="w-full h-40 bg-gray-50 rounded-[40px] p-10 text-2xl text-gray-500 font-mono overflow-hidden shadow-inner flex items-center">
                             {frame > 270 ? 'Dear Customer, you have paid ETB 70.00...' : 'Paste here...'}
                         </div>
-                        <div className="w-full h-20 bg-[#cba153] rounded-2xl flex items-center justify-center text-black font-black text-2xl uppercase tracking-widest shadow-lg">
+                        <div 
+                            className="w-full h-24 bg-[#cba153] rounded-3xl flex items-center justify-center text-black font-black text-3xl uppercase tracking-[0.2em] shadow-2xl"
+                            style={{ transform: `scale(${frame > 290 && frame < 305 ? 1.05 : 1})` }}
+                        >
                             Place Order
                         </div>
                     </div>
                     
                     {/* Success Animation at the very end */}
-                    {frame > 290 && (
-                        <div className="absolute inset-0 bg-white/90 backdrop-blur flex items-center justify-center z-50">
-                            <div className="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center shadow-lg animate-bounce">
-                                <svg className="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M5 13l4 4L19 7" />
+                    {frame > 300 && (
+                        <div className="absolute inset-0 bg-white/95 backdrop-blur-xl flex flex-col items-center justify-center z-50 p-10 space-y-10">
+                            <motion.div 
+                                initial={{ scale: 0, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                className="w-48 h-48 bg-green-500 rounded-full flex items-center justify-center shadow-2xl"
+                            >
+                                <svg className="w-24 h-24 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path 
+                                        strokeLinecap="round" 
+                                        strokeLinejoin="round" 
+                                        strokeWidth={4} 
+                                        d="M5 13l4 4L19 7" 
+                                        style={{ strokeDasharray: 100, strokeDashoffset: interpolate(frame, [300, 320], [100, 0], { extrapolateRight: 'clamp' }) }}
+                                    />
                                 </svg>
+                            </motion.div>
+                            <div className="text-center space-y-4">
+                                <h1 className="text-6xl font-black text-gray-900 uppercase tracking-tighter">
+                                    Order Placed!
+                                </h1>
+                                <p className="text-3xl font-bold text-[#cba153] uppercase tracking-[0.3em]">
+                                    Thank You For Shopping
+                                </p>
                             </div>
                         </div>
                     )}
@@ -196,8 +217,8 @@ export const HowToPay: React.FC = () => {
 
             {/* Global Overlay for transition */}
             <div 
-                className="absolute inset-0 pointer-events-none" 
-                style={{ opacity: interpolate(frame, [295, 300], [0, 1]) }}
+                className="absolute inset-0 pointer-events-none z-[100]" 
+                style={{ opacity: interpolate(frame, [490, 500], [0, 1]) }}
             >
                 <div className="w-full h-full bg-black" />
             </div>
