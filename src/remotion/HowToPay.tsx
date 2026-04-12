@@ -118,10 +118,10 @@ export const HowToPay: React.FC = () => {
                             className="w-full h-full object-cover"
                         />
                         {/* Blur sensitive areas (70px height for solid coverage) */}
-                        {/* Upper Balance Blur (First SMS) */}
+                        {/* Upper Balance Blur (First SMS: 5,186.77) */}
                         <div 
-                            className="absolute left-[10%] w-[35%] bg-[#121212] rounded"
-                            style={{ top: '5%', height: 70 }}
+                            className="absolute left-[10%] w-[45%] bg-[#121212] rounded"
+                            style={{ top: '6.2%', height: 70 }}
                         />
                         {/* Name Blur (Dear bizawet) */}
                         <div 
@@ -133,10 +133,10 @@ export const HowToPay: React.FC = () => {
                             className="absolute left-[22%] w-[35%] bg-[#121212] rounded"
                             style={{ top: '38.5%', height: 70 }}
                         />
-                        {/* Lower Balance Blur (Your current balance is...) */}
+                        {/* Lower Balance Blur (5,116.77) */}
                         <div 
-                            className="absolute left-[45%] w-[35%] bg-[#121212] rounded"
-                            style={{ top: '52.5%', height: 70 }}
+                            className="absolute left-[40%] w-[45%] bg-[#121212] rounded"
+                            style={{ top: '53.8%', height: 70 }}
                         />
 
                         {/* Copy Selection Animation */}
