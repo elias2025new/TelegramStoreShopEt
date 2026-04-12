@@ -67,25 +67,25 @@ export const HowToPay: React.FC = () => {
                 <AbsoluteFill className="bg-[#f8f9fa] flex items-center justify-center">
                     <div 
                         className="w-[90%] bg-white rounded-[50px] shadow-2xl overflow-hidden border border-gray-100 flex flex-col items-center p-16 space-y-10"
-                        style={{ transform: `scale(${interpolate(frame, [0, 40], [0.8, 1], { extrapolateRight: 'clamp' })})` }}
+                        style={{ transform: `scale(${interpolate(frame, [120, 160], [0.8, 1], { extrapolateRight: 'clamp' })})` }}
                     >
                         <div className="text-xl font-black text-[#cba153] tracking-[0.3em] uppercase">STEP 1: COPY NUMBER</div>
                         <div className="w-full h-32 bg-gray-50 rounded-3xl border-2 border-gray-100 flex items-center justify-between px-10 shadow-inner">
                             <span className="font-mono font-black text-5xl text-gray-900 tracking-tighter">09 63 13 81 23</span>
                             <div 
-                                className={`text-xl font-black px-6 py-4 rounded-2xl transition-colors duration-200 ${frame > 120 ? 'bg-green-500 text-white' : 'bg-[#cba153] text-black'}`}
-                                style={{ transform: `scale(${frame > 120 && frame < 140 ? 1.2 : 1})` }}
+                                className={`text-xl font-black px-6 py-4 rounded-2xl transition-colors duration-200 ${frame > 240 ? 'bg-green-500 text-white' : 'bg-[#cba153] text-black'}`}
+                                style={{ transform: `scale(${frame > 240 && frame < 260 ? 1.2 : 1})` }}
                             >
-                                {frame > 120 ? 'COPIED!' : 'COPY'}
+                                {frame > 240 ? 'COPIED!' : 'COPY'}
                             </div>
                         </div>
                     </div>
                     {/* Pointer animation */}
                     <Pointer 
-                        x={interpolate(frame, [50, 120], [width + 200, width/2 + 140], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })}
+                        x={interpolate(frame, [170, 240], [width + 200, width/2 + 140], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })}
                         y={height / 2 + 35}
-                        opacity={interpolate(frame, [40, 60, 145, 155], [0, 1, 1, 0])}
-                        scale={interpolate(frame, [120, 125, 130], [1, 0.8, 1])}
+                        opacity={interpolate(frame, [160, 180, 265, 275], [0, 1, 1, 0])}
+                        scale={interpolate(frame, [240, 245, 250], [1, 0.8, 1])}
                     />
                 </AbsoluteFill>
             </Sequence>
@@ -111,8 +111,8 @@ export const HowToPay: React.FC = () => {
                     <Pointer 
                         x={width * 0.6}
                         y={height * 0.43}
-                        opacity={interpolate(frame, [20, 40, 130, 145], [0, 1, 1, 0])}
-                        scale={interpolate(frame, [45, 50, 55], [1, 0.8, 1])}
+                        opacity={interpolate(frame, [300, 320, 410, 425], [0, 1, 1, 0])}
+                        scale={interpolate(frame, [325, 330, 335], [1, 0.8, 1])}
                     />
                 </AbsoluteFill>
             </Sequence>
@@ -153,9 +153,9 @@ export const HowToPay: React.FC = () => {
                             style={{
                                 top: '40.6%',
                                 left: '8%',
-                                width: interpolate(frame, [40, 80], [0, 84], { extrapolateRight: 'clamp' }) + '%',
+                                width: interpolate(frame, [470, 510], [0, 84], { extrapolateRight: 'clamp' }) + '%',
                                 height: '14.5%',
-                                opacity: interpolate(frame, [30, 50], [0, 1])
+                                opacity: interpolate(frame, [460, 480], [0, 1])
                             }}
                         />
                         {/* Copy Instruction Banner */}
@@ -174,22 +174,22 @@ export const HowToPay: React.FC = () => {
                     <div className="w-[95%] bg-white rounded-[60px] shadow-2xl p-16 space-y-10 border border-gray-100">
                         <div className="text-2xl font-black text-[#cba153] tracking-[0.4em] uppercase">STEP 2: PASTE SMS</div>
                         <div className="w-full h-40 bg-gray-50 rounded-[40px] p-10 text-3xl text-gray-500 font-mono overflow-hidden shadow-inner flex items-center">
-                            {frame > 30 ? 'Dear Customer, you have paid ETB 70.00...' : 'Paste here...'}
+                            {frame > 610 ? 'Dear Customer, you have paid ETB 70.00...' : 'Paste here...'}
                         </div>
                         <div 
                             className="w-full h-24 bg-[#cba153] rounded-3xl flex items-center justify-center text-black font-black text-3xl uppercase tracking-[0.2em] shadow-2xl"
-                            style={{ transform: `scale(${frame > 60 && frame < 80 ? 1.05 : 1})` }}
+                            style={{ transform: `scale(${frame > 640 && frame < 660 ? 1.05 : 1})` }}
                         >
                             Place Order
                         </div>
                     </div>
                     
                     {/* Success Animation at the very end */}
-                    {frame > 80 && (
+                    {frame > 660 && (
                         <div className="absolute inset-0 bg-white/95 backdrop-blur-xl flex flex-col items-center justify-center z-50 p-10 space-y-10">
                             <div 
                                 className="w-48 h-48 bg-green-500 rounded-full flex items-center justify-center shadow-2xl"
-                                style={{ transform: `scale(${interpolate(frame, [80, 100], [0, 1], { extrapolateRight: 'clamp' })})` }}
+                                style={{ transform: `scale(${interpolate(frame, [660, 680], [0, 1], { extrapolateRight: 'clamp' })})` }}
                             >
                                 <svg className="w-24 h-24 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path 
@@ -197,13 +197,13 @@ export const HowToPay: React.FC = () => {
                                         strokeLinejoin="round" 
                                         strokeWidth={4} 
                                         d="M5 13l4 4L19 7" 
-                                        style={{ strokeDasharray: 100, strokeDashoffset: interpolate(frame, [100, 130], [100, 0], { extrapolateRight: 'clamp' }) }}
+                                        style={{ strokeDasharray: 100, strokeDashoffset: interpolate(frame, [680, 710], [100, 0], { extrapolateRight: 'clamp' }) }}
                                     />
                                 </svg>
                             </div>
                             <div 
                                 className="text-center space-y-4"
-                                style={{ opacity: interpolate(frame, [110, 140], [0, 1]) }}
+                                style={{ opacity: interpolate(frame, [690, 720], [0, 1]) }}
                             >
                                 <h1 className="text-6xl font-black text-gray-900 uppercase tracking-tighter">
                                     Order Placed!
