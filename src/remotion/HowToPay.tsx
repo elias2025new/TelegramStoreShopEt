@@ -36,6 +36,9 @@ export const HowToPay: React.FC = () => {
 
     const springConfig: SpringConfig = {
         damping: 12,
+        mass: 1,
+        stiffness: 100,
+        overshootClamping: false,
     };
 
     // Transition values
