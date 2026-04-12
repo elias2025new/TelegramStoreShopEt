@@ -143,7 +143,7 @@ export const HowToPay: React.FC = () => {
                         />
                         {/* Lower Balance Blur (5,116.77) */}
                         <div 
-                            className="absolute left-[40%] w-[55%] bg-[#121212] rounded"
+                            className="absolute left-[10%] w-[50%] bg-[#121212] rounded"
                             style={{ top: '57.5%', height: 70 }}
                         />
 
