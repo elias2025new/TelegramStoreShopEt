@@ -48,50 +48,50 @@ export const HowToPay: React.FC = () => {
         <AbsoluteFill className="bg-black text-white font-sans overflow-hidden">
             
             {/* Scene 1: Intro */}
-            <Sequence from={0} durationInFrames={60}>
+            <Sequence from={0} durationInFrames={120}>
                 <AbsoluteFill className="bg-[#111] flex items-center justify-center">
                     <div className="text-center space-y-4 px-10">
                         <h1 
-                            className="text-6xl font-black uppercase tracking-tighter text-[#cba153]"
+                            className="text-7xl font-black uppercase tracking-tighter text-[#cba153]"
                             style={{ transform: `scale(${spring({ frame, fps, config: springConfig })})` }}
                         >
                             Telebirr
                         </h1>
-                        <p className="text-2xl font-bold text-gray-400">Tutorial: How to Pay</p>
+                        <p className="text-3xl font-bold text-gray-400">Tutorial: How to Pay</p>
                     </div>
                 </AbsoluteFill>
             </Sequence>
 
             {/* Scene 2: Copy Phone Number from Checkout */}
-            <Sequence from={60} durationInFrames={70}>
+            <Sequence from={120} durationInFrames={160}>
                 <AbsoluteFill className="bg-[#f8f9fa] flex items-center justify-center">
                     <div 
                         className="w-[90%] bg-white rounded-[50px] shadow-2xl overflow-hidden border border-gray-100 flex flex-col items-center p-16 space-y-10"
-                        style={{ transform: `scale(${interpolate(frame, [60, 75], [0.8, 1], { extrapolateRight: 'clamp' })})` }}
+                        style={{ transform: `scale(${interpolate(frame, [0, 40], [0.8, 1], { extrapolateRight: 'clamp' })})` }}
                     >
                         <div className="text-xl font-black text-[#cba153] tracking-[0.3em] uppercase">STEP 1: COPY NUMBER</div>
                         <div className="w-full h-32 bg-gray-50 rounded-3xl border-2 border-gray-100 flex items-center justify-between px-10 shadow-inner">
                             <span className="font-mono font-black text-5xl text-gray-900 tracking-tighter">09 63 13 81 23</span>
                             <div 
-                                className={`text-xl font-black px-6 py-4 rounded-2xl transition-colors duration-200 ${frame > 95 ? 'bg-green-500 text-white' : 'bg-[#cba153] text-black'}`}
-                                style={{ transform: `scale(${frame > 95 && frame < 105 ? 1.2 : 1})` }}
+                                className={`text-xl font-black px-6 py-4 rounded-2xl transition-colors duration-200 ${frame > 120 ? 'bg-green-500 text-white' : 'bg-[#cba153] text-black'}`}
+                                style={{ transform: `scale(${frame > 120 && frame < 140 ? 1.2 : 1})` }}
                             >
-                                {frame > 95 ? 'COPIED!' : 'COPY'}
+                                {frame > 120 ? 'COPIED!' : 'COPY'}
                             </div>
                         </div>
                     </div>
                     {/* Pointer animation */}
                     <Pointer 
-                        x={interpolate(frame, [70, 95], [width + 200, width/2 + 140], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })}
+                        x={interpolate(frame, [50, 120], [width + 200, width/2 + 140], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })}
                         y={height / 2 + 35}
-                        opacity={interpolate(frame, [65, 75, 120, 130], [0, 1, 1, 0])}
-                        scale={interpolate(frame, [95, 100, 105], [1, 0.8, 1])}
+                        opacity={interpolate(frame, [40, 60, 145, 155], [0, 1, 1, 0])}
+                        scale={interpolate(frame, [120, 125, 130], [1, 0.8, 1])}
                     />
                 </AbsoluteFill>
             </Sequence>
 
             {/* Scene 3: Paste in Telebirr App */}
-            <Sequence from={130} durationInFrames={60}>
+            <Sequence from={280} durationInFrames={150}>
                 <AbsoluteFill className="bg-white">
                     <Img 
                         src={staticFile("tutorials/telebirr_app.jpg")} 
@@ -109,16 +109,16 @@ export const HowToPay: React.FC = () => {
                         </span>
                     </div>
                     <Pointer 
-                        x={width / 2}
-                        y={height * 0.35}
-                        opacity={interpolate(frame, [135, 145, 180, 190], [0, 1, 1, 0])}
-                        scale={interpolate(frame, [145, 150], [1, 0.9])}
+                        x={width * 0.6}
+                        y={height * 0.43}
+                        opacity={interpolate(frame, [20, 40, 130, 145], [0, 1, 1, 0])}
+                        scale={interpolate(frame, [45, 50, 55], [1, 0.8, 1])}
                     />
                 </AbsoluteFill>
             </Sequence>
 
             {/* Scene 4: SMS Received & Copy */}
-            <Sequence from={190} durationInFrames={60}>
+            <Sequence from={430} durationInFrames={150}>
                 <AbsoluteFill className="bg-[#121212]">
                     <div className="relative w-full h-full">
                         <Img 
@@ -153,9 +153,9 @@ export const HowToPay: React.FC = () => {
                             style={{
                                 top: '40.6%',
                                 left: '8%',
-                                width: interpolate(frame, [210, 230], [0, 84], { extrapolateRight: 'clamp' }) + '%',
+                                width: interpolate(frame, [40, 80], [0, 84], { extrapolateRight: 'clamp' }) + '%',
                                 height: '14.5%',
-                                opacity: interpolate(frame, [205, 215], [0, 1])
+                                opacity: interpolate(frame, [30, 50], [0, 1])
                             }}
                         />
                         {/* Copy Instruction Banner */}
@@ -169,28 +169,27 @@ export const HowToPay: React.FC = () => {
             </Sequence>
 
             {/* Scene 5: Paste in store & Finish */}
-            <Sequence from={250} durationInFrames={250}>
+            <Sequence from={580} durationInFrames={220}>
                 <AbsoluteFill className="bg-[#f8f9fa] flex flex-col items-center justify-center p-8 space-y-12">
                     <div className="w-[95%] bg-white rounded-[60px] shadow-2xl p-16 space-y-10 border border-gray-100">
                         <div className="text-2xl font-black text-[#cba153] tracking-[0.4em] uppercase">STEP 2: PASTE SMS</div>
-                        <div className="w-full h-40 bg-gray-50 rounded-[40px] p-10 text-2xl text-gray-500 font-mono overflow-hidden shadow-inner flex items-center">
-                            {frame > 270 ? 'Dear Customer, you have paid ETB 70.00...' : 'Paste here...'}
+                        <div className="w-full h-40 bg-gray-50 rounded-[40px] p-10 text-3xl text-gray-500 font-mono overflow-hidden shadow-inner flex items-center">
+                            {frame > 30 ? 'Dear Customer, you have paid ETB 70.00...' : 'Paste here...'}
                         </div>
                         <div 
                             className="w-full h-24 bg-[#cba153] rounded-3xl flex items-center justify-center text-black font-black text-3xl uppercase tracking-[0.2em] shadow-2xl"
-                            style={{ transform: `scale(${frame > 290 && frame < 305 ? 1.05 : 1})` }}
+                            style={{ transform: `scale(${frame > 60 && frame < 80 ? 1.05 : 1})` }}
                         >
                             Place Order
                         </div>
                     </div>
                     
                     {/* Success Animation at the very end */}
-                    {frame > 300 && (
+                    {frame > 80 && (
                         <div className="absolute inset-0 bg-white/95 backdrop-blur-xl flex flex-col items-center justify-center z-50 p-10 space-y-10">
-                            <motion.div 
-                                initial={{ scale: 0, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
+                            <div 
                                 className="w-48 h-48 bg-green-500 rounded-full flex items-center justify-center shadow-2xl"
+                                style={{ transform: `scale(${interpolate(frame, [80, 100], [0, 1], { extrapolateRight: 'clamp' })})` }}
                             >
                                 <svg className="w-24 h-24 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path 
@@ -198,11 +197,14 @@ export const HowToPay: React.FC = () => {
                                         strokeLinejoin="round" 
                                         strokeWidth={4} 
                                         d="M5 13l4 4L19 7" 
-                                        style={{ strokeDasharray: 100, strokeDashoffset: interpolate(frame, [300, 320], [100, 0], { extrapolateRight: 'clamp' }) }}
+                                        style={{ strokeDasharray: 100, strokeDashoffset: interpolate(frame, [100, 130], [100, 0], { extrapolateRight: 'clamp' }) }}
                                     />
                                 </svg>
-                            </motion.div>
-                            <div className="text-center space-y-4">
+                            </div>
+                            <div 
+                                className="text-center space-y-4"
+                                style={{ opacity: interpolate(frame, [110, 140], [0, 1]) }}
+                            >
                                 <h1 className="text-6xl font-black text-gray-900 uppercase tracking-tighter">
                                     Order Placed!
                                 </h1>
@@ -218,7 +220,7 @@ export const HowToPay: React.FC = () => {
             {/* Global Overlay for transition */}
             <div 
                 className="absolute inset-0 pointer-events-none z-[100]" 
-                style={{ opacity: interpolate(frame, [490, 500], [0, 1]) }}
+                style={{ opacity: interpolate(frame, [780, 800], [0, 1]) }}
             >
                 <div className="w-full h-full bg-black" />
             </div>
