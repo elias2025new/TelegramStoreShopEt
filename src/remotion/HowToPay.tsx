@@ -89,6 +89,11 @@ export const HowToPay: React.FC = () => {
                         src={staticFile("tutorials/telebirr_app.jpg")} 
                         className="w-full h-full object-cover"
                     />
+                    {/* Blur 'Recent' name (Merko) */}
+                    <div 
+                        className="absolute top-[58.8%] left-[15%] w-[30%] h-6 bg-white/60 backdrop-blur-xl rounded-md"
+                    />
+                    
                     <div className="absolute top-[35%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[70%] h-10 flex items-center px-4 bg-white/10">
                         <span className="text-gray-900 font-bold text-xl">
                             {frame > 150 ? '0963138123' : ''}
@@ -112,13 +117,21 @@ export const HowToPay: React.FC = () => {
                             className="w-full h-full object-cover"
                         />
                         {/* Blur sensitive areas */}
-                        {/* Name Blur */}
+                        {/* Upper Balance Blur (First SMS) */}
                         <div 
-                            className="absolute top-[37.7%] left-[17%] w-[25%] h-5 bg-black/40 backdrop-blur-md rounded"
+                            className="absolute top-[6.3%] left-[10%] w-[25%] h-5 bg-black/60 backdrop-blur-xl rounded"
                         />
-                        {/* Balance Blur */}
+                        {/* Name Blur (Dear bizawet) */}
                         <div 
-                            className="absolute top-[55.5%] left-[45%] w-[30%] h-5 bg-black/40 backdrop-blur-md rounded"
+                            className="absolute top-[37.7%] left-[16%] w-[25%] h-5 bg-black/60 backdrop-blur-xl rounded"
+                        />
+                        {/* Paid Amount Blur (paid ETB 70.00) */}
+                        <div 
+                            className="absolute top-[40.4%] left-[23%] w-[25%] h-5 bg-black/60 backdrop-blur-xl rounded"
+                        />
+                        {/* Lower Balance Blur (Your current balance is...) */}
+                        <div 
+                            className="absolute top-[55.3%] left-[45%] w-[30%] h-5 bg-black/60 backdrop-blur-xl rounded"
                         />
 
                         {/* Copy Selection Animation */}
