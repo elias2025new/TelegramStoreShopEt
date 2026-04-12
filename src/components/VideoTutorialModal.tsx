@@ -50,7 +50,7 @@ export const VideoTutorialModal: React.FC<VideoTutorialModalProps> = ({ isOpen, 
                         <div className="flex-1 bg-black relative flex items-center justify-center">
                             <Player
                                 component={HowToPay}
-                                durationInFrames={300}
+                                durationInFrames={800}
                                 compositionWidth={1080}
                                 compositionHeight={1920}
                                 fps={30}
