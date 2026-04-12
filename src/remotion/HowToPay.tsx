@@ -170,13 +170,13 @@ export const HowToPay: React.FC = () => {
 
             {/* Scene 5: Paste in store & Finish */}
             <Sequence from={250} durationInFrames={50}>
-                <AbsoluteFill className="bg-[#f8f9fa] flex flex-col items-center justify-center p-8 space-y-6">
-                    <div className="w-full bg-white rounded-3xl shadow-xl p-6 space-y-4 border border-gray-100">
-                        <div className="text-xs font-black text-gray-400 tracking-widest">STEP 2: PASTE SMS</div>
-                        <div className="w-full h-24 bg-gray-50 rounded-xl p-3 text-xs text-gray-500 font-mono overflow-hidden">
-                            {frame > 270 ? 'Dear Customer, you have paid ETB 70.00... transaction number DDB5SPBBZZ...' : 'Paste here...'}
+                <AbsoluteFill className="bg-[#f8f9fa] flex flex-col items-center justify-center p-8 space-y-10">
+                    <div className="w-[90%] bg-white rounded-[50px] shadow-2xl p-12 space-y-8 border border-gray-100">
+                        <div className="text-xl font-black text-[#cba153] tracking-[0.3em] uppercase">STEP 2: PASTE SMS</div>
+                        <div className="w-full h-32 bg-gray-50 rounded-3xl p-6 text-xl text-gray-500 font-mono overflow-hidden shadow-inner flex items-center">
+                            {frame > 270 ? 'Dear Customer, you have paid ETB 70.00...' : 'Paste here...'}
                         </div>
-                        <div className="w-full h-12 bg-[#cba153] rounded-xl flex items-center justify-center text-black font-black uppercase tracking-widest shadow-md">
+                        <div className="w-full h-20 bg-[#cba153] rounded-2xl flex items-center justify-center text-black font-black text-2xl uppercase tracking-widest shadow-lg">
                             Place Order
                         </div>
                     </div>
