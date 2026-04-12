@@ -91,7 +91,8 @@ export const HowToPay: React.FC = () => {
                     />
                     {/* Blur 'Recent' name (Merko) */}
                     <div 
-                        className="absolute top-[58.2%] left-[15%] w-[35%] h-10 bg-[#f8f9fa] backdrop-blur-xl rounded-md"
+                        className="absolute left-[15%] w-[40%] bg-[#f8f9fa] backdrop-blur-xl rounded-md"
+                        style={{ top: '56.5%', height: 70 }}
                     />
                     
                     <div className="absolute top-[35%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[70%] h-10 flex items-center px-4 bg-white/10">
@@ -116,22 +117,26 @@ export const HowToPay: React.FC = () => {
                             src={staticFile("tutorials/telebirr_sms.jpg")} 
                             className="w-full h-full object-cover"
                         />
-                        {/* Blur sensitive areas */}
+                        {/* Blur sensitive areas (70px height for solid coverage) */}
                         {/* Upper Balance Blur (First SMS) */}
                         <div 
-                            className="absolute top-[6.3%] left-[10%] w-[30%] h-8 bg-[#121212] rounded"
+                            className="absolute left-[10%] w-[35%] bg-[#121212] rounded"
+                            style={{ top: '5%', height: 70 }}
                         />
                         {/* Name Blur (Dear bizawet) */}
                         <div 
-                            className="absolute top-[36.6%] left-[15%] w-[30%] h-9 bg-[#121212] rounded"
+                            className="absolute left-[15%] w-[35%] bg-[#121212] rounded"
+                            style={{ top: '35%', height: 70 }}
                         />
                         {/* Paid Amount Blur (paid ETB 70.00) */}
                         <div 
-                            className="absolute top-[40.2%] left-[22%] w-[30%] h-9 bg-[#121212] rounded"
+                            className="absolute left-[22%] w-[35%] bg-[#121212] rounded"
+                            style={{ top: '38.5%', height: 70 }}
                         />
                         {/* Lower Balance Blur (Your current balance is...) */}
                         <div 
-                            className="absolute top-[54.3%] left-[45%] w-[35%] h-9 bg-[#121212] rounded"
+                            className="absolute left-[45%] w-[35%] bg-[#121212] rounded"
+                            style={{ top: '52.5%', height: 70 }}
                         />
 
                         {/* Copy Selection Animation */}
