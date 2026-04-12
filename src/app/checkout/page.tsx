@@ -19,7 +19,8 @@ import {
     CreditCard,
     CheckCircle2,
     Loader2,
-    AlertCircle
+    AlertCircle,
+    Play
 } from 'lucide-react';
 import { VideoTutorialModal } from '@/components/VideoTutorialModal';
 
