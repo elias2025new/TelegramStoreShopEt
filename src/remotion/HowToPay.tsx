@@ -158,10 +158,11 @@ export const HowToPay: React.FC = () => {
                                 opacity: interpolate(frame, [205, 215], [0, 1])
                             }}
                         />
-                    </div>
-                    <div className="absolute bottom-10 w-full text-center">
-                        <div className="inline-block bg-[#cba153] text-black font-black px-6 py-2 rounded-full text-lg shadow-lg">
-                            COPY SMS
+                        {/* Copy Instruction Banner */}
+                        <div className="absolute top-[40%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[80%] bg-[#cba153] py-6 px-4 rounded-3xl shadow-2xl border-4 border-white flex items-center justify-center z-50">
+                            <span className="text-black font-black text-5xl text-center uppercase tracking-tight">
+                                Copy SMS
+                            </span>
                         </div>
                     </div>
                 </AbsoluteFill>
