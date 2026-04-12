@@ -91,7 +91,7 @@ export const HowToPay: React.FC = () => {
                     />
                     {/* Blur 'Recent' name (Merko) */}
                     <div 
-                        className="absolute top-[58.8%] left-[15%] w-[30%] h-6 bg-white/60 backdrop-blur-xl rounded-md"
+                        className="absolute top-[58.2%] left-[15%] w-[35%] h-10 bg-[#f8f9fa] backdrop-blur-xl rounded-md"
                     />
                     
                     <div className="absolute top-[35%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[70%] h-10 flex items-center px-4 bg-white/10">
@@ -119,19 +119,19 @@ export const HowToPay: React.FC = () => {
                         {/* Blur sensitive areas */}
                         {/* Upper Balance Blur (First SMS) */}
                         <div 
-                            className="absolute top-[6.3%] left-[10%] w-[25%] h-5 bg-black/60 backdrop-blur-xl rounded"
+                            className="absolute top-[6.3%] left-[10%] w-[30%] h-8 bg-[#121212] rounded"
                         />
                         {/* Name Blur (Dear bizawet) */}
                         <div 
-                            className="absolute top-[37.7%] left-[16%] w-[25%] h-5 bg-black/60 backdrop-blur-xl rounded"
+                            className="absolute top-[36.6%] left-[15%] w-[30%] h-9 bg-[#121212] rounded"
                         />
                         {/* Paid Amount Blur (paid ETB 70.00) */}
                         <div 
-                            className="absolute top-[40.4%] left-[23%] w-[25%] h-5 bg-black/60 backdrop-blur-xl rounded"
+                            className="absolute top-[40.2%] left-[22%] w-[30%] h-9 bg-[#121212] rounded"
                         />
                         {/* Lower Balance Blur (Your current balance is...) */}
                         <div 
-                            className="absolute top-[55.3%] left-[45%] w-[30%] h-5 bg-black/60 backdrop-blur-xl rounded"
+                            className="absolute top-[54.3%] left-[45%] w-[35%] h-9 bg-[#121212] rounded"
                         />
 
                         {/* Copy Selection Animation */}
