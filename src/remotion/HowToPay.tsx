@@ -65,19 +65,27 @@ export const HowToPay: React.FC = () => {
             {/* Scene 2: Copy Phone Number from Checkout */}
             <Sequence from={60} durationInFrames={70}>
                 <AbsoluteFill className="bg-[#f8f9fa] flex items-center justify-center">
-                    <div className="w-full max-w-sm bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 flex flex-col items-center p-8 space-y-4">
-                        <div className="text-xs font-black text-gray-400 tracking-widest">STEP 1: COPY NUMBER</div>
-                        <div className="w-full h-12 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-between px-4">
-                            <span className="font-mono font-bold text-gray-900">09 63 13 81 23</span>
-                            <div className="bg-[#cba153] text-black text-[10px] font-black px-2 py-1 rounded">COPY</div>
+                    <div 
+                        className="w-full max-w-md bg-white rounded-[40px] shadow-2xl overflow-hidden border border-gray-100 flex flex-col items-center p-12 space-y-6"
+                        style={{ transform: `scale(${interpolate(frame, [60, 75], [0.8, 1], { extrapolateRight: 'clamp' })})` }}
+                    >
+                        <div className="text-sm font-black text-[#cba153] tracking-[0.2em]">STEP 1: COPY NUMBER</div>
+                        <div className="w-full h-20 bg-gray-50 rounded-2xl border-2 border-gray-100 flex items-center justify-between px-6 shadow-inner">
+                            <span className="font-mono font-black text-3xl text-gray-900 tracking-tight">09 63 13 81 23</span>
+                            <div 
+                                className={`text-sm font-black px-4 py-2 rounded-xl transition-colors duration-200 ${frame > 95 ? 'bg-green-500 text-white' : 'bg-[#cba153] text-black'}`}
+                                style={{ transform: `scale(${frame > 95 && frame < 105 ? 1.1 : 1})` }}
+                            >
+                                {frame > 95 ? 'COPIED!' : 'COPY'}
+                            </div>
                         </div>
                     </div>
                     {/* Pointer animation */}
                     <Pointer 
-                        x={interpolate(frame, [70, 90], [width, width/2 + 100], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })}
-                        y={height / 2 + 25}
+                        x={interpolate(frame, [70, 95], [width + 200, width/2 + 140], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })}
+                        y={height / 2 + 35}
                         opacity={interpolate(frame, [65, 75, 120, 130], [0, 1, 1, 0])}
-                        scale={interpolate(frame, [90, 95, 100], [1, 0.8, 1])}
+                        scale={interpolate(frame, [95, 100, 105], [1, 0.8, 1])}
                     />
                 </AbsoluteFill>
             </Sequence>
