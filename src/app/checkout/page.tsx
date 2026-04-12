@@ -574,16 +574,6 @@ export default function CheckoutPage() {
                                                     </button>
                                                 </div>
 
-                                                <div className="flex justify-center mb-4">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setShowTutorial(true)}
-                                                        className="text-[10px] font-black text-[#cba153] hover:underline uppercase tracking-widest flex items-center gap-1.5 py-1 px-3 bg-[#cba153]/10 rounded-full border border-[#cba153]/20"
-                                                    >
-                                                        <Play className="w-2.5 h-2.5 fill-[#cba153]" />
-                                                        How to Pay?
-                                                    </button>
-                                                </div>
 
                                                 <AnimatePresence>
                                                     {formData.bankMethod === 'telebirr' && (
@@ -594,6 +584,16 @@ export default function CheckoutPage() {
                                                             className="overflow-hidden mt-3"
                                                         >
                                                             <div className="p-4 bg-white dark:bg-gray-900 border border-[#cba153]/30 rounded-2xl space-y-4 shadow-sm shadow-[#cba153]/5">
+                                                                <div className="flex justify-center mb-2">
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => setShowTutorial(true)}
+                                                                        className="text-[10px] font-black text-[#cba153] hover:underline uppercase tracking-widest flex items-center gap-1.5 py-1 px-3 bg-[#cba153]/10 rounded-full border border-[#cba153]/20"
+                                                                    >
+                                                                        <Play className="w-2.5 h-2.5 fill-[#cba153]" />
+                                                                        How to Pay?
+                                                                    </button>
+                                                                </div>
                                                                 <div className="space-y-1">
                                                                     <p className="text-xs font-bold text-gray-900 dark:text-white">Step 1: Send Payment</p>
                                                                     <p className="text-[11px] text-gray-500">Send <span className="font-bold text-[#cba153]">{new Intl.NumberFormat('en-ET', { style: 'currency', currency: 'ETB', maximumFractionDigits: 0 }).format(totalPrice)}</span> to the following number:</p>
