@@ -6,9 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "video": "remotion studio src/remotion/index.ts",
+    "video:render": "remotion render src/remotion/index.ts HowToPay out/video.mp4"
   },
   "dependencies": {
+    "@remotion/bundler": "^4.0.448",
+    "@remotion/cli": "^4.0.448",
+    "@remotion/player": "^4.0.448",
+    "@remotion/renderer": "^4.0.448",
     "@supabase/supabase-js": "^2.96.0",
     "@tanstack/react-query": "^5.90.21",
     "@twa-dev/sdk": "^8.0.2",
@@ -17,7 +23,9 @@
     "lucide-react": "^0.574.0",
     "next": "16.1.6",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "remotion": "^4.0.448",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

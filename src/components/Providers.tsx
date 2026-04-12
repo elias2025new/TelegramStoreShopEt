@@ -23,10 +23,12 @@ export default function Providers({ children }: { children: React.ReactNode }) {
                 // Expand to fill full height
                 twa.expand();
                 // Request true fullscreen (covers top status bar too) — Telegram 8.0+
-                try {
-                    twa.requestFullscreen();
-                } catch {
-                    // Older Telegram clients don't support requestFullscreen, ignore
+                if (twa.isVersionAtLeast('8.0')) {
+                    try {
+                        twa.requestFullscreen();
+                    } catch (err) {
+                        console.warn('Fullscreen request failed:', err);
+                    }
                 }
                 // Hide the back button so users don't see the Telegram back arrow
                 twa.BackButton.hide();

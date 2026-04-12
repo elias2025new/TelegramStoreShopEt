@@ -21,6 +21,7 @@ import {
     Loader2,
     AlertCircle
 } from 'lucide-react';
+import { VideoTutorialModal } from '@/components/VideoTutorialModal';
 
 type Step = 'details' | 'payment' | 'summary' | 'success';
 
@@ -35,13 +36,14 @@ interface FormData {
 
 export default function CheckoutPage() {
     const router = useRouter();
-    const { items, totalPrice, clearCart } = useCart();
+    const { items, totalPrice, clearCart, isInitialized } = useCart();
     const { locationName, locationEnabled, enableLocation } = useLocation();
 
     const [currentStep, setCurrentStep] = useState<Step>('details');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [orderId, setOrderId] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [showTutorial, setShowTutorial] = useState(false);
 
     const [formData, setFormData] = useState<FormData>({
         fullName: '',
@@ -71,6 +73,14 @@ export default function CheckoutPage() {
             setFormData(prev => ({ ...prev, address: locationName }));
         }
     }, [locationEnabled, locationName]);
+
+    if (!isInitialized) {
+        return (
+            <div className="min-h-screen bg-[#f8f9fa] dark:bg-black flex flex-col items-center justify-center p-4">
+                <Loader2 className="w-8 h-8 animate-spin text-[#cba153]" />
+            </div>
+        );
+    }
 
     if (items.length === 0 && currentStep !== 'success') {
         return (
@@ -563,6 +573,17 @@ export default function CheckoutPage() {
                                                     </button>
                                                 </div>
 
+                                                <div className="flex justify-center mb-4">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowTutorial(true)}
+                                                        className="text-[10px] font-black text-[#cba153] hover:underline uppercase tracking-widest flex items-center gap-1.5 py-1 px-3 bg-[#cba153]/10 rounded-full border border-[#cba153]/20"
+                                                    >
+                                                        <Play className="w-2.5 h-2.5 fill-[#cba153]" />
+                                                        How to Pay?
+                                                    </button>
+                                                </div>
+
                                                 <AnimatePresence>
                                                     {formData.bankMethod === 'telebirr' && (
                                                         <motion.div
@@ -743,6 +764,11 @@ export default function CheckoutPage() {
                         </button>
                     </div>
                 )}
+
+                <VideoTutorialModal 
+                    isOpen={showTutorial} 
+                    onClose={() => setShowTutorial(false)} 
+                />
             </main>
         </PageTransition>
     );

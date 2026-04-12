@@ -23,28 +23,39 @@ interface CartContextType {
     totalItems: number;
     totalPrice: number;
     showToast: (message: string) => void;
+    isInitialized: boolean;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-    const [items, setItems] = useState<CartItem[]>(() => {
-        // Lazy initialize from localStorage to avoid setState-in-effect
-        if (typeof window === 'undefined') return [];
+    const [items, setItems] = useState<CartItem[]>([]);
+    const [isInitialized, setIsInitialized] = useState(false);
+    const [toast, setToast] = useState({ message: '', isVisible: false });
+
+    // Initial load from localStorage
+    useEffect(() => {
         try {
             const saved = localStorage.getItem('cart_items');
-            const parsed = saved ? JSON.parse(saved) : [];
-            return Array.isArray(parsed) ? parsed : [];
-        } catch {
-            return [];
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (Array.isArray(parsed)) {
+                    setItems(parsed);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to load cart from localStorage:', error);
+        } finally {
+            setIsInitialized(true);
         }
-    });
-    const [toast, setToast] = useState({ message: '', isVisible: false });
+    }, []);
 
     // Save cart to localStorage whenever it changes
     useEffect(() => {
-        localStorage.setItem('cart_items', JSON.stringify(items));
-    }, [items]);
+        if (isInitialized) {
+            localStorage.setItem('cart_items', JSON.stringify(items));
+        }
+    }, [items, isInitialized]);
 
     const showToast = useCallback((message: string) => {
         setToast({ message, isVisible: true });
@@ -139,7 +150,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const totalPrice = items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
 
     return (
-        <CartContext.Provider value={{ items, addToCart, removeFromCart, updateQuantity, clearCart, totalItems, totalPrice, showToast }}>
+        <CartContext.Provider value={{ items, addToCart, removeFromCart, updateQuantity, clearCart, totalItems, totalPrice, showToast, isInitialized }}>
             {children}
             <Toast
                 message={toast.message}
