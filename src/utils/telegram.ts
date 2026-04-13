@@ -72,6 +72,7 @@ interface OrderData {
     payment_method: string;
     status: string;
     transaction_id?: string | null;
+    payment_screenshot_url?: string | null;
 }
 
 export function formatOrderMessage(orderData: OrderData, items: CartItem[], totalPrice: number) {
@@ -95,6 +96,8 @@ ${itemsList}
 
 <b>📍 ADDRESS:</b>
 ${orderData.shipping_address}
+
+${orderData.payment_screenshot_url ? `✅ <b>Payment Proof Uploaded</b>` : ''}
 
 <i>Check the admin panel for more details.</i>
 `.trim();

@@ -94,6 +94,7 @@ export interface Database {
                     payment_method: string
                     delivered_at: string | null
                     transaction_id: string | null
+                    payment_screenshot_url: string | null
                 }
                 Insert: {
                     id?: string
@@ -109,6 +110,7 @@ export interface Database {
                     payment_method?: string
                     delivered_at?: string | null
                     transaction_id?: string | null
+                    payment_screenshot_url?: string | null
                 }
                 Update: {
                     id?: string
@@ -124,6 +126,7 @@ export interface Database {
                     payment_method?: string
                     delivered_at?: string | null
                     transaction_id?: string | null
+                    payment_screenshot_url?: string | null
                 }
                 Relationships: []
             },

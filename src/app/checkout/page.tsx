@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { useLocation } from '@/context/LocationContext';
@@ -33,6 +33,8 @@ interface FormData {
     paymentMethod: 'cash_on_delivery' | 'bank_transfer';
     bankMethod: 'cbe' | 'telebirr' | null;
     telebirrSmsText: string;
+    paymentScreenshot: File | null;
+    paymentScreenshotUrl: string | null;
 }
 
 export default function CheckoutPage() {
@@ -53,7 +55,11 @@ export default function CheckoutPage() {
         paymentMethod: 'cash_on_delivery',
         bankMethod: null,
         telebirrSmsText: '',
+        paymentScreenshot: null,
+        paymentScreenshotUrl: null,
     });
+
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Auto-fill from Telegram if available
     useEffect(() => {
@@ -136,6 +142,10 @@ export default function CheckoutPage() {
                 return;
             }
             if (formData.paymentMethod === 'bank_transfer' && formData.bankMethod === 'telebirr') {
+                if (!formData.paymentScreenshot) {
+                    setError('You have to upload a screenshot of the payment you made');
+                    return;
+                }
                 if (!formData.telebirrSmsText || formData.telebirrSmsText.length < 30) {
                     setError('Please paste the FULL SMS message from Telebirr to proceed');
                     return;
@@ -199,6 +209,29 @@ export default function CheckoutPage() {
                 transactionId = verifyData.transactionId;
             }
 
+            let screenshotUrl = null;
+            if (formData.paymentMethod === 'bank_transfer' && formData.paymentScreenshot) {
+                const file = formData.paymentScreenshot;
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+                const filePath = `screenshots/${fileName}`;
+
+                const { error: uploadError } = await supabase.storage
+                    .from('products')
+                    .upload(filePath, file);
+
+                if (uploadError) {
+                    console.error('Upload error:', uploadError);
+                    throw new Error('Failed to upload payment screenshot. Please try again.');
+                }
+
+                const { data: { publicUrl } } = supabase.storage
+                    .from('products')
+                    .getPublicUrl(filePath);
+                
+                screenshotUrl = publicUrl;
+            }
+
             const telegramUser = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initDataUnsafe?.user : null;
             const telegramUserId = telegramUser?.id?.toString() || 'anonymous';
 
@@ -213,7 +246,8 @@ export default function CheckoutPage() {
                     total_price: totalPrice,
                     payment_method: formData.paymentMethod,
                     status: formData.paymentMethod === 'bank_transfer' && formData.bankMethod === 'telebirr' ? 'paid' : 'pending',
-                    transaction_id: transactionId
+                    transaction_id: transactionId,
+                    payment_screenshot_url: screenshotUrl
                 }])
                 .select()
                 .single();
@@ -287,6 +321,10 @@ export default function CheckoutPage() {
             const imageUrls = items
                 .map(item => item.product.image_url)
                 .filter((url): url is string => !!url);
+            
+            if (screenshotUrl) {
+                imageUrls.push(screenshotUrl);
+            }
 
             const ownerMessage = formatOrderMessage(orderData, items, totalPrice);
             await sendTelegramNotification(ownerMessage, imageUrls);
@@ -612,17 +650,68 @@ export default function CheckoutPage() {
                                                                     </button>
                                                                 </div>
 
-                                                                <div className="space-y-2">
-                                                                    <p className="text-xs font-bold text-gray-900 dark:text-white">Step 2: Paste SMS</p>
-                                                                    <p className="text-[11px] text-gray-500">Paste the FULL SMS message you received from Telebirr here:</p>
-                                                                    <textarea
-                                                                        rows={4}
-                                                                        value={formData.telebirrSmsText}
-                                                                        onChange={(e) => setFormData(prev => ({ ...prev, telebirrSmsText: e.target.value }))}
-                                                                        placeholder="Paste here..."
-                                                                        className="w-full bg-gray-50 dark:bg-gray-800 border-none outline-none focus:ring-2 focus:ring-[#cba153] rounded-xl px-4 py-3 text-sm transition resize-none"
-                                                                    />
+                                                                <div className="grid grid-cols-2 gap-3">
+                                                                    {/* Step 2: Payment Proof */}
+                                                                    <div className="space-y-2">
+                                                                        <div className="flex items-center justify-between">
+                                                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Screenshot</p>
+                                                                            <input
+                                                                                type="file"
+                                                                                ref={fileInputRef}
+                                                                                onChange={(e) => {
+                                                                                    const file = e.target.files?.[0];
+                                                                                    if (file) {
+                                                                                        setFormData(prev => ({ ...prev, paymentScreenshot: file }));
+                                                                                        if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+                                                                                            window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+                                                                                        }
+                                                                                    }
+                                                                                }}
+                                                                                accept="image/*"
+                                                                                className="hidden"
+                                                                            />
+                                                                        </div>
+                                                                        <div 
+                                                                            onClick={() => fileInputRef.current?.click()}
+                                                                            className={`relative w-full aspect-[4/3] rounded-xl border-2 border-dashed flex flex-col items-center justify-center transition-all overflow-hidden bg-gray-50 dark:bg-black/40 group cursor-pointer ${formData.paymentScreenshot ? 'border-green-500/30' : 'border-gray-200 dark:border-gray-800'}`}
+                                                                        >
+                                                                            {formData.paymentScreenshot ? (
+                                                                                <>
+                                                                                    <Image 
+                                                                                        src={URL.createObjectURL(formData.paymentScreenshot)} 
+                                                                                        alt="Screenshot" 
+                                                                                        fill 
+                                                                                        className="object-cover opacity-60" 
+                                                                                    />
+                                                                                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40">
+                                                                                        <CheckCircle2 className="w-6 h-6 text-green-500 mb-1" />
+                                                                                        <span className="text-[8px] font-black text-white uppercase tracking-widest">Attached</span>
+                                                                                    </div>
+                                                                                </>
+                                                                            ) : (
+                                                                                <>
+                                                                                    <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
+                                                                                        <Image src="https://img.icons8.com/ios-filled/50/cba153/camera.png" alt="upload" width={16} height={16} className="w-4 h-4 opacity-60" unoptimized />
+                                                                                    </div>
+                                                                                    <span className="text-[9px] font-bold text-gray-900 dark:text-white text-center px-2">Upload Screenshot</span>
+                                                                                </>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {/* Step 3: Paste SMS */}
+                                                                    <div className="space-y-2">
+                                                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Confirmation SMS</p>
+                                                                        <textarea
+                                                                            rows={4}
+                                                                            value={formData.telebirrSmsText}
+                                                                            onChange={(e) => setFormData(prev => ({ ...prev, telebirrSmsText: e.target.value }))}
+                                                                            placeholder="Paste SMS here..."
+                                                                            className="w-full h-[calc(100%-20px)] bg-gray-50 dark:bg-black/40 border-2 border-dashed border-gray-200 dark:border-gray-800 focus:border-[#cba153]/50 outline-none rounded-xl px-3 py-2 text-[11px] transition resize-none placeholder:text-gray-500"
+                                                                        />
+                                                                    </div>
                                                                 </div>
+                                                                <p className="text-[9px] text-gray-500 text-center italic mt-1">"You have to upload a screenshot of the payment you made"</p>
                                                             </div>
                                                         </motion.div>
                                                     )}

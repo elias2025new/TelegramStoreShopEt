@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { supabase } from '@/utils/supabase/client';
 import { Database } from '@/types/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -43,6 +44,7 @@ export default function AdminOrders() {
     const [isDeleteAllModalOpen, setIsDeleteAllModalOpen] = useState(false);
     const [isDeleteSelectedModalOpen, setIsDeleteSelectedModalOpen] = useState(false);
     const [updateErrorMsg, setUpdateErrorMsg] = useState<string | null>(null);
+    const [zoomedImage, setZoomedImage] = useState<string | null>(null);
 
     const DELETE_AFTER_MS = 5 * 60 * 1000; // 5 minutes for delivered
     const CANCELLED_DELETE_AFTER_MS = 24 * 60 * 60 * 1000; // 24 hours for cancelled
@@ -502,6 +504,31 @@ export default function AdminOrders() {
                                                 </div>
                                             </div>
 
+                                            {/* Payment Screenshot */}
+                                            {order.payment_screenshot_url && (
+                                                <div className="space-y-2">
+                                                    <h5 className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Payment Screenshot</h5>
+                                                    <div 
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setZoomedImage(order.payment_screenshot_url);
+                                                        }}
+                                                        className="w-24 aspect-[3/4] rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black group cursor-pointer active:scale-95 transition-all shadow-sm"
+                                                    >
+                                                        <div className="relative w-full h-full">
+                                                            <img 
+                                                                src={order.payment_screenshot_url} 
+                                                                alt="Payment Proof" 
+                                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                                            />
+                                                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                                                                <Image src="https://img.icons8.com/ios-filled/50/ffffff/zoom-in.png" alt="zoom" width={20} height={20} className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity" unoptimized />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+
                                             {/* Items */}
                                             <div className="space-y-3">
                                                 <h5 className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Items Ordered</h5>
@@ -643,6 +670,41 @@ export default function AdminOrders() {
                 onCancel={() => setIsDeleteSelectedModalOpen(false)}
                 variant="danger"
             />
+
+            {/* Zoomed Image Modal */}
+            <AnimatePresence>
+                {zoomedImage && (
+                    <>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setZoomedImage(null)}
+                            className="fixed inset-0 bg-black/90 backdrop-blur-md z-[200] flex items-center justify-center p-4 cursor-zoom-out"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+                            className="fixed inset-0 z-[201] flex items-center justify-center p-4 pointer-events-none"
+                        >
+                            <div className="relative max-w-full max-h-full pointer-events-auto">
+                                <img
+                                    src={zoomedImage}
+                                    alt="Payment Screenshot Full"
+                                    className="max-w-full max-h-[90vh] rounded-2xl shadow-2xl border border-white/10"
+                                />
+                                <button
+                                    onClick={() => setZoomedImage(null)}
+                                    className="absolute -top-4 -right-4 w-10 h-10 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center shadow-xl border border-gray-100 dark:border-gray-700 text-gray-500 hover:text-black dark:hover:text-white transition-colors"
+                                >
+                                    <XCircle className="w-6 h-6" />
+                                </button>
+                            </div>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
