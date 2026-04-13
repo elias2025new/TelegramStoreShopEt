@@ -38,9 +38,9 @@ export default function ProductGrid({ selectedCategory = 'All', selectedSubcateg
 
     if (isLoading) {
         return (
-            <div className="grid grid-cols-2 gap-2 px-3 pb-24">
+            <div className="grid grid-cols-3 gap-1.5 px-3 pb-24">
                 {[...Array(6)].map((_, i) => (
-                    <div key={i} className="bg-white dark:bg-[#1c1c1e] rounded-xl border border-gray-100 dark:border-[#2a2a2a] flex flex-col h-[260px] animate-pulse">
+                    <div key={i} className="bg-white dark:bg-[#1c1c1e] rounded-xl border border-gray-100 dark:border-[#2a2a2a] flex flex-col h-[200px] animate-pulse">
                         <div className="aspect-square w-full bg-gray-100 dark:bg-[#111111] rounded-t-xl" />
                         <div className="p-2 space-y-2">
                             <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-3/4" />
@@ -186,7 +186,7 @@ export default function ProductGrid({ selectedCategory = 'All', selectedSubcateg
     }
 
     return (
-        <div className="grid grid-cols-2 gap-2 px-3 transform-gpu">
+        <div className="grid grid-cols-3 gap-1.5 px-3 transform-gpu">
             {sorted.map((product) => (
                 <ProductCard key={product.id} product={product} />
             ))}

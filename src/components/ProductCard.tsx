@@ -95,13 +95,13 @@ export default function ProductCard({ product }: ProductCardProps) {
                 </div>
 
                 {/* Content Section */}
-                <div className="p-2 flex flex-col flex-grow">
-                    <h3 className="text-xs font-medium text-gray-900 dark:text-white line-clamp-1">
+                <div className="p-1.5 flex flex-col flex-grow">
+                    <h3 className="text-[11px] font-medium text-gray-900 dark:text-white line-clamp-1">
                         {product.name}
                     </h3>
 
                     <div className="mt-0.5 flex items-baseline gap-1.5">
-                        <span className="text-xs font-bold text-gray-900 dark:text-white">
+                        <span className="text-[11px] font-bold text-gray-900 dark:text-white">
                             {new Intl.NumberFormat('en-ET', { style: 'currency', currency: 'ETB', maximumFractionDigits: 0 }).format(product.price)}
                         </span>
                         <span className="text-[9px] text-gray-400 dark:text-gray-500 line-through">
@@ -119,7 +119,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                         </div>
 
                         <button
-                            className={`text-[10px] font-bold px-2 py-1 rounded-md transform-gpu active:scale-90 transition-all duration-200 ${outOfStock
+                            className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md transform-gpu active:scale-90 transition-all duration-200 ${outOfStock
                                 ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed border border-gray-200 dark:border-gray-700'
                                 : 'text-[#cba153] bg-[#cba153]/10 border border-[#cba153]/20 hover:bg-[#cba153]/20'
                                 }`}

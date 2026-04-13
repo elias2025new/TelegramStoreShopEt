@@ -46,7 +46,7 @@ export default function FavoritesPage() {
                             </Link>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-2 gap-3 mt-4">
+                        <div className="grid grid-cols-3 gap-1.5 mt-4">
                             {favorites.map((product) => (
                                 <ProductCard key={product.id} product={product} />
                             ))}
